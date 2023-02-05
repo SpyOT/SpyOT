@@ -27,3 +27,9 @@ npm run dev
 ```sh
 npm run build
 ```
+
+### Run website locally
+
+```sh
+npm run preview
+```
