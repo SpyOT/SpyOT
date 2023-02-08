@@ -22,14 +22,38 @@ npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
-
+## To Run and Commit to GitHub for Deployment
 ```sh
 npm run build
 ```
 
-### Run website locally
+```sh
+git add dist -f
+```
+
+```sh
+git commit -m "COMMIT MESSAGE HERE"
+```
+
+```sh
+git subtree push --prefix dist origin gh-pages
+```
+
+Wait for the Pages: Build and Deployment workflow
+#### Website should be live at: https://spyot.github.io/SpyOT/
+
+## Check Deployment Status
+#### You can check status of the build and deployment in the "Actions" tab of the repository
+#### Github Pages settings are in repository: Settings > Pages
+
+
+
+## To Run Locally
+```sh
+npm run build
+```
 
 ```sh
 npm run preview
 ```
+Copy localhost url and paste into browser
