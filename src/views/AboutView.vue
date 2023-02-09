@@ -1,7 +1,7 @@
 <template>
   <div class="about">
-    <h1>Department of Computer Science & Engineering</h1>
-    <h2>University of Nevada, Reno</h2>
+    <h2>Department of Computer Science & Engineering</h2>
+    <h4>University of Nevada, Reno - Spring 2023</h4>
   </div>
 </template>
 
