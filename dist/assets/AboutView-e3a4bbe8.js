@@ -1,1 +1,0 @@
-import{_ as t,o,c as n,a as e}from"./index-2e1e1a34.js";const s={},_={class:"about"},c=e("h1",null,"Department of Computer Science & Engineering",-1),a=e("h2",null,"University of Nevada, Reno",-1),i=[c,a];function r(d,l){return o(),n("div",_,i)}const f=t(s,[["render",r]]);export{f as default};
