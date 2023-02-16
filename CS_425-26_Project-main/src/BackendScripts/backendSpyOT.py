@@ -1,6 +1,6 @@
 import nmap, socket
 
-class Network(object):
+class NetworkScanner(object):
     def __init__(self, ip=''):
         #These two lines grab router ip address
         #hostname = socket.gethostname()
