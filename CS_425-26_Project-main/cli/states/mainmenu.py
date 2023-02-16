@@ -25,16 +25,15 @@ class MainMenu:
 
     def state_input(self):
         self.user_choice = int(input("Input: "))
-        print()
         match self.user_choice:
             case 0:
-                print("Goodbye!")
+                print("Goodbye!\n")
             case 1:
                 self.about()
             case 2:
                 self.network = SIsys.NetworkManager()
             case 3:
-                pass
+                self.network.network_view()
             case _:
                 print("\n!Error: Input", self.user_choice, "is not a valid choice. Please enter")
                 print("one of the options listed.\n")
