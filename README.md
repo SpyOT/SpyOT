@@ -36,7 +36,7 @@ git commit -m "COMMIT MESSAGE HERE"
 ```
 
 ```sh
-git subtree push --prefix dist origin gh-pages
+git subtree push --prefix dist origin deploy-gh-pages
 ```
 
 Wait for the Pages: Build and Deployment workflow
