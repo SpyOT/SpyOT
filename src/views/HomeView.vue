@@ -9,7 +9,8 @@ import TheWelcome from '../components/TheWelcome.vue'
     <h3>CS 426 Senior Project in Computer Science</h3>
     <br>
     <h2>Department of Computer Science & Engineering</h2>
-    <h3>University of Nevada, Reno - Spring 2023</h3>
+    <h2>University of Nevada, Reno</h2>
+    <h4>Spring 2023</h4>
     <br>
     <div>
       <article>
@@ -43,7 +44,7 @@ import TheWelcome from '../components/TheWelcome.vue'
     <br>
     <div>
       <article id="description">
-        <h2>Project Desciption</h2>
+        <h2>Project Description</h2>
         <p>
           &emsp;&emsp;The main goal of this project is to create a cybersecurity program that identifies security vulnerabilities on a user’s network/IoT environment with attached IOT and smart devices. With this program, we’ll be able to collect data that can be used to inform the user of potential vulnerabilities in their network.These vulnerabilities are typically linked to malicious attacks or creating larger botnets.
           <br>
@@ -55,15 +56,16 @@ import TheWelcome from '../components/TheWelcome.vue'
     </div>
     <br>
     <div id="resources">
-      <h2>Resoures</h2>
+      <h2>Resources</h2>
       <ul>
-        <li><a href="https://www.holmsecurity.com/blog/what-is-nmap" target="_blank">
+        <li class="resource_list"><a href="https://www.holmsecurity.com/blog/what-is-nmap" target="_blank">
           Thelberg, Stefan. HolmSecurity. “Nmap -What is it and how does it work”</a></li>
-        <li><a href="https://linuxhint.com/zenmap_scan_network/" target="_blank">
+        <li class="resource_list"><a href="https://linuxhint.com/zenmap_scan_network/" target="_blank">
           Adams, David. Linuxhint. “How to use Zenmap to Scan a network”</a></li>
-        <li><a href="https://linuxhint.com/unicornscan_beginner_tutorial/" target="_blank">
+        <li class="resource_list"><a href="https://linuxhint.com/unicornscan_beginner_tutorial/" target="_blank">
           Said, Younis. Linuxhint. “Unicornscan: A beginner’s guide”</a></li>
       </ul>
+      <div class="padding"></div>
     </div>
   </main>
 </template>
@@ -79,12 +81,32 @@ import TheWelcome from '../components/TheWelcome.vue'
 h1 {
   text-align: center;
   font-size: 4rem;
+  color: white;
+}
+h2 {
+  font-size: 2em;
+  color: white;
+}
+h4 {
+  font-size: 1.8em;
+  color: whitesmoke;
+  text-align: center;
 }
 h3, h2, article {
   text-align: center;
 }
+ul {
+  padding-left: 0;
+}
 li {
   list-style:none;
+}
+.padding {
+  margin-bottom: 5em;
+}
+.resource_list {
+  list-style: circle;
+  list-style-position: inside;
 }
 #description h2, p{
   text-align: left;
