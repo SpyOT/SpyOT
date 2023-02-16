@@ -86,6 +86,7 @@ h1 {
 h2 {
   font-size: 2em;
   color: white;
+  /* nothing */
 }
 h4 {
   font-size: 1.8em;
