@@ -10,7 +10,9 @@ class MongoAPI:
     def create_collection(self, collection_name):
         self.collections[collection_name] = self.db[collection_name]
 
-    def insert_into_collection(self, collection_name, *items):
+    def insert_into_collection(self, collection_name, entries):
         self.dest_collection = self.collections[collection_name]
-        for item in items[0]:
-            print(item)
+        self.dest_collection.insert_many([entries])
+
+    def is_db_setup(self):
+        return len(self.db.list_collection_names()) != 0
