@@ -21,8 +21,15 @@ class testSpyOT(unittest.TestCase):
 
         testNetwork.ip = "Neither default gateway 1.1 or 0.0"
         self.assertFalse(testNetwork.networkCheck())
-        
     
+    def test_tuple_separation(self):
+        testNetwork = NetworkScanner()
+
+        hasNothing = len(testNetwork.host_names)
+        testNetwork.host_list = [('hostname', 'junk', 'hostip'), ('hostname1', 'junk1', 'hostip1')]
+        self.assertNotEqual(hasNothing, testNetwork.tupleSeparater())
+
+
     
 
 if __name__ == '__main__':

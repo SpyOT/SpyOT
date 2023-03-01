@@ -57,11 +57,14 @@ class NetworkScanner(object):
 
             self.networkCheck()
 
-            for host, b, ip in self.host_list:
-                if(host == self.ip):
-                    print("\n List of connected devices:  ")
-                    print("_______________________________")
-                else:
+            self.tupleSeparater()
+
+    def tupleSeparater(self):
+        for host, b, ip in self.host_list:
+            if(host == self.ip):
+                print("\n List of connected devices:  ")
+                print("_______________________________")
+            else:
                     print(host)
                     host, b, ip = socket.gethostbyaddr(host) #The tuple returned puts ip strings in a list
                     for x in range(self.host_list_size - 1): #This for loop takes the string ip out of the list
@@ -69,10 +72,13 @@ class NetworkScanner(object):
                     self.host_names.append(host)    #Stores the names of the devices
                     self.host_ips.append(ip)        #Stores the ip of the devices
                 #Test:
-                print("\nDevice names here:\n_______________")
-                print(self.host_names)
-                print("\nDevice Ip addresses here:\n_____________")
-                print(self.host_ips)
+            print("\nDevice names here:\n_______________")
+            print(self.host_names)
+            print("\nDevice Ip addresses here:\n_____________")
+            print(self.host_ips)
+        numHostNames = len(self.host_names)
+
+        return numHostNames #For testing purposes this is going to verify that we have names inside the attribute host_name.
 
 if __name__ == "__main__":
     network = NetworkScanner()
