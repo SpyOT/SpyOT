@@ -1,4 +1,4 @@
-from tkinter import Tk, ttk, Frame, Button, Label, NORMAL, PhotoImage
+from tkinter import ttk, Frame, Button, Label, PhotoImage
 from PIL import ImageTk
 import constants as preset
 
@@ -10,7 +10,7 @@ class App:
         self.style.theme_use('vista')
 
         self.configure_win()
-        self.main_menu = MainMenu(self.win)
+        self.main_menu = MainMenu(window.network, self.win)
 
     def configure_win(self):
         # self.win.resizable(False, False)
@@ -19,8 +19,10 @@ class App:
         self.win.columnconfigure(0, weight=1)
         self.win.rowconfigure(0, weight=1)
 
+
 class MainMenu:
-    def __init__(self, window):
+    def __init__(self, network, window):
+        self.network = network
         self.win = window
         self.container = Frame(
             self.win,
@@ -74,13 +76,15 @@ class MainMenu:
             case "settings":
                 pass
             case "scan":
-                pass
+                print("clicked scan button")
+                self.network.scan()
             case "collect":
                 pass
             case "upload":
                 pass
             case "exit":
-                pass
+                print("Goodbye!")
+                self.win.quit()
 
     def set_widgets(self):
         # Header widgets
