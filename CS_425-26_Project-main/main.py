@@ -43,11 +43,17 @@ class SpyOT(Tk):
         self.backend = src.ModelManager()
         self.frontend = src.SceneManager(self)
 
+class test_main:
+    def __init__(self):
+        self.app = SpyOT("UnitTest")
+        self.frontend = self.app.frontend
+        self.curr_scene = self.frontend.scene
+
+        self.app.mainloop()
 
 def main():
     demo = SpyOT("SpyOT Demo")
     demo.mainloop()
-
 
 if __name__ == '__main__':
     main()
