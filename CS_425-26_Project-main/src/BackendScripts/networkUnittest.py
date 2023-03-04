@@ -1,12 +1,12 @@
 #Ken Escovilla
 #SpyOT network unittest
-#02/22/23
+#03/01/23
 #SpyOtUnittest.py
 
 from backendSpyOT import NetworkScanner
 import unittest
 
-class testSpyOT(unittest.TestCase):
+class test_network_given(unittest.TestCase):
    
     def test_network_counter(self):       
         testNetwork = NetworkScanner()     
