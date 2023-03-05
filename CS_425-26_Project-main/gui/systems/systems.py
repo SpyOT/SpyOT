@@ -81,8 +81,10 @@ class Network:
 
     def can_upload(self):
         local_scans_path = 'systems/local_scans'
-        local_scans = [join(local_scans_path, f) for f in listdir(local_scans_path) if
-                       isfile(join(local_scans_path, f))][0]
+        local_scans = []
+        if listdir(local_scans_path):
+            local_scans = [join(local_scans_path, f) for f in listdir(local_scans_path) if
+                           isfile(join(local_scans_path, f))][0]
         if self.metadata:
             return True
         elif local_scans:
