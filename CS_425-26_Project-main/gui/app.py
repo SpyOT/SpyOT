@@ -1,6 +1,6 @@
 from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox
-from PIL import ImageTk
 import constants as preset
+import threading, time
 
 
 class App:
@@ -31,6 +31,14 @@ class MainMenu:
             highlightthickness=0,
             relief="ridge"
         )
+        self.output = Frame(
+            self.container,
+            bg="#3b3b3b",
+            bd=0,
+            width=150,
+            highlightthickness=0,
+            relief="ridge",
+        )
         self.header = Frame(
             self.container,
             bg="#3b3b3b",
@@ -54,19 +62,26 @@ class MainMenu:
         )
         self.set_win()
 
+        self.output_widgets = {}
         self.header_widgets = {}
         self.body_widgets = {}
         self.footer_widgets = {}
         self.alert_widgets = {}
         self.set_widgets()
 
+        self.pb_state = 0
+
         self.display_win()
 
     def set_win(self):
-        self.container.columnconfigure(0, weight=1)
+        self.container.columnconfigure(0, weight=2)
+        self.container.columnconfigure(1, weight=1)
         self.container.rowconfigure(0, weight=1)
         self.container.rowconfigure(1, weight=5)
         self.container.rowconfigure(2, weight=3)
+
+        self.output.columnconfigure(0, weight=1)
+        self.output.rowconfigure(0, weight=1)
 
         self.header.columnconfigure(0, weight=1)
         self.header.columnconfigure(1, weight=8)
@@ -92,8 +107,19 @@ class MainMenu:
             case "settings":
                 pass
             case "scan":
-                self.network.scan()
-                messagebox.showinfo(self.win.version, "Scan Complete")
+                def scan_thread():
+                    self.output_widgets["scan"].grid(
+                        column=0,
+                        row=0,
+                        padx=10, pady=10
+                    )
+                    self.output_widgets["scan"].start(5)
+                    self.network.scan()
+                    self.output_widgets["scan"].stop()
+                    self.body_widgets["scan"]["button"]["state"] = "normal"
+                    messagebox.showinfo(self.win.version, "Scan Complete")
+                self.body_widgets["scan"]["button"]["state"] = "disabled"
+                threading.Thread(target=scan_thread).start()
             case "collect":
                 pass
             case "upload":
@@ -111,6 +137,14 @@ class MainMenu:
     def set_widgets(self):
         widget_bg = "#3b3b3b"
         win_bg = "#202020"
+        # Output widgets
+        self.output_widgets["scan"] = ttk.Progressbar(
+            self.output,
+            orient='horizontal',
+            mode='indeterminate',
+            length=140
+        )
+
         # Header widgets
         profile_icon = PhotoImage(file=preset.profile_path)
         self.header_widgets["profile"] = Button(
@@ -229,18 +263,22 @@ class MainMenu:
 
     def display_win(self):
         self.container.grid(column=0, row=0, sticky='nesw')
+        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
         self.header.grid(column=0, row=0, sticky='nesw', padx=5, pady=5)
         self.body.grid(column=0, row=1, sticky='nesw', padx=5, pady=5)
         self.footer.grid(column=0, row=2, sticky='nesw', padx=5, pady=5)
+
+        # self.output_widgets["scan"].grid(
+        #     column=0,
+        #     row=0,
+        #     padx=10, pady=10
+        # )
 
         for i, option in enumerate(self.header_widgets):
             self.header_widgets[option].grid(
                 column=i,
                 row=0,
                 padx=15, pady=15)
-        # self.header_widgets["profile"].grid(column=0, row=0)
-        # self.header_widgets["title"].grid(column=1, row=0)
-        # self.header_widgets["settings"].grid(column=2, row=0)
 
         for i, action in enumerate(self.body_widgets):
             action = self.body_widgets[action]
@@ -250,10 +288,6 @@ class MainMenu:
             action["button"].grid(
                 column=1, row=i, padx=15, pady=15
             )
-        # self.body_widgets["scan"].grid(column=0, row=0, padx=15, pady=15)
-        # self.body_widgets["collect"].grid(column=0, row=1)
-        # self.body_widgets["upload"].grid(column=0, row=2)
-        # self.body_widgets["exit"].grid(column=0, row=3)
 
         self.footer_widgets["info"].grid(
             column=0,
