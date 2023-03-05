@@ -26,6 +26,7 @@ class MainMenu:
         self.win = window
         self.win_bg = self.win.configure("bg")[-1]
         self.frame_bg = "#3b3b3b" if not self.win.is_prod else self.win_bg
+        self.text_color = "#5EFF5E"
         self.container = Frame(
             self.win,
             bg=self.win_bg,
@@ -64,7 +65,8 @@ class MainMenu:
         )
         self.set_win()
 
-        self.devices = StringVar(value=self.network.devices)
+        self.devices = StringVar(value=[self.network.devices[device]["name"] for device in self.network.devices])
+        self.host = StringVar(value=self.network.host["name"])
         self.output_widgets = {}
         self.header_widgets = {}
         self.body_widgets = {}
@@ -82,7 +84,9 @@ class MainMenu:
         self.container.rowconfigure(2, weight=3)
 
         self.output.columnconfigure(0, weight=1)
+        self.output.columnconfigure(1, weight=1)
         self.output.rowconfigure(0, weight=1)
+        self.output.rowconfigure(1, weight=1)
 
         self.header.columnconfigure(0, weight=1)
         self.header.columnconfigure(1, weight=8)
@@ -107,6 +111,27 @@ class MainMenu:
         self.footer_widgets["exit"]["state"] = "normal"
         messagebox.showinfo(self.win.version, "Scan Complete")
         self.output_widgets["scan_progress"].grid_forget()
+        self.display_summary()
+
+    def display_summary(self):
+        self.host.set(self.network.host["name"])
+        device_names = [device["name"] for device in self.network.devices]
+        self.devices.set(device_names)
+        self.output_widgets["host_caption"].grid(
+            column=0, row=0,
+            padx=5, pady=5,
+            sticky='s'
+        )
+        self.output_widgets["host_name"].grid(
+            column=1, row=0,
+            padx=5, pady=5,
+            sticky='s'
+        )
+        self.output_widgets["device_list"].grid(
+            column=0, columnspan=2,
+            row=1, padx=5, pady=5,
+            sticky='new'
+        )
 
     def handle_btn_press(self, option):
         print("clicked on", option, "button")
@@ -119,7 +144,8 @@ class MainMenu:
                     self.output_widgets["scan_progress"].grid(
                         column=0,
                         row=0,
-                        padx=10, pady=10
+                        padx=10, pady=10,
+                        sticky="n"
                     )
                     self.output_widgets["scan_progress"].start(5)
                     self.body_widgets["scan"]["button"]["state"] = "disabled"
@@ -133,6 +159,7 @@ class MainMenu:
                             self.win.version,
                             "Collection Complete"
                         )
+                        self.display_summary()
                     else:
                         messagebox.showerror(
                             self.win.version,
@@ -150,10 +177,15 @@ class MainMenu:
                     pass
                 case "upload":
                     if self.network.can_upload():
-                        self.network.upload()
-                        messagebox.showinfo(
-                            self.win.version,
-                            "Upload Complete")
+                        is_success = self.network.upload()
+                        if is_success:
+                            messagebox.showinfo(
+                                self.win.version,
+                                "Upload Complete")
+                        else:
+                            messagebox.showerror(
+                                self.win.version,
+                                "Error with Upload")
                     else:
                         messagebox.showerror(
                             self.win.version,
@@ -172,9 +204,19 @@ class MainMenu:
             mode='indeterminate',
             length=140
         )
-        self.output_widgets["list_title"] = Label(
-            self.header,
-            text=self.network,
+        self.output_widgets["host_caption"] = Label(
+            self.output,
+            text="Network Name:",
+            foreground=self.text_color,
+            bg=widget_bg,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
+        self.output_widgets["host_name"] = Label(
+            self.output,
+            textvariable=self.host,
+            foreground=self.text_color,
             bg=widget_bg,
             bd=0,
             highlightthickness=0,
@@ -183,6 +225,11 @@ class MainMenu:
         self.output_widgets["device_list"] = Listbox(
             self.output,
             listvariable=self.devices,
+            foreground=self.win_bg,
+            # bg=widget_bg,
+            # bd=0,
+            # highlightthickness=0,
+            # relief="ridge",
             justify="center"
         )
 

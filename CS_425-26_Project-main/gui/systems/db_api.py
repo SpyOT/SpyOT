@@ -10,6 +10,7 @@ class MongoAPI:
         CONNECTION_STRING = "temp" if not is_prod else "mongodb://localhost:27017"
         self.client = MongoClient(CONNECTION_STRING)
         self.db = self.client[db_name]
+        self.dest_collection = {}
         self.collections = {}
 
     def create_collection(self, collection_name):
