@@ -1,6 +1,6 @@
-from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox
+from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox, Listbox, StringVar
 import constants as preset
-import threading, time
+import threading
 
 
 class App:
@@ -15,7 +15,7 @@ class App:
     def configure_win(self):
         # self.win.resizable(False, False)
         # self.win.geometry(preset.default_geometry)
-        self.win.configure(bg="#202020")
+        self.win.configure(bg="#0c131e")
         self.win.columnconfigure(0, weight=1)
         self.win.rowconfigure(0, weight=1)
 
@@ -24,16 +24,18 @@ class MainMenu:
     def __init__(self, network, window):
         self.network = network
         self.win = window
+        self.win_bg = self.win.configure("bg")[-1]
+        self.frame_bg = "#3b3b3b" if not self.win.is_prod else self.win_bg
         self.container = Frame(
             self.win,
-            bg="#202020",
+            bg=self.win_bg,
             bd=0,
             highlightthickness=0,
             relief="ridge"
         )
         self.output = Frame(
             self.container,
-            bg="#3b3b3b",
+            bg=self.frame_bg,
             bd=0,
             width=150,
             highlightthickness=0,
@@ -41,35 +43,34 @@ class MainMenu:
         )
         self.header = Frame(
             self.container,
-            bg="#3b3b3b",
+            bg=self.frame_bg,
             bd=0,
             highlightthickness=0,
             relief="ridge",
         )
         self.body = Frame(
             self.container,
-            bg="#3b3b3b",
+            bg=self.frame_bg,
             bd=0,
             highlightthickness=0,
             relief="ridge"
         )
         self.footer = Frame(
             self.container,
-            bg="#3b3b3b",
+            bg=self.frame_bg,
             bd=0,
             highlightthickness=0,
             relief="ridge"
         )
         self.set_win()
 
+        self.devices = StringVar(value=self.network.devices)
         self.output_widgets = {}
         self.header_widgets = {}
         self.body_widgets = {}
         self.footer_widgets = {}
         self.alert_widgets = {}
         self.set_widgets()
-
-        self.pb_state = 0
 
         self.display_win()
 
@@ -99,50 +100,90 @@ class MainMenu:
         self.footer.columnconfigure(1, weight=1)
         self.footer.rowconfigure(0, weight=1)
 
+    def scan_thread(self):
+        self.network.scan()
+        self.output_widgets["scan_progress"].stop()
+        self.body_widgets["scan"]["button"]["state"] = "normal"
+        self.footer_widgets["exit"]["state"] = "normal"
+        messagebox.showinfo(self.win.version, "Scan Complete")
+        self.output_widgets["scan_progress"].grid_forget()
+
     def handle_btn_press(self, option):
         print("clicked on", option, "button")
-        match option:
-            case "profile":
-                pass
-            case "settings":
-                pass
-            case "scan":
-                def scan_thread():
-                    self.output_widgets["scan"].grid(
+
+        has_output = ["scan", "collect", "info"]
+        if option in has_output:
+            match option:
+                case "scan":
+                    self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+                    self.output_widgets["scan_progress"].grid(
                         column=0,
                         row=0,
                         padx=10, pady=10
                     )
-                    self.output_widgets["scan"].start(5)
-                    self.network.scan()
-                    self.output_widgets["scan"].stop()
-                    self.body_widgets["scan"]["button"]["state"] = "normal"
-                    messagebox.showinfo(self.win.version, "Scan Complete")
-                self.body_widgets["scan"]["button"]["state"] = "disabled"
-                threading.Thread(target=scan_thread).start()
-            case "collect":
-                pass
-            case "upload":
-                if self.network.can_upload():
-                    self.network.upload()
-                    messagebox.showinfo(self.win.version, "Upload Complete")
-                else:
-                    messagebox.showerror(self.win.version, "Nothing to upload.\nTry scanning network first.")
-            case "exit":
-                print("Goodbye!")
-                self.win.quit()
-            case "info":
-                pass
+                    self.output_widgets["scan_progress"].start(5)
+                    self.body_widgets["scan"]["button"]["state"] = "disabled"
+                    self.footer_widgets["exit"]["state"] = "disabled"
+                    threading.Thread(target=self.scan_thread).start()
+                case "collect":
+                    if self.network.can_upload():
+                        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+                        self.network.collect()
+                        messagebox.showinfo(
+                            self.win.version,
+                            "Collection Complete"
+                        )
+                    else:
+                        messagebox.showerror(
+                            self.win.version,
+                            "Nothing to upload.\nTry scanning network first.")
+                        self.output.grid_forget()
+                case "info":
+                    self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+                    pass
+        else:
+            self.output.grid_forget()
+            match option:
+                case "profile":
+                    pass
+                case "settings":
+                    pass
+                case "upload":
+                    if self.network.can_upload():
+                        self.network.upload()
+                        messagebox.showinfo(
+                            self.win.version,
+                            "Upload Complete")
+                    else:
+                        messagebox.showerror(
+                            self.win.version,
+                            "Nothing to upload.\nTry scanning network first.")
+                case "exit":
+                    print("Goodbye!")
+                    self.win.destroy()
 
     def set_widgets(self):
-        widget_bg = "#3b3b3b"
-        win_bg = "#202020"
+        widget_bg = self.frame_bg
+        win_bg = self.win_bg
         # Output widgets
-        self.output_widgets["scan"] = ttk.Progressbar(
+        self.output_widgets["scan_progress"] = ttk.Progressbar(
             self.output,
             orient='horizontal',
             mode='indeterminate',
             length=140
+        )
+        self.output_widgets["list_title"] = Label(
+            self.header,
+            text=self.network,
+            bg=widget_bg,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
+        self.output_widgets["device_list"] = Listbox(
+            self.output,
+            listvariable=self.devices,
+            justify="center"
         )
 
         # Header widgets
@@ -201,39 +242,80 @@ class MainMenu:
             )
             curr_line["label"].image = action_icon
 
+        # self.body_widgets["scan"]["button"] = Button(
+        #     self.body,
+        #     text="Scan Network",
+        #     bg=widget_bg,
+        #     activebackground="white",
+        #     bd=1,
+        #     highlightthickness=0,
+        #     relief="solid",
+        #     foreground="#5EFF5E",
+        #     command=lambda: self.handle_btn_press("scan")
+        # )
+        scan_button = PhotoImage(file=preset.scan_button)
         self.body_widgets["scan"]["button"] = Button(
             self.body,
-            text="Scan Network",
+            image=scan_button,
             bg=widget_bg,
             activebackground="white",
-            bd=1,
+            bd=0,
             highlightthickness=0,
-            relief="flat",
-            foreground="#5EFF5E",
+            # relief="solid",
+            # foreground="#5EFF5E",
             command=lambda: self.handle_btn_press("scan")
         )
+        self.body_widgets["scan"]["button"].image = scan_button
+
+        # self.body_widgets["collect"]["button"] = Button(
+        #     self.body,
+        #     text="Collect Data",
+        #     bg=widget_bg,
+        #     activebackground="white",
+        #     bd=0,
+        #     highlightthickness=0,
+        #     relief="flat",
+        #     foreground="#5EFF5E",
+        #     command=lambda: self.handle_btn_press("collect")
+        # )
+        collect_button = PhotoImage(file=preset.collect_button)
         self.body_widgets["collect"]["button"] = Button(
             self.body,
-            text="Collect Data",
+            image=collect_button,
             bg=widget_bg,
             activebackground="white",
-            bd=1,
+            bd=0,
             highlightthickness=0,
-            relief="flat",
-            foreground="#5EFF5E",
+            # relief="solid",
+            # foreground="#5EFF5E",
             command=lambda: self.handle_btn_press("collect")
         )
+        self.body_widgets["collect"]["button"].image = collect_button
+
+        # self.body_widgets["upload"]["button"] = Button(
+        #     self.body,
+        #     text="Upload Data",
+        #     bg="#5EFF5E",
+        #     activebackground="white",
+        #     bd=1,
+        #     highlightthickness=0,
+        #     relief="flat",
+        #     foreground=widget_bg,
+        #     command=lambda: self.handle_btn_press("upload")
+        # )
+        upload_button = PhotoImage(file=preset.upload_button)
         self.body_widgets["upload"]["button"] = Button(
             self.body,
-            text="Upload Data",
+            image=upload_button,
             bg=widget_bg,
             activebackground="white",
-            bd=1,
+            bd=0,
             highlightthickness=0,
-            relief="flat",
-            foreground="#5EFF5E",
+            # relief="solid",
+            # foreground="#5EFF5E",
             command=lambda: self.handle_btn_press("upload")
         )
+        self.body_widgets["upload"]["button"].image = upload_button
 
         # Footer widgets
         info_icon = PhotoImage(file=preset.info_path)
@@ -263,12 +345,12 @@ class MainMenu:
 
     def display_win(self):
         self.container.grid(column=0, row=0, sticky='nesw')
-        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        # self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
         self.header.grid(column=0, row=0, sticky='nesw', padx=5, pady=5)
         self.body.grid(column=0, row=1, sticky='nesw', padx=5, pady=5)
         self.footer.grid(column=0, row=2, sticky='nesw', padx=5, pady=5)
 
-        # self.output_widgets["scan"].grid(
+        # self.output_widgets["scan_progress"].grid(
         #     column=0,
         #     row=0,
         #     padx=10, pady=10
