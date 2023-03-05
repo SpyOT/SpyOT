@@ -14,14 +14,18 @@ class Network:
         print("starting scan")
         self.scanner.networkScanner()
         self.metadata = self.scanner.device_list
-        self.db_setup()
         print("scan complete")
 
     def collect(self):
         pass
 
     def upload(self):
-        pass
+        print("starting upload")
+        try:
+            self.db_setup()
+        except:
+            print("error in upload")
+        print("upload complete")
 
     def db_setup(self):
         self.db.create_collection("user_devices")
@@ -38,13 +42,16 @@ class Network:
             device_id = "U1IT" + str(self.device_count)
             self.device_count += 1
             devices[device[0]] = {
-                "_id" : device_id,
-                "ip" : device[2][0]
+                "_id": device_id,
+                "ip": device[2][0]
             }
         entry = {
-            "_id" : host_id,
-            "host_name" : host_name,
-            "host_ip" : host_ip,
-            "devices" : devices
+            "_id": host_id,
+            "host_name": host_name,
+            "host_ip": host_ip,
+            "devices": devices
         }
         return entry
+
+    def can_upload(self):
+        return self.metadata is not None
