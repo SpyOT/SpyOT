@@ -1,4 +1,5 @@
-import nmap, socket
+import subprocess
+import nmap
 import sys
 import socket
 from datetime import datetime
@@ -7,8 +8,10 @@ from datetime import datetime
 class NetworkScanner(object):
     def __init__(self, ip=''):
         # These two lines grab router ip address
-        # hostname = socket.gethostname()
-        # ip = socket.gethostbyname(hostname)
+        hostname = socket.gethostname()
+        test_ip = socket.gethostbyname(hostname)
+        self.defaultGateway = None
+        self.getDefaultGateway()
 
         # However 192.168.0.1 and 192.168.1.1 are default gateways
 
@@ -18,6 +21,20 @@ class NetworkScanner(object):
         self.host_list = None
         self.ip_list = []
         self.device_list = {"devices": []}
+
+    def getDefaultGateway(self):
+        host_ipconfig = subprocess.check_output(['ipconfig']).decode('utf-8')
+        host_ipconfig = [line.strip(' \r') for line in host_ipconfig.split('\n') if line.strip('\r')]
+        wifi_index = [i for i, line in enumerate(host_ipconfig) if "Wi-Fi" in line][0]
+        host_ipconfig = host_ipconfig[wifi_index:]
+        wifi_media_state = [line for line in host_ipconfig if "Media State" in line][0].split()[-1]
+        if wifi_media_state != 'disconnected':
+            default_gateway_index = [i for i, line in enumerate(host_ipconfig) if 'Default Gateway' in line][0] + 1
+            self.defaultGateway = host_ipconfig[default_gateway_index]
+            return True
+        else:
+            print("Not connected to an online network!!!!")
+            return False
 
     def networkCheck(self):
         if (self.host_list_size == 0):
@@ -101,6 +118,6 @@ class NetworkScanner(object):
 
 
 if __name__ == "__main__":
-    network = Network()
-    IP_addresses = network.networkScanner()
-    network.P_Scanner()
+    network = NetworkScanner()
+    #IP_addresses = network.networkScanner()
+    #network.P_Scanner()
