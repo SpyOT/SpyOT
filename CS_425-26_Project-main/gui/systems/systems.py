@@ -2,7 +2,10 @@ from systems.network_scanner import NetworkScanner
 from systems.db_api import MongoAPI
 from os import listdir, mkdir
 from os.path import isfile, join
+from cryptography.fernet import Fernet
 
+key = Fernet.generate_key()
+fernet = Fernet(key)
 
 class Network:
     def __init__(self):
@@ -82,7 +85,8 @@ class Network:
     def create_collection_entry(self, host, device_list):
         host_id = "U1IT" + str(self.device_count)
         self.device_count += 1
-        host_name, host_ip = host["name"], host["ip"]
+        enc_host_ip = fernet.encrypt(host["ip"].encode())
+        host_name, host_ip = host["name"], enc_host_ip
         devices = {}
         if not device_list:
             return False
@@ -166,6 +170,8 @@ class Network:
         blacklist = self.get_blacklist()
         blacklist = [x.strip('\n') for x in blacklist]
         self.upload_devices = []
-        for device in self.devices:
+        for i, device in enumerate(self.devices):
             if device["name"] not in blacklist:
                 self.upload_devices.append(device)
+                enc_IP = fernet.encrypt(device["ip"].encode())
+                self.upload_devices[-1]["ip"] = enc_IP
