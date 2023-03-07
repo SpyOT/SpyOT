@@ -69,7 +69,9 @@ class Network:
     def db_setup(self):
         if self.db.test_connection():
             self.db.create_collection("user_devices")
-            entry = self.create_collection_entry(self.host, self.devices)
+            entry = self.create_collection_entry(self.host, self.upload_devices)
+            if not entry:
+                return False
             self.db.insert_into_collection("user_devices", entry)
             self.isSetup = self.db.is_db_setup()
             return True
@@ -82,6 +84,8 @@ class Network:
         self.device_count += 1
         host_name, host_ip = host["name"], host["ip"]
         devices = {}
+        if not device_list:
+            return False
 
         for i, device in enumerate(device_list):
             device_id = "U1IT" + str(self.device_count)
@@ -161,7 +165,7 @@ class Network:
     def update_devices(self):
         blacklist = self.get_blacklist()
         blacklist = [x.strip('\n') for x in blacklist]
-        updated_devices = []
+        self.upload_devices = []
         for device in self.devices:
             if device["name"] not in blacklist:
-                updated_devices.append(device)
+                self.upload_devices.append(device)

@@ -223,7 +223,7 @@ class MainMenu:
                 case "settings":
                     pass
                 case "upload":
-                    if self.network.can_upload():
+                    if self.network.metadata:
                         is_success = self.network.upload()
                         if is_success:
                             messagebox.showinfo(
