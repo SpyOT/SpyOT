@@ -22,6 +22,8 @@ class NetworkScanner(object):
         self.host_ips = []
         self.device_list = {"devices": []}
 
+        self.nm = nmap.PortScanner()
+
     def getWiFiData(self):
         ipconfig_output = subprocess.check_output(['ipconfig']).decode('utf-8').split('\n')
         ipconfig_output = [line.strip(' \r') for line in ipconfig_output if line.strip('\r')]
@@ -40,7 +42,12 @@ class NetworkScanner(object):
         if default_gateway_entry:
             wifi_data["connected"] = True
             gateway_ip_index = default_gateway_entry[0][0]
-            wifi_data["default_gateway"] = wifi_entry[gateway_ip_index + 1]
+            gateway_ip_entry = wifi_entry[gateway_ip_index]
+            if '::' in wifi_entry[gateway_ip_index]:
+                gateway_ip_entry = wifi_entry[gateway_ip_index + 1]
+            else:
+                gateway_ip_entry = wifi_entry[gateway_ip_index].split()[-1]
+            wifi_data["default_gateway"] = gateway_ip_entry
         return wifi_data
 
     def setDefaultGateway(self):
@@ -64,9 +71,8 @@ class NetworkScanner(object):
 
     def networkPatch(self):
         network = self.ip + '/24'
-        nm = nmap.PortScanner()
-        nm.scan(hosts=network, arguments='-sn')
-        self.host_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
+        self.nm.scan(hosts=network, arguments='-sn')
+        self.host_list = [(x, self.nm[x]['status']['state']) for x in self.nm.all_hosts()]
 
     def networkCounter(self):
         self.host_list_size = len(self.host_list)  # Counts the amount of connected devices in a network.
@@ -75,7 +81,7 @@ class NetworkScanner(object):
         network_mask = '.'.join(self.ip.split('.')[:-1]) + '.0' + '/24'
 
         print("Scanning IPs")  # this takes awhile.
-        nm = nmap.PortScanner()  # nm is used to scan the network
+        nm = self.nm  # nm is used to scan the network
         nm.scan(hosts=network_mask, arguments='-sn')
 
         # Stores a list of every ip address on the network into host_list
@@ -103,6 +109,7 @@ class NetworkScanner(object):
         # grabs ip addresses from host_list and adds to its list
         for i in self.host_list:
             self.host_ips.append(i[0])
+        return self.host_ips
 
     def portScanner(self):
         try:
@@ -132,6 +139,22 @@ class NetworkScanner(object):
             print("\ Server not responding !!!!")
             sys.exit()
 
+    def deepNetworkScanner(self, host_ips=()):
+        nm = self.nm
+        for host in host_ips:
+            try:
+                nm.scan(host, arguments="-sV -Pn")
+                for proto in nm[host].all_protocols():
+                    print('-'*50)
+                    print("Protocol: %s" % proto)
+
+                    lport = nm[host][proto].keys()
+                    lport.sort()
+                    for port in lport:
+                        print('port: %s\tstate: %s' % (port, nm[host][proto][port]['state']))
+            except:
+                print("Error with", host)
+
     def pcapScanner(self, file):
         pass
 
@@ -139,4 +162,5 @@ class NetworkScanner(object):
 if __name__ == "__main__":
     network = NetworkScanner()
     IP_addresses = network.networkScanner()
-    # network.P_Scanner()
+    #network.portScanner()
+    network.deepNetworkScanner(IP_addresses)
