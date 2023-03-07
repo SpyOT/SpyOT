@@ -68,6 +68,7 @@ class MainMenu:
         self.devices = StringVar(value=[self.network.devices[device]["name"] for device in self.network.devices])
         self.host = StringVar(value=self.network.host["name"])
         self.selected_device, self.selected_index = "", 0
+        self.info_toggle = 1
         self.output_widgets = {}
         self.header_widgets = {}
         self.body_widgets = {}
@@ -179,7 +180,18 @@ class MainMenu:
                             "Nothing to upload.\nTry scanning network first.")
                         self.output.grid_forget()
                 case "info":
-                    self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+                    if self.info_toggle:
+                        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+                        self.output_widgets["info"].grid(
+                            column=0, columnspan=2,
+                            row=0, rowspan=3,
+                            sticky='nesw', padx=5, pady=5
+                        )
+                        self.info_toggle = not self.info_toggle
+                    else:
+                        self.output_widgets["info"].grid_forget()
+                        self.output.grid_forget()
+                        self.info_toggle = not self.info_toggle
                     pass
                 case "add_to_bl":
                     print(self.selected_device)
@@ -322,6 +334,36 @@ class MainMenu:
             relief="solid",
             state="disabled",
             command=lambda: self.handle_btn_press("remove_from_bl")
+        )
+
+        about_text = """
+        Instructions -
+        scan network: Performs a light weight scan on your 
+        network with the help of the Nmap library. Once complete,
+        a list containing all devices on your network will
+        be displayed on this right-hand display.
+        
+        collect data: Performs an in-depth scan of your network
+        that allows it to collect information on each devices ports
+        including: protocol, availability, and service. At this point
+        you may also blacklist specific devices by clicking on 
+        the devices name, then selecting the 'Add to blacklist' button.
+        You may also remove that device from your blacklist by
+        selecting the 'Remove from blacklist' button.
+        
+        upload data: Connects to our database server and updates
+        the collected data to remove devices in the blacklist. Once
+        complete, a message will appear stating whether your data
+        was successfully uploaded or not.
+        """
+        self.output_widgets["info"] = Label(
+            self.output,
+            text=about_text,
+            foreground=self.text_color,
+            bg=widget_bg,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
         )
 
         # Header widgets
