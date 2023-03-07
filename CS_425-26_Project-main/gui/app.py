@@ -67,6 +67,7 @@ class MainMenu:
 
         self.devices = StringVar(value=[self.network.devices[device]["name"] for device in self.network.devices])
         self.host = StringVar(value=self.network.host["name"])
+        self.selected_device, self.selected_index = "", 0
         self.output_widgets = {}
         self.header_widgets = {}
         self.body_widgets = {}
@@ -86,7 +87,8 @@ class MainMenu:
         self.output.columnconfigure(0, weight=1)
         self.output.columnconfigure(1, weight=1)
         self.output.rowconfigure(0, weight=1)
-        self.output.rowconfigure(1, weight=1)
+        self.output.rowconfigure(1, weight=2)
+        self.output.rowconfigure(2, weight=1)
 
         self.header.columnconfigure(0, weight=1)
         self.header.columnconfigure(1, weight=8)
@@ -127,22 +129,33 @@ class MainMenu:
             padx=5, pady=5,
             sticky='s'
         )
+        self.configure_bl_device()
         self.output_widgets["device_list"].grid(
             column=0, columnspan=2,
             row=1, padx=5, pady=5,
-            sticky='new'
+            sticky='nesw'
+        )
+        self.output_widgets["add_device"].grid(
+            column=1,
+            row=2, padx=5, pady=5,
+            sticky='nesw'
+        )
+        self.output_widgets["remove_device"].grid(
+            column=0,
+            row=2, padx=5, pady=5,
+            sticky='nesw'
         )
 
     def handle_btn_press(self, option):
         print("clicked on", option, "button")
 
-        has_output = ["scan", "collect", "info"]
+        has_output = ["scan", "collect", "info", "add_to_bl", "remove_from_bl"]
         if option in has_output:
             match option:
                 case "scan":
                     self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
                     self.output_widgets["scan_progress"].grid(
-                        column=0,
+                        column=0, columnspan=2,
                         row=0,
                         padx=10, pady=10,
                         sticky="n"
@@ -168,6 +181,28 @@ class MainMenu:
                 case "info":
                     self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
                     pass
+                case "add_to_bl":
+                    print(self.selected_device)
+                    result = self.network.add_to_blacklist(self.selected_device)
+                    device_list = self.output_widgets["device_list"]
+                    if result:
+                        device_list.selection_clear(0, 'end')
+                        device_list.itemconfigure(
+                            self.selected_index,
+                            bg=self.win_bg,
+                            foreground='white')
+                        self.disable_device_options()
+                case "remove_from_bl":
+                    print(self.selected_device)
+                    result = self.network.remove_from_blacklist(self.selected_device)
+                    device_list = self.output_widgets["device_list"]
+                    if result:
+                        device_list.selection_clear(0, 'end')
+                        device_list.itemconfigure(
+                            self.selected_index,
+                            bg='white',
+                            foreground=self.win_bg)
+                        self.disable_device_options()
         else:
             self.output.grid_forget()
             match option:
@@ -193,6 +228,36 @@ class MainMenu:
                 case "exit":
                     print("Goodbye!")
                     self.win.destroy()
+
+    def display_device_options(self, *args):
+        device_names = [device["name"] for device in self.network.devices]
+        self.output_widgets["add_device"]["bg"] = self.text_color
+        self.output_widgets["add_device"]["state"] = 'normal'
+        self.output_widgets["remove_device"]["bg"] = self.text_color
+        self.output_widgets["remove_device"]["state"] = 'normal'
+        device_display = self.output_widgets["device_list"]
+        curr_dev = device_display.curselection()[0]
+        self.selected_index = curr_dev
+        self.selected_device = device_names[curr_dev]
+
+    def disable_device_options(self):
+        self.output_widgets["add_device"]["bg"] = self.frame_bg
+        self.output_widgets["add_device"]["state"] = 'disabled'
+        self.output_widgets["remove_device"]["bg"] = self.frame_bg
+        self.output_widgets["remove_device"]["state"] = 'disabled'
+
+    def configure_bl_device(self):
+        bl_devices = self.network.get_blacklist()
+        bl_devices = [device.strip('\n') for device in bl_devices]
+        device_names = [device["name"] for device in self.network.devices]
+        bl_indices = [i for i, device in enumerate(device_names) if device in bl_devices]
+        device_list = self.output_widgets["device_list"]
+        device_list.selection_clear(0, 'end')
+        for index in bl_indices:
+            device_list.itemconfigure(
+                index,
+                bg=self.win_bg,
+                foreground='white')
 
     def set_widgets(self):
         widget_bg = self.frame_bg
@@ -231,6 +296,32 @@ class MainMenu:
             # highlightthickness=0,
             # relief="ridge",
             justify="center"
+        )
+        device_list = self.output_widgets["device_list"]
+        device_list.bind('<<ListboxSelect>>', self.display_device_options)
+
+        self.output_widgets["add_device"] = Button(
+            self.output,
+            text="Blacklist Device",
+            bg=self.frame_bg,
+            activebackground="white",
+            bd=0,
+            highlightthickness=0,
+            relief="solid",
+            state="disabled",
+            command=lambda: self.handle_btn_press("add_to_bl")
+        )
+
+        self.output_widgets["remove_device"] = Button(
+            self.output,
+            text="Whitelist Device",
+            bg=self.frame_bg,
+            activebackground="white",
+            bd=0,
+            highlightthickness=0,
+            relief="solid",
+            state="disabled",
+            command=lambda: self.handle_btn_press("remove_from_bl")
         )
 
         # Header widgets

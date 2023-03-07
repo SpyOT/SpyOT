@@ -1,6 +1,6 @@
-from systems.networkscanner import NetworkScanner
+from systems.network_scanner import NetworkScanner
 from systems.db_api import MongoAPI
-from os import listdir
+from os import listdir, mkdir
 from os.path import isfile, join
 
 
@@ -9,12 +9,24 @@ class Network:
         self.db = MongoAPI("user_network")
         self.metadata = None
         self.scanner = NetworkScanner()
-        self.isSetup = self.db.is_db_setup()
         self.device_count = 0
         self.devices = []
         self.device_ips = []
         self.host = {"name": "", "ip": ""}
+        self.blacklist_path = 'systems/local/blacklist.text'
+        self.upload_devices = []
+        self.create_local_storage()
 
+    def create_local_storage(self):
+        local_dir = 'systems/local'
+        try:
+            mkdir(local_dir)
+            print("Created local storage")
+        except FileExistsError as err:
+            print("!Error: Local dir already exists")
+
+        f = open(self.blacklist_path, 'a')
+        f.close()
     def add_local_scan(self):
         local_dir = open("systems/local_scans/scan01", "w")
         scan_entry = list()
@@ -32,13 +44,12 @@ class Network:
         self.add_local_scan()
         print("scan complete")
 
-    def collect(self, blacklist=()):
+    def collect(self):
         print("collecting data")
         # encrypt host IP here
         self.host = {"name": self.metadata["host"][0], "ip": self.metadata["host"][-1][0]}
         for device in self.metadata["devices"]:
-            print(device)
-            if device[0] not in blacklist and device[-1][0] not in self.device_ips:
+            if device[-1][0] not in self.device_ips:
                 # encrypt device IP here
                 self.devices.append({"name": device[0], "ip": device[-1][0]})
                 self.device_ips.append(device[-1][0])
@@ -46,19 +57,25 @@ class Network:
 
     def upload(self):
         print("starting upload")
+        self.update_devices()
         try:
-            self.db_setup()
+            result = self.db_setup()
             print("upload complete")
-            return True
+            return result
         except:
             print("incomplete upload")
             return False
 
     def db_setup(self):
-        self.db.create_collection("user_devices")
-        entry = self.create_collection_entry(self.host, self.devices)
-        self.db.insert_into_collection("user_devices", entry)
-        self.isSetup = self.db.is_db_setup()
+        if self.db.test_connection():
+            self.db.create_collection("user_devices")
+            entry = self.create_collection_entry(self.host, self.devices)
+            self.db.insert_into_collection("user_devices", entry)
+            self.isSetup = self.db.is_db_setup()
+            return True
+        else:
+            print("!Error: Database is not responding")
+            return False
 
     def create_collection_entry(self, host, device_list):
         host_id = "U1IT" + str(self.device_count)
@@ -103,3 +120,48 @@ class Network:
                         self.metadata[entry_type].append([entry_name, [entry_ip]])
             return True
         return False
+
+    def add_to_blacklist(self, device):
+        blacklist = open(self.blacklist_path, 'r')
+        lines = blacklist.readlines()
+        curr_list = []
+        for line in lines:
+            if device in line:
+                print("!Error: Device already blacklisted")
+                return False
+            curr_list.append(line)
+        print("Adding", device, "to blacklist")
+        curr_list.append(device+'\n')
+        blacklist.close()
+        blacklist = open(self.blacklist_path, 'w')
+        blacklist.writelines(curr_list)
+        blacklist.close()
+        return True
+
+    def remove_from_blacklist(self, device):
+        blacklist = open(self.blacklist_path, 'r+')
+        curr_devices = blacklist.readlines()
+        if device + '\n' not in curr_devices:
+            print("Error: Device is not blacklisted")
+            return False
+        new_devices = [line for line in curr_devices if device not in line]
+        blacklist.truncate(0)
+        blacklist.seek(0)
+        blacklist.writelines(new_devices)
+        return True
+
+    def get_blacklist(self):
+        device_list = []
+        with open(self.blacklist_path) as f:
+            lines = f.readlines()
+            for line in lines:
+                device_list.append(line)
+        return device_list
+
+    def update_devices(self):
+        blacklist = self.get_blacklist()
+        blacklist = [x.strip('\n') for x in blacklist]
+        updated_devices = []
+        for device in self.devices:
+            if device["name"] not in blacklist:
+                updated_devices.append(device)
