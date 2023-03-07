@@ -308,11 +308,13 @@ export default {
 }
 .heading {
   background-color: var(--secondary-color);
+
 }
 .heading .logo {
   text-align: left;
   margin-left: 2em;
   font-size: 3em;
+  color: black;
 }
 .input-container span {
   position: absolute;
