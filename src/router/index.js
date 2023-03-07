@@ -3,6 +3,11 @@ import HomeView from '../views/HomeView.vue'
 import AboutView from '../views/AboutView.vue'
 import Dashboard from "../views/Dashboard.vue";
 import DashboardHome from "../views/dashboard/Home.vue";
+import DashboardAnalyze from "../views/dashboard/Analyze.vue";
+import DashboardGenerate from "../views/dashboard/Generate.vue";
+import DashboardView from "../views/dashboard/View.vue";
+import DashboardSettings from "../views/dashboard/Settings.vue";
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +32,22 @@ const router = createRouter({
         {
           path: "",
           component: DashboardHome,
+        },
+        {
+          path: "analyze-report",
+          component: DashboardAnalyze,
+        },
+        {
+          path: "generate-report",
+          component: DashboardGenerate,
+        },
+        {
+          path: "view-report",
+          component: DashboardView,
+        },
+        {
+          path: "settings",
+          component: DashboardSettings,
         },
       ],
     },

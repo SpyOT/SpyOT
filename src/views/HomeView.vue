@@ -216,7 +216,7 @@ export default {
 
 .left-side h2 {
   margin-top: 139px; 
-  margin-left: 132px; 
+  margin-right: 4em; 
   width: 564px; 
   font-size: 52px; 
   line-height: 74px; 

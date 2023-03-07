@@ -6,8 +6,6 @@
       </div>
       
     </div>
-    <AutoRedirect />
-    <AutoLogout />
   </template>
   
   <script setup>

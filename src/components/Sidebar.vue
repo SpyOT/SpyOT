@@ -14,6 +14,22 @@
         <span class="material-icons-outlined">dashboard</span>
         <span class="text">Dashboard</span>
       </router-link>
+      <router-link class="button" to="/dashboard/generate-report">
+        <span class="material-icons-outlined">build</span>
+        <span class="text">Generate Report</span>
+      </router-link>
+      <router-link class="button" to="/dashboard/analyze-report">
+        <span class="material-icons-outlined">search</span>
+        <span class="text">Analyze Report</span>
+      </router-link>
+      <router-link class="button" to="/dashboard/view-report">
+        <span class="material-icons-outlined">dns</span>
+        <span class="text">View Report</span>
+      </router-link>
+      <router-link class="button" to="/dashboard/settings">
+        <span class="material-icons-outlined">settings</span>
+        <span class="text">Settings</span>
+      </router-link>
     </div>
 
     <div class="padding"></div>
