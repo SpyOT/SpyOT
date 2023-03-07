@@ -5,13 +5,10 @@ import HelloWorld from './components/HelloWorld.vue'
 
 <template>
   <header>
-
     <div class="wrapper">
-      <!-- <HelloWorld msg="This works!" /> -->
-
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <!-- <RouterLink to="/about">About</RouterLink> -->
+        <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
   </header>
@@ -38,7 +35,7 @@ nav {
 }
 
 nav a.router-link-exact-active {
-  color: var(--color-text);
+  color: var(--primary-color);
 }
 
 nav a.router-link-exact-active:hover {
@@ -57,11 +54,6 @@ nav a:first-of-type {
 }
 
 @media (min-width: 1024px) {
-  /* header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  } */
 
   .logo {
     margin: 0 2rem 0 0;

@@ -1,0 +1,36 @@
+<template>
+    <div class="dashboard">
+      <Sidebar />
+      <div class="body">
+        <router-view></router-view>
+      </div>
+      
+    </div>
+    <AutoRedirect />
+    <AutoLogout />
+  </template>
+  
+  <script setup>
+  import Sidebar from  "../components/Sidebar.vue";
+
+  </script>
+  
+  <style scoped>
+  .dashboard {
+    background-color: black;
+    display: flex;
+    column-gap: 3em;
+  }
+  
+  .body {
+    flex-grow: 1;
+    margin-right: 2em;
+    background-color: black;
+    /* margin-bottom: 5em; */
+  }
+  
+  
+  
+  </style>
+  
+  
