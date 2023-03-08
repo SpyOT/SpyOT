@@ -94,12 +94,20 @@ aside .logo img {
 }
 
 aside .menu-toggle-wrap {
-  display: flex;
+  /* display: flex;
   justify-content: flex-end;
   margin-bottom: 1rem;
-  position: relative;
+  position: relative; */
   top: 0;
   transition: 0.2s ease-out;
+  /* margin-left: none; */
+}
+aside .menu-toggle-wrap .menu-toggle {
+  /* background-color: red; */
+  /* padding-right: .4rem; */
+  /* border: solid; */
+  /* border-radius: 1px; */
+  border-color: var(--secondary-color);
 }
 
 aside .menu-toggle-wrap .menu-toggle {
@@ -113,6 +121,11 @@ aside.is_expanded {
 
 aside.is_expanded .menu-toggle-wrap {
   top: -3rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  position: relative;
+  /* transition: 0.2s ease-out; */
 }
 
 aside.is_expanded .menu-toggle-wrap .menu-toggle {
