@@ -6,8 +6,8 @@ load_dotenv()
 
 class MongoAPI:
     def __init__(self, db_name="default_db"):
-        is_prod = os.getenv('DB_ENV')
-        CONNECTION_STRING = "temp" if not is_prod else "mongodb://localhost:27017"
+        is_prod = os.getenv('DB_ENV') == "prod"
+        CONNECTION_STRING = "temp" if is_prod else "mongodb://localhost:27017"
         self.client = MongoClient(CONNECTION_STRING)
         self.db = self.client[db_name]
         self.collections = {}

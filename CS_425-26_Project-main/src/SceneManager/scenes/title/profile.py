@@ -11,6 +11,7 @@ class CreateProfile:
                                      padding=self.padding)
         self.set_frames()
         self.set_widgets()
+        self.network_found = None
 
     def set_frames(self):
         self.scene_frame.columnconfigure(0, weight=1)
@@ -132,8 +133,8 @@ class CreateProfile:
         self.network_name.configure(text=self.network_found)
         for device in devices_found:
             self.device_tree.insert('', 'end', text=device[0], values=device[2])
-        print(1, self.network_metadata['devices'][0])
-        print(2, self.network_metadata['devices'])
+        # print(1, self.network_metadata['devices'][0])
+        # print(2, self.network_metadata['devices'])
 
     def remove_content(self):
         self.scene_frame.grid_remove()
