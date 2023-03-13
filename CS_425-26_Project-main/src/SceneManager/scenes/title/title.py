@@ -7,7 +7,6 @@ class TitleScreen:
     def __init__(self, base):
         self.base = base
         self.root = self.base.root
-
         self.scene_frame = ttk.Frame(self.root,
                                      padding=(3, 3, 12, 12))
         self.set_frames()

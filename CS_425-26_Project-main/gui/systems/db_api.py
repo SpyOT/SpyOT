@@ -4,13 +4,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class MongoAPI:
     def __init__(self, db_name="default_db"):
-        is_prod = os.getenv('DB_ENV') == "prod"
+        is_prod = os.getenv('DB_ENV') == 'prod'
         CONNECTION_STRING = "temp" if is_prod else "mongodb://localhost:27017"
         self.client = MongoClient(CONNECTION_STRING)
         self.db = self.client[db_name]
+        self.dest_collection = {}
         self.collections = {}
+
+    def test_connection(self):
+        try:
+            self.client.list_databases()
+            return True
+        except:
+            print("!Error: Could not connect to client")
+            return False
 
     def create_collection(self, collection_name):
         self.collections[collection_name] = self.db[collection_name]
@@ -28,4 +38,5 @@ class MongoAPI:
         return self.db.list_collection_names()
 
     def is_db_setup(self):
-        return len(self.get_collection_names()) != 0
+        total_collections = len(self.get_collection_names())
+        return total_collections != 0
