@@ -70,8 +70,8 @@ class NetworkScanner(object):
                 self.networkPatch()
 
     def networkPatch(self):
-        network = self.ip + '/24'
-        self.nm.scan(hosts=network, arguments='-sn')
+        curr_network = self.ip + '/24'
+        self.nm.scan(hosts=curr_network, arguments='-sn')
         self.host_list = [(x, self.nm[x]['status']['state']) for x in self.nm.all_hosts()]
 
     def networkCounter(self):
@@ -87,9 +87,9 @@ class NetworkScanner(object):
         # Stores a list of every ip address on the network into host_list
         self.host_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
 
-        #self.networkCounter()
+        # self.networkCounter()
 
-        #self.networkCheck()
+        # self.networkCheck()
 
         for host, up in self.host_list:
             if (host == self.ip):
@@ -139,28 +139,9 @@ class NetworkScanner(object):
             print("\ Server not responding !!!!")
             sys.exit()
 
-    def deepNetworkScanner(self, host_ips=()):
-        nm = self.nm
-        for host in host_ips:
-            try:
-                nm.scan(host, arguments="-sV -Pn")
-                for proto in nm[host].all_protocols():
-                    print('-'*50)
-                    print("Protocol: %s" % proto)
-
-                    lport = nm[host][proto].keys()
-                    lport.sort()
-                    for port in lport:
-                        print('port: %s\tstate: %s' % (port, nm[host][proto][port]['state']))
-            except:
-                print("Error with", host)
-
-    def pcapScanner(self, file):
-        pass
-
 
 if __name__ == "__main__":
     network = NetworkScanner()
     IP_addresses = network.networkScanner()
-    #network.portScanner()
+    # network.portScanner()
     network.deepNetworkScanner(IP_addresses)

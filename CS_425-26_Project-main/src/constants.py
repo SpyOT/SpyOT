@@ -1,0 +1,21 @@
+# Constants
+default_width, default_height = 800, 600
+default_res = default_width, default_height
+default_geometry = str(default_width) + 'x' + str(default_height)
+title = "SpyOT"
+logo_img = ""
+default_text_size = 18
+default_font = "Helvetica"
+padding = (3, 3, 12, 12)
+asset_path = "src/assets/"
+profile_path = asset_path + "profile_icon.png"
+setting_path = asset_path + "settings_icon.png"
+title_path = asset_path + "title_icon.png"
+info_path = asset_path + "info_icon.png"
+scan_path = asset_path + "scan_icon.png"
+collect_path = asset_path + "collect_icon.png"
+upload_path = asset_path + "transfer_icon.png"
+exit_path = asset_path + "exit_icon.png"
+scan_button = asset_path + "scan_button.png"
+collect_button = asset_path + "collect_button.png"
+upload_button = asset_path + "upload_button.png"

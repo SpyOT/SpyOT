@@ -1,6 +1,7 @@
-import src
 from tkinter import Tk
-import constants as preset
+import os
+import src
+from dotenv import load_dotenv
 """
 sources:
 https://tkdocs.com/tutorial/index.html
@@ -37,23 +38,27 @@ class SpyOT(Tk):
         - Profile_Settings: Contains the settings screen with various options for the selected
             profile to choose and adjust
     """
-    def __init__(self, title=preset.title):
+    def __init__(self, version="SpyOT"):
+        print("Welcome to SpyOT! The IoT Security System.")
         super().__init__()
-        self.title(title)
-        self.backend = src.ModelManager()
-        self.frontend = src.SceneManager(self)
+        self.version = version
+        self.env = os.getenv('APP_ENV')
+        self.is_prod = self.env == "prod"
+        self.title(self.version)
+        self.network = src.Network()
+        self.app = src.App(self)
 
-class test_main:
-    def __init__(self):
-        self.app = SpyOT("UnitTest")
-        self.frontend = self.app.frontend
-        self.curr_scene = self.frontend.scene
-
-        self.app.mainloop()
+# class test_main:
+#     def __init__(self):
+#         self.app = SpyOT("UnitTest")
+#         self.frontend = self.app.frontend
+#         self.curr_scene = self.frontend.scene
+#
+#         self.app.mainloop()
 
 def main():
-    demo = SpyOT("SpyOT Demo")
-    demo.mainloop()
+    root = SpyOT("DEMO")
+    root.mainloop()
 
 if __name__ == '__main__':
     main()

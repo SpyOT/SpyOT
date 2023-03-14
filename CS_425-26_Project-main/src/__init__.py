@@ -1,2 +1,2 @@
-from src.SceneManager import SceneManager
-from src.ModelManager import ModelManager
+from src.app import App
+from src.systems import Network

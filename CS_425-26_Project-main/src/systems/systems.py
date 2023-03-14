@@ -1,5 +1,5 @@
-from systems.network_scanner import NetworkScanner
-from systems.db_api import MongoAPI
+from src.systems.network_scanner import NetworkScanner
+from src.systems.db_api import MongoAPI
 from os import listdir, mkdir
 from os.path import isfile, join
 from cryptography.fernet import Fernet
@@ -16,12 +16,12 @@ class Network:
         self.devices = []
         self.device_ips = []
         self.host = {"name": "", "ip": ""}
-        self.blacklist_path = 'systems/local/blacklist.text'
+        self.blacklist_path = 'src/systems/local/blacklist.text'
         self.upload_devices = []
         self.create_local_storage()
 
     def create_local_storage(self):
-        local_dir = 'systems/local'
+        local_dir = 'src/systems/local'
         try:
             mkdir(local_dir)
             print("Created local storage")
