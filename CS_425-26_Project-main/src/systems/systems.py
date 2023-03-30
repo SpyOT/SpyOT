@@ -16,22 +16,28 @@ class Network:
         self.devices = []
         self.device_ips = []
         self.host = {"name": "", "ip": ""}
+        self.local_storage_path = 'src/systems/local'
         self.blacklist_path = 'src/systems/local/blacklist.text'
         self.upload_devices = []
         self.create_local_storage()
 
     def create_local_storage(self):
-        local_dir = 'src/systems/local'
         try:
-            mkdir(local_dir)
+            mkdir(self.local_storage_path)
             print("Created local storage")
+        except FileExistsError as err:
+            print("!Error: Local dir already exists")
+        local_scan_dir = self.local_storage_path + '/local_scans'
+        try:
+            mkdir(local_scan_dir)
         except FileExistsError as err:
             print("!Error: Local dir already exists")
 
         f = open(self.blacklist_path, 'a')
         f.close()
+
     def add_local_scan(self):
-        local_dir = open("systems/local_scans/scan01", "w")
+        local_dir = open("src/systems/local/local_scans/scan01", "w")
         scan_entry = list()
         scan_entry.append(' '.join(["host", self.host["name"], self.host["ip"] + '\n']))
         for device in self.devices:
@@ -105,7 +111,7 @@ class Network:
         return entry
 
     def can_upload(self):
-        local_scans_path = 'systems/local_scans'
+        local_scans_path = 'src/systems/local/local_scans'
         local_scans = []
         if listdir(local_scans_path):
             local_scans = [join(local_scans_path, f) for f in listdir(local_scans_path) if

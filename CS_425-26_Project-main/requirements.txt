@@ -1,0 +1,4 @@
+cryptography
+pymongo
+python-nmap
+python-dotenv

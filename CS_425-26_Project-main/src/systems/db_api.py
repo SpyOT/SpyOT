@@ -8,7 +8,10 @@ load_dotenv()
 class MongoAPI:
     def __init__(self, db_name="default_db"):
         is_prod = os.getenv('DB_ENV') == 'prod'
-        CONNECTION_STRING = "temp" if is_prod else "mongodb://localhost:27017"
+        mongo_user, mongo_passw = os.getenv('user'), os.getenv('password')
+        PROD_STR = "mongodb+srv://{}:{}@spyot.uvi3yw5.mongodb.net/test".format(mongo_user, mongo_passw)
+        DEV_STR = "mongodb://localhost:27017"
+        CONNECTION_STRING = PROD_STR if is_prod else DEV_STR
         self.client = MongoClient(CONNECTION_STRING)
         self.db = self.client[db_name]
         self.dest_collection = {}
