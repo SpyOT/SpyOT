@@ -1,5 +1,5 @@
 from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox, Listbox, StringVar
-import src.constants as preset
+from . import constants as preset
 import threading
 
 
@@ -13,8 +13,8 @@ class App:
         self.main_menu = MainMenu(window.network, self.win)
 
     def configure_win(self):
-        # self.win.resizable(False, False)
-        # self.win.geometry(preset.default_geometry)
+        logo = PhotoImage(file=preset.logo_img)
+        self.win.iconphoto(False, logo)
         self.win.configure(bg="#0c131e")
         self.win.columnconfigure(0, weight=1)
         self.win.rowconfigure(0, weight=1)
@@ -24,8 +24,9 @@ class MainMenu:
     def __init__(self, network, window):
         self.network = network
         self.win = window
+        self.is_prod = self.win.APP_ENV == "prod"
         self.win_bg = self.win.configure("bg")[-1]
-        self.frame_bg = "#3b3b3b" if not self.win.is_prod else self.win_bg
+        self.frame_bg = self.win_bg if self.is_prod else "#3b3b3b"
         self.text_color = "#5EFF5E"
         self.container = Frame(
             self.win,
