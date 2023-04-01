@@ -1,6 +1,5 @@
-from tkinter import Tk
 from gui import App
-from systems import Network
+from systems import Systems
 
 """
 sources:
@@ -10,15 +9,16 @@ https://www.pythontutorial.net/tkinter/tkinter-grid/
 """
 
 
-class SpyOT(Tk):
+class SpyOT:
     def __init__(self, version="v1", env="dev"):
         print("Welcome to SpyOT! The IoT Security System.")
-        super().__init__()
-        self.version = version
-        self.APP_ENV = env
-        self.title('-'.join(["SpyOT", self.version]))
-        self.network = Network()
-        self.app = App(self)
+        self.title = "SpyOT - " + version
+        self.env = env
+        self.network = Systems()
+        self.app = App(self.network, self.title, self.env)
+
+    def mainloop(self):
+        self.app.mainloop()
 
 
 class TestMain:

@@ -8,7 +8,7 @@ key = Fernet.generate_key()
 fernet = Fernet(key)
 
 
-class Network:
+class Systems:
     def __init__(self):
         self.db = MongoAPI("user_network")
         self.metadata = None
