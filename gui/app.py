@@ -1,5 +1,5 @@
 from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox, Listbox, StringVar
-from . import constants as preset
+from SpyOT.gui import constants as preset
 import threading
 
 

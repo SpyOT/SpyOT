@@ -17,8 +17,8 @@ class Network:
         self.devices = []
         self.device_ips = []
         self.host = {"name": "", "ip": ""}
-        self.local_storage_path = 'src/systems/local'
-        self.blacklist_path = 'src/systems/local/blacklist.text'
+        self.local_storage_path = 'systems/local'
+        self.blacklist_path = self.local_storage_path + '/blacklist.text'
         self.upload_devices = []
         self.create_local_storage()
 
@@ -38,7 +38,7 @@ class Network:
         f.close()
 
     def add_local_scan(self):
-        local_dir = open("src/systems/local/local_scans/scan01", "w")
+        local_dir = open(self.local_storage_path + '/local_scans/scan01', "w")
         scan_entry = list()
         scan_entry.append(' '.join(["host", self.host["name"], self.host["ip"] + '\n']))
         for device in self.devices:
@@ -112,7 +112,7 @@ class Network:
         return entry
 
     def can_upload(self):
-        local_scans_path = 'src/systems/local/local_scans'
+        local_scans_path = self.local_storage_path + '/local_scans'
         local_scans = []
         if listdir(local_scans_path):
             local_scans = [join(local_scans_path, f) for f in listdir(local_scans_path) if

@@ -1,5 +1,6 @@
 from tkinter import Tk
-import src
+from gui import App
+from systems import Network
 
 """
 sources:
@@ -16,8 +17,8 @@ class SpyOT(Tk):
         self.version = version
         self.APP_ENV = env
         self.title('-'.join(["SpyOT", self.version]))
-        self.network = src.Network()
-        self.app = src.App(self)
+        self.network = Network()
+        self.app = App(self)
 
 
 class TestMain:

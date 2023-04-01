@@ -161,7 +161,7 @@ cython_debug/
 
 # Logs
 logs
-*.log
+#*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -234,14 +234,14 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
+.env.*
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
 
 # parcel-bundler cache (https://parceljs.org/)
-.cache
+#.cache
 .parcel-cache
 
 # Next.js build output
@@ -263,7 +263,7 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
+#.cache
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -289,3 +289,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# misc.
+__pycache__
+*.pyc
+*.pcap
+.idea/
+systems/local/*
