@@ -1,2 +1,2 @@
-from src.app import App
-from src.systems import Network
+from .app import App
+from .systems import Network

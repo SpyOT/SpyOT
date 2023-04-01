@@ -1,2 +1,0 @@
-# Constants
-title = "SpyOT"

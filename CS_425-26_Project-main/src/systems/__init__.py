@@ -1,1 +1,1 @@
-from src.systems.systems import Network
+from .systems import Network

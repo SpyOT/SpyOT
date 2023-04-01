@@ -1,11 +1,12 @@
-from src.systems.network_scanner import NetworkScanner
-from src.systems.db_api import MongoAPI
+from .network_scanner import NetworkScanner
+from .db_api import MongoAPI
 from os import listdir, mkdir
 from os.path import isfile, join
 from cryptography.fernet import Fernet
 
 key = Fernet.generate_key()
 fernet = Fernet(key)
+
 
 class Network:
     def __init__(self):
@@ -145,7 +146,7 @@ class Network:
                 return False
             curr_list.append(line)
         print("Adding", device, "to blacklist")
-        curr_list.append(device+'\n')
+        curr_list.append(device + '\n')
         blacklist.close()
         blacklist = open(self.blacklist_path, 'w')
         blacklist.writelines(curr_list)
