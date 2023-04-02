@@ -34,6 +34,11 @@ class CustomContainer(ttk.Frame):
         if 'image' in kwargs:
             self.widgets[name].image = kwargs['image']
 
+    def update_widget_value(self, name, val, new_val):
+        self.widgets[name][val] = new_val
+        if val == 'image':
+            self.widgets[name].image = new_val
+
     def get_widgets(self):
         return self.widgets
 
@@ -44,3 +49,13 @@ class CustomContainer(ttk.Frame):
         self.widgets[name].grid(
             **kwargs
         )
+
+    def display_widgets(self):
+        pass
+
+    def display_frame(self, **kwargs):
+        self.grid(**kwargs)
+        self.display_widgets()
+
+    def remove_frame(self):
+        self.grid_forget()

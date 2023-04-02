@@ -20,3 +20,23 @@ collect_button = asset_path + "collect_button.png"
 upload_button = asset_path + "upload_button.png"
 expand_button = asset_path + "expand_output.png"
 collapse_button = asset_path + "collapse_output.png"
+about_text = """
+        Instructions -
+        scan systems: Performs a light weight scan on your 
+        systems with the help of the Nmap library. Once complete,
+        a list containing all devices on your systems will
+        be displayed on this right-hand display.
+
+        collect data: Performs an in-depth scan of your systems
+        that allows it to collect information on each devices ports
+        including: protocol, availability, and service. At this point
+        you may also blacklist specific devices by clicking on 
+        the devices name, then selecting the 'Add to blacklist' button.
+        You may also remove that device from your blacklist by
+        selecting the 'Remove from blacklist' button.
+
+        upload data: Connects to our database server and updates
+        the collected data to remove devices in the blacklist. Once
+        complete, a message will appear stating whether your data
+        was successfully uploaded or not.
+        """
