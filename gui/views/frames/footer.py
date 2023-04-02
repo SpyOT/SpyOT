@@ -22,7 +22,7 @@ class CustomFooter(CustomContainer):
                             column=0, row=0,
                             padx=15, pady=15,
                             sticky='w')
-        self.display_widget("exit",
+        self.display_widget("toggle_output",
                             column=1, row=0,
                             padx=15, pady=15,
                             sticky='e')

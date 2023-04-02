@@ -6,8 +6,8 @@ from ..widgets import *
 
 
 class MainWindow:
-    def __init__(self, network, window):
-        self.network = network
+    def __init__(self, systems, window):
+        self.systems = systems
         self.win = window
         self.is_prod = self.win.APP_ENV == "prod"
         self.win_bg = self.win.configure("bg")[-1]
@@ -41,8 +41,8 @@ class MainWindow:
 
         self.set_win()
 
-        self.devices = StringVar(value=[self.network.devices[device]["name"] for device in self.network.devices])
-        self.host = StringVar(value=self.network.host["name"])
+        self.devices = StringVar(value=[self.systems.devices[device]["name"] for device in self.systems.devices])
+        self.host = StringVar(value=self.systems.host["name"])
         self.selected_device, self.selected_index = "", 0
         self.info_toggle = 1
         self.output_widgets = {}
@@ -57,170 +57,6 @@ class MainWindow:
         self.output.rowconfigure(0, weight=1)
         self.output.rowconfigure(1, weight=2)
         self.output.rowconfigure(2, weight=1)
-
-    def scan_thread(self):
-        self.network.scan()
-        self.output_widgets["scan_progress"].stop()
-        self.body_widgets["scan"]["button"]["state"] = "normal"
-        self.footer_widgets["exit"]["state"] = "normal"
-        messagebox.showinfo(self.win.version, "Scan Complete")
-        self.output_widgets["scan_progress"].grid_forget()
-        self.display_summary()
-
-    def display_summary(self):
-        self.host.set(self.network.host["name"])
-        device_names = [device["name"] for device in self.network.devices]
-        self.devices.set(device_names)
-        self.output_widgets["host_caption"].grid(
-            column=0, row=0,
-            padx=5, pady=5,
-            sticky='s'
-        )
-        self.output_widgets["host_name"].grid(
-            column=1, row=0,
-            padx=5, pady=5,
-            sticky='s'
-        )
-        self.configure_bl_device()
-        self.output_widgets["device_list"].grid(
-            column=0, columnspan=2,
-            row=1, padx=5, pady=5,
-            sticky='nesw'
-        )
-        self.output_widgets["add_device"].grid(
-            column=1,
-            row=2, padx=5, pady=5,
-            sticky='nesw'
-        )
-        self.output_widgets["remove_device"].grid(
-            column=0,
-            row=2, padx=5, pady=5,
-            sticky='nesw'
-        )
-
-    def handle_btn_press(self, option):
-        print("clicked on", option, "button")
-
-        has_output = ["scan", "collect", "info", "add_to_bl", "remove_from_bl"]
-        if option in has_output:
-            match option:
-                case "scan":
-                    self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-                    self.output_widgets["scan_progress"].grid(
-                        column=0, columnspan=2,
-                        row=0,
-                        padx=10, pady=10,
-                        sticky="n"
-                    )
-                    self.output_widgets["scan_progress"].start(5)
-                    self.body_widgets["scan"]["button"]["state"] = "disabled"
-                    self.footer_widgets["exit"]["state"] = "disabled"
-                    threading.Thread(target=self.scan_thread).start()
-                case "collect":
-                    if self.network.can_upload():
-                        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-                        self.network.collect()
-                        messagebox.showinfo(
-                            self.win.version,
-                            "Collection Complete"
-                        )
-                        self.display_summary()
-                    else:
-                        messagebox.showerror(
-                            self.win.version,
-                            "Nothing to upload.\nTry scanning network first.")
-                        self.output.grid_forget()
-                case "info":
-                    if self.info_toggle:
-                        self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-                        self.output_widgets["info"].grid(
-                            column=0, columnspan=2,
-                            row=0, rowspan=3,
-                            sticky='nesw', padx=5, pady=5
-                        )
-                        self.info_toggle = not self.info_toggle
-                    else:
-                        self.output_widgets["info"].grid_forget()
-                        self.output.grid_forget()
-                        self.info_toggle = not self.info_toggle
-                    pass
-                case "add_to_bl":
-                    print(self.selected_device)
-                    result = self.network.add_to_blacklist(self.selected_device)
-                    device_list = self.output_widgets["device_list"]
-                    if result:
-                        device_list.selection_clear(0, 'end')
-                        device_list.itemconfigure(
-                            self.selected_index,
-                            bg=self.win_bg,
-                            foreground='white')
-                        self.disable_device_options()
-                case "remove_from_bl":
-                    print(self.selected_device)
-                    result = self.network.remove_from_blacklist(self.selected_device)
-                    device_list = self.output_widgets["device_list"]
-                    if result:
-                        device_list.selection_clear(0, 'end')
-                        device_list.itemconfigure(
-                            self.selected_index,
-                            bg='white',
-                            foreground=self.win_bg)
-                        self.disable_device_options()
-        else:
-            self.output.grid_forget()
-            match option:
-                case "profile":
-                    pass
-                case "settings":
-                    pass
-                case "upload":
-                    if self.network.metadata:
-                        is_success = self.network.upload()
-                        if is_success:
-                            messagebox.showinfo(
-                                self.win.version,
-                                "Upload Complete")
-                        else:
-                            messagebox.showerror(
-                                self.win.version,
-                                "Error with Upload")
-                    else:
-                        messagebox.showerror(
-                            self.win.version,
-                            "Nothing to upload.\nTry scanning network first.")
-                case "exit":
-                    print("Goodbye!")
-                    self.win.destroy()
-
-    def display_device_options(self, *args):
-        device_names = [device["name"] for device in self.network.devices]
-        self.output_widgets["add_device"]["bg"] = self.text_color
-        self.output_widgets["add_device"]["state"] = 'normal'
-        self.output_widgets["remove_device"]["bg"] = self.text_color
-        self.output_widgets["remove_device"]["state"] = 'normal'
-        device_display = self.output_widgets["device_list"]
-        curr_dev = device_display.curselection()[0]
-        self.selected_index = curr_dev
-        self.selected_device = device_names[curr_dev]
-
-    def disable_device_options(self):
-        self.output_widgets["add_device"]["bg"] = self.frame_bg
-        self.output_widgets["add_device"]["state"] = 'disabled'
-        self.output_widgets["remove_device"]["bg"] = self.frame_bg
-        self.output_widgets["remove_device"]["state"] = 'disabled'
-
-    def configure_bl_device(self):
-        bl_devices = self.network.get_blacklist()
-        bl_devices = [device.strip('\n') for device in bl_devices]
-        device_names = [device["name"] for device in self.network.devices]
-        bl_indices = [i for i, device in enumerate(device_names) if device in bl_devices]
-        device_list = self.output_widgets["device_list"]
-        device_list.selection_clear(0, 'end')
-        for index in bl_indices:
-            device_list.itemconfigure(
-                index,
-                bg=self.win_bg,
-                foreground='white')
 
     def set_widgets(self):
         widget_bg = self.frame_bg
@@ -289,12 +125,12 @@ class MainWindow:
 
         about_text = """
         Instructions -
-        scan network: Performs a light weight scan on your 
-        network with the help of the Nmap library. Once complete,
-        a list containing all devices on your network will
+        scan systems: Performs a light weight scan on your 
+        systems with the help of the Nmap library. Once complete,
+        a list containing all devices on your systems will
         be displayed on this right-hand display.
 
-        collect data: Performs an in-depth scan of your network
+        collect data: Performs an in-depth scan of your systems
         that allows it to collect information on each devices ports
         including: protocol, availability, and service. At this point
         you may also blacklist specific devices by clicking on 
@@ -366,11 +202,12 @@ class MainWindow:
                                bg=widget_bg,
                                command=lambda: self.handle_btn_press("info"))
 
-        exit_icon = PhotoImage(file=preset.exit_path)
-        self.footer.set_widget("exit", CustomButton,
-                               image=exit_icon,
+        toggle_output_icon = PhotoImage(file=preset.expand_button)
+        self.footer.set_widget("toggle_output", CustomButton,
+                               text="closed",
+                               image=toggle_output_icon,
                                bg=widget_bg,
-                               command=lambda: self.handle_btn_press("exit"))
+                               command=lambda: self.handle_btn_press("toggle_output"))
 
     def display_win(self):
         self.container.grid(column=0, row=0, sticky='nesw')
@@ -382,3 +219,194 @@ class MainWindow:
         self.header.display_widgets()
         self.body.display_widgets()
         self.footer.display_widgets()
+
+    def handle_btn_press(self, option):
+        print("clicked on", option, "button")
+
+        match option:
+            # Header Buttons
+            case "profile":
+                pass
+            case "settings":
+                pass
+            # Body Buttons
+            case "scan":
+                pass
+            case "collect":
+                pass
+            case "upload":
+                pass
+            # Footer Buttons
+            case "info":
+                pass
+            case "toggle_out":
+                pass
+            # Output Buttons
+            # TBD
+        # match option:
+        #     case "scan":
+        #         self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        #         self.output_widgets["scan_progress"].grid(
+        #             column=0, columnspan=2,
+        #             row=0,
+        #             padx=10, pady=10,
+        #             sticky="n"
+        #         )
+        #         self.output_widgets["scan_progress"].start(5)
+        #         self.body.actions["scan"]["button"]["state"] = "disabled"
+        #         self.footer.widgets["toggle_output"]["state"] = "disabled"
+        #         threading.Thread(target=self.scan_thread).start()
+        #     case "collect":
+        #         if self.systems.can_upload():
+        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        #             self.systems.collect()
+        #             messagebox.showinfo(
+        #                 self.win.version,
+        #                 "Collection Complete"
+        #             )
+        #             self.display_summary()
+        #         else:
+        #             messagebox.showerror(
+        #                 self.win.version,
+        #                 "Nothing to upload.\nTry scanning systems first.")
+        #             self.output.grid_forget()
+        #     case "info":
+        #         if self.info_toggle:
+        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        #             self.output_widgets["info"].grid(
+        #                 column=0, columnspan=2,
+        #                 row=0, rowspan=3,
+        #                 sticky='nesw', padx=5, pady=5
+        #             )
+        #             self.info_toggle = not self.info_toggle
+        #         else:
+        #             self.output_widgets["info"].grid_forget()
+        #             self.output.grid_forget()
+        #             self.info_toggle = not self.info_toggle
+        #         pass
+        #     case "add_to_bl":
+        #         print(self.selected_device)
+        #         result = self.systems.add_to_blacklist(self.selected_device)
+        #         device_list = self.output_widgets["device_list"]
+        #         if result:
+        #             device_list.selection_clear(0, 'end')
+        #             device_list.itemconfigure(
+        #                 self.selected_index,
+        #                 bg=self.win_bg,
+        #                 foreground='white')
+        #             self.disable_device_options()
+        #     case "remove_from_bl":
+        #         print(self.selected_device)
+        #         result = self.systems.remove_from_blacklist(self.selected_device)
+        #         device_list = self.output_widgets["device_list"]
+        #         if result:
+        #             device_list.selection_clear(0, 'end')
+        #             device_list.itemconfigure(
+        #                 self.selected_index,
+        #                 bg='white',
+        #                 foreground=self.win_bg)
+        #             self.disable_device_options()
+        #     case "profile":
+        #         pass
+        #     case "settings":
+        #         pass
+        #     case "upload":
+        #         if self.systems.metadata:
+        #             is_success = self.systems.upload()
+        #             if is_success:
+        #                 messagebox.showinfo(
+        #                     self.win.version,
+        #                     "Upload Complete")
+        #             else:
+        #                 messagebox.showerror(
+        #                     self.win.version,
+        #                     "Error with Upload")
+        #         else:
+        #             messagebox.showerror(
+        #                 self.win.version,
+        #                 "Nothing to upload.\nTry scanning systems first.")
+        #     case "toggle_output":
+        #         print("Toggling Output")
+        #         if self.footer.get_widget("toggle_output").cget("text") == "open":
+        #             self.output.grid_forget()
+        #             self.footer.get_widget("toggle_output")["text"] = "closed"
+        #             toggle_output_icon = PhotoImage(file=preset.expand_button)
+        #             self.footer.get_widget("toggle_output")["image"] = toggle_output_icon
+        #             self.footer.get_widget("toggle_output").image = toggle_output_icon
+        #         else:
+        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        #             toggle_output_icon = PhotoImage(file=preset.collapse_button)
+        #             self.footer.get_widget("toggle_output")["image"] = toggle_output_icon
+        #             self.footer.get_widget("toggle_output").image = toggle_output_icon
+        #             self.footer.get_widget("toggle_output")["text"] = "open"
+
+    # Output utils
+    def scan_thread(self):
+        self.systems.scan()
+        self.output_widgets["scan_progress"].stop()
+        self.body_widgets["scan"]["button"]["state"] = "normal"
+        self.footer_widgets["exit"]["state"] = "normal"
+        messagebox.showinfo(self.win.version, "Scan Complete")
+        self.output_widgets["scan_progress"].grid_forget()
+        self.display_summary()
+
+    def display_summary(self):
+        self.host.set(self.systems.host["name"])
+        device_names = [device["name"] for device in self.systems.devices]
+        self.devices.set(device_names)
+        self.output_widgets["host_caption"].grid(
+            column=0, row=0,
+            padx=5, pady=5,
+            sticky='s'
+        )
+        self.output_widgets["host_name"].grid(
+            column=1, row=0,
+            padx=5, pady=5,
+            sticky='s'
+        )
+        self.configure_bl_device()
+        self.output_widgets["device_list"].grid(
+            column=0, columnspan=2,
+            row=1, padx=5, pady=5,
+            sticky='nesw'
+        )
+        self.output_widgets["add_device"].grid(
+            column=1,
+            row=2, padx=5, pady=5,
+            sticky='nesw'
+        )
+        self.output_widgets["remove_device"].grid(
+            column=0,
+            row=2, padx=5, pady=5,
+            sticky='nesw'
+        )
+
+    def display_device_options(self, *args):
+        device_names = [device["name"] for device in self.systems.devices]
+        self.output_widgets["add_device"]["bg"] = self.text_color
+        self.output_widgets["add_device"]["state"] = 'normal'
+        self.output_widgets["remove_device"]["bg"] = self.text_color
+        self.output_widgets["remove_device"]["state"] = 'normal'
+        device_display = self.output_widgets["device_list"]
+        curr_dev = device_display.curselection()[0]
+        self.selected_index = curr_dev
+        self.selected_device = device_names[curr_dev]
+
+    def disable_device_options(self):
+        self.output_widgets["add_device"]["bg"] = self.frame_bg
+        self.output_widgets["add_device"]["state"] = 'disabled'
+        self.output_widgets["remove_device"]["bg"] = self.frame_bg
+        self.output_widgets["remove_device"]["state"] = 'disabled'
+
+    def configure_bl_device(self):
+        bl_devices = self.systems.get_blacklist()
+        bl_devices = [device.strip('\n') for device in bl_devices]
+        device_names = [device["name"] for device in self.systems.devices]
+        bl_indices = [i for i, device in enumerate(device_names) if device in bl_devices]
+        device_list = self.output_widgets["device_list"]
+        device_list.selection_clear(0, 'end')
+        for index in bl_indices:
+            device_list.itemconfigure(
+                index,
+                bg=self.win_bg,
+                foreground='white')
