@@ -1,11 +1,11 @@
-from tkinter import Button
+from tkinter import Label
 
 
-class CustomButton(Button):
+class CustomLabel(Label):
     def __init__(self, frame, **kwargs):
         super().__init__(
             frame,
-            activebackground=frame.style.lookup('MyFrame.TFrame', 'background'),
+            activebackground="white",
             bd=0,
             highlightthickness=0,
             relief="solid",

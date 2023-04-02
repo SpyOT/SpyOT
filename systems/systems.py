@@ -33,7 +33,6 @@ class Systems:
             mkdir(local_scan_dir)
         except FileExistsError as err:
             print("!Error: Local dir already exists")
-
         f = open(self.blacklist_path, 'a')
         f.close()
 

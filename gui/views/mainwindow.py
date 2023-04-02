@@ -1,9 +1,11 @@
 from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox, Listbox, StringVar
 import threading
 import SpyOT.gui.constants as preset
+from .frames import *
+from ..widgets import *
 
 
-class MainMenu:
+class MainWindow:
     def __init__(self, network, window):
         self.network = network
         self.win = window
@@ -11,13 +13,19 @@ class MainMenu:
         self.win_bg = self.win.configure("bg")[-1]
         self.frame_bg = self.win_bg if self.is_prod else "#3b3b3b"
         self.text_color = "#5EFF5E"
-        self.container = Frame(
-            self.win,
-            bg=self.win_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
+
+        self.container = CustomContainer(frame=self.win, background=self.win_bg,
+                                         col_config={0: 2, 1: 1},
+                                         row_config={0: 1, 1: 5, 2: 3})
+
+        self.header = CustomHeader(frame=self.container, background=self.frame_bg,
+                                   col_config={0: 1, 1: 8, 2: 1},
+                                   row_config={0: 1})
+
+        self.body = CustomBody(frame=self.container, background=self.frame_bg,
+                               col_config={0: 1, 1: 1},
+                               row_config={0: 1, 1: 1, 2: 1, 3: 1})
+
         self.output = Frame(
             self.container,
             bg=self.frame_bg,
@@ -26,27 +34,11 @@ class MainMenu:
             highlightthickness=0,
             relief="ridge",
         )
-        self.header = Frame(
-            self.container,
-            bg=self.frame_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-        )
-        self.body = Frame(
-            self.container,
-            bg=self.frame_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
-        self.footer = Frame(
-            self.container,
-            bg=self.frame_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
+
+        self.footer = CustomFooter(frame=self.container, background=self.frame_bg,
+                                   col_config={0: 1, 1: 1},
+                                   row_config={0: 1})
+
         self.set_win()
 
         self.devices = StringVar(value=[self.network.devices[device]["name"] for device in self.network.devices])
@@ -54,42 +46,17 @@ class MainMenu:
         self.selected_device, self.selected_index = "", 0
         self.info_toggle = 1
         self.output_widgets = {}
-        self.header_widgets = {}
-        self.body_widgets = {}
-        self.footer_widgets = {}
         self.alert_widgets = {}
         self.set_widgets()
 
         self.display_win()
 
     def set_win(self):
-        self.container.columnconfigure(0, weight=2)
-        self.container.columnconfigure(1, weight=1)
-        self.container.rowconfigure(0, weight=1)
-        self.container.rowconfigure(1, weight=5)
-        self.container.rowconfigure(2, weight=3)
-
         self.output.columnconfigure(0, weight=1)
         self.output.columnconfigure(1, weight=1)
         self.output.rowconfigure(0, weight=1)
         self.output.rowconfigure(1, weight=2)
         self.output.rowconfigure(2, weight=1)
-
-        self.header.columnconfigure(0, weight=1)
-        self.header.columnconfigure(1, weight=8)
-        self.header.columnconfigure(2, weight=1)
-        self.header.rowconfigure(0, weight=1)
-
-        self.body.columnconfigure(0, weight=1)
-        self.body.columnconfigure(1, weight=1)
-        self.body.rowconfigure(0, weight=1)
-        self.body.rowconfigure(1, weight=1)
-        self.body.rowconfigure(2, weight=1)
-        self.body.rowconfigure(3, weight=1)
-
-        self.footer.columnconfigure(0, weight=1)
-        self.footer.columnconfigure(1, weight=1)
-        self.footer.rowconfigure(0, weight=1)
 
     def scan_thread(self):
         self.network.scan()
@@ -352,160 +319,58 @@ class MainMenu:
 
         # Header widgets
         profile_icon = PhotoImage(file=preset.profile_path)
-        self.header_widgets["profile"] = Button(
-            self.header,
-            image=profile_icon,
-            bg=widget_bg,
-            activebackground=win_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-            command=lambda: self.handle_btn_press("profile")
-        )
-        self.header_widgets["profile"].image = profile_icon
-
+        self.header.set_widget("profile", CustomButton,
+                               image=profile_icon,
+                               bg=widget_bg,
+                               command=lambda: self.handle_btn_press("profile"))
         title_icon = PhotoImage(file=preset.title_path)
-        self.header_widgets["title"] = Label(
-            self.header,
-            image=title_icon,
-            bg=widget_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
-        self.header_widgets["title"].image = title_icon
-
+        self.header.set_widget("title", CustomLabel,
+                               image=title_icon,
+                               bg=widget_bg
+                               )
         settings_icon = PhotoImage(file=preset.setting_path)
-        self.header_widgets["settings"] = Button(
-            self.header,
-            image=settings_icon,
-            bg=widget_bg,
-            activebackground=win_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-            command=lambda: self.handle_btn_press("settings")
-        )
-        self.header_widgets["settings"].image = settings_icon
+        self.header.set_widget("settings", CustomButton,
+                               image=settings_icon,
+                               bg=widget_bg,
+                               command=lambda: self.handle_btn_press("settings"))
 
         # Body widgets
-        action_icons = {"scan": preset.scan_path,
-                        "collect": preset.collect_path,
-                        "upload": preset.upload_path}
-        for action in action_icons:
-            self.body_widgets[action] = {}
-            curr_line = self.body_widgets[action]
-            action_icon = PhotoImage(file=action_icons[action])
-            curr_line["label"] = Label(
-                self.body,
-                image=action_icon,
-                bg=widget_bg,
-                bd=0,
-                highlightthickness=0,
-                relief="ridge"
-            )
-            curr_line["label"].image = action_icon
+        actions = {"scan": {"label": preset.scan_path, "button": preset.scan_button},
+                   "collect": {"label": preset.collect_path, "button": preset.collect_button},
+                   "upload": {"label": preset.upload_path, "button": preset.upload_button}}
+        for action in actions:
+            action_label_icon = PhotoImage(file=actions[action]["label"])
+            action_label = action + "_label"
+            self.body.set_widget(action_label, CustomLabel,
+                                 image=action_label_icon,
+                                 bg=widget_bg)
+            action_button_icon = PhotoImage(file=actions[action]["button"])
+            action_button = action + "_button"
 
-        # self.body_widgets["scan"]["button"] = Button(
-        #     self.body,
-        #     text="Scan Network",
-        #     bg=widget_bg,
-        #     activebackground="white",
-        #     bd=1,
-        #     highlightthickness=0,
-        #     relief="solid",
-        #     foreground="#5EFF5E",
-        #     command=lambda: self.handle_btn_press("scan")
-        # )
-        scan_button = PhotoImage(file=preset.scan_button)
-        self.body_widgets["scan"]["button"] = Button(
-            self.body,
-            image=scan_button,
-            bg=widget_bg,
-            activebackground="white",
-            bd=0,
-            highlightthickness=0,
-            # relief="solid",
-            # foreground="#5EFF5E",
-            command=lambda: self.handle_btn_press("scan")
-        )
-        self.body_widgets["scan"]["button"].image = scan_button
+            def callback(curr_action=action):
+                self.handle_btn_press(curr_action)
 
-        # self.body_widgets["collect"]["button"] = Button(
-        #     self.body,
-        #     text="Collect Data",
-        #     bg=widget_bg,
-        #     activebackground="white",
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="flat",
-        #     foreground="#5EFF5E",
-        #     command=lambda: self.handle_btn_press("collect")
-        # )
-        collect_button = PhotoImage(file=preset.collect_button)
-        self.body_widgets["collect"]["button"] = Button(
-            self.body,
-            image=collect_button,
-            bg=widget_bg,
-            activebackground="white",
-            bd=0,
-            highlightthickness=0,
-            # relief="solid",
-            # foreground="#5EFF5E",
-            command=lambda: self.handle_btn_press("collect")
-        )
-        self.body_widgets["collect"]["button"].image = collect_button
-
-        # self.body_widgets["upload"]["button"] = Button(
-        #     self.body,
-        #     text="Upload Data",
-        #     bg="#5EFF5E",
-        #     activebackground="white",
-        #     bd=1,
-        #     highlightthickness=0,
-        #     relief="flat",
-        #     foreground=widget_bg,
-        #     command=lambda: self.handle_btn_press("upload")
-        # )
-        upload_button = PhotoImage(file=preset.upload_button)
-        self.body_widgets["upload"]["button"] = Button(
-            self.body,
-            image=upload_button,
-            bg=widget_bg,
-            activebackground="white",
-            bd=0,
-            highlightthickness=0,
-            # relief="solid",
-            # foreground="#5EFF5E",
-            command=lambda: self.handle_btn_press("upload")
-        )
-        self.body_widgets["upload"]["button"].image = upload_button
+            self.body.set_widget(action_button, CustomButton,
+                                 image=action_button_icon,
+                                 bg=widget_bg,
+                                 command=callback
+                                 )
+            self.body.set_actions(action,
+                                  self.body.get_widget(action_label),
+                                  self.body.get_widget(action_button))
 
         # Footer widgets
         info_icon = PhotoImage(file=preset.info_path)
-        self.footer_widgets["info"] = Button(
-            self.footer,
-            image=info_icon,
-            bg=widget_bg,
-            activebackground=win_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-            command=lambda: self.handle_btn_press("info"),
-        )
-        self.footer_widgets["info"].image = info_icon
+        self.footer.set_widget("info", CustomButton,
+                               image=info_icon,
+                               bg=widget_bg,
+                               command=lambda: self.handle_btn_press("info"))
+
         exit_icon = PhotoImage(file=preset.exit_path)
-        self.footer_widgets["exit"] = Button(
-            self.footer,
-            image=exit_icon,
-            bg=widget_bg,
-            activebackground=win_bg,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-            command=lambda: self.handle_btn_press("exit")
-        )
-        self.footer_widgets["exit"].image = exit_icon
+        self.footer.set_widget("exit", CustomButton,
+                               image=exit_icon,
+                               bg=widget_bg,
+                               command=lambda: self.handle_btn_press("exit"))
 
     def display_win(self):
         self.container.grid(column=0, row=0, sticky='nesw')
@@ -514,36 +379,6 @@ class MainMenu:
         self.body.grid(column=0, row=1, sticky='nesw', padx=5, pady=5)
         self.footer.grid(column=0, row=2, sticky='nesw', padx=5, pady=5)
 
-        # self.output_widgets["scan_progress"].grid(
-        #     column=0,
-        #     row=0,
-        #     padx=10, pady=10
-        # )
-
-        for i, option in enumerate(self.header_widgets):
-            self.header_widgets[option].grid(
-                column=i,
-                row=0,
-                padx=15, pady=15)
-
-        for i, action in enumerate(self.body_widgets):
-            action = self.body_widgets[action]
-            action["label"].grid(
-                column=0, row=i, padx=15, pady=15
-            )
-            action["button"].grid(
-                column=1, row=i, padx=15, pady=15
-            )
-
-        self.footer_widgets["info"].grid(
-            column=0,
-            row=0,
-            padx=15, pady=15,
-            sticky='w'
-        )
-        self.footer_widgets["exit"].grid(
-            column=1,
-            row=0,
-            padx=15, pady=15,
-            sticky='e'
-        )
+        self.header.display_widgets()
+        self.body.display_widgets()
+        self.footer.display_widgets()
