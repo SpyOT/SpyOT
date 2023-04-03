@@ -21,6 +21,9 @@ class CustomBody(CustomContainer):
     def set_actions(self, action, label_widget, button_widget):
         self.actions[action] = {"label": label_widget, "button": button_widget}
 
+    def get_actions(self):
+        return self.actions
+
     def display_widgets(self):
         for i, action in enumerate(self.actions):
             self.actions[action]["label"].grid(

@@ -12,6 +12,7 @@ class MainWindow:
         self.is_prod = self.win.APP_ENV == "prod"
         self.win_bg = self.win.configure("bg")[-1]
         self.frame_bg = self.win_bg if self.is_prod else "#3b3b3b"
+        self.button_bg = "#1DD75B"
         self.text_color = "#5EFF5E"
 
         self.container = CustomContainer(frame=self.win, background=self.win_bg,
@@ -28,7 +29,7 @@ class MainWindow:
 
         self.output = CustomOutput(frame=self.container, background=self.frame_bg,
                                    col_config={0: 1, 1: 1},
-                                   row_config={0: 1, 1: 2, 2: 1})
+                                   row_config={0: 1, 1: 2, 2: 1, 3: 1})
 
         self.footer = CustomFooter(frame=self.container, background=self.frame_bg,
                                    col_config={0: 1, 1: 1},
@@ -40,12 +41,12 @@ class MainWindow:
         self.info_toggle = 1
         self.alert_widgets = {}
         self.set_widgets()
-
+        self.thread = None
         self.display_win()
 
     def set_widgets(self):
         widget_bg = self.frame_bg
-        win_bg = self.win_bg
+        button_bg = "#1DD75B"
         """ Header widgets"""
         profile_icon = PhotoImage(file=preset.profile_path)
         self.header.set_widget("profile", CustomButton,
@@ -101,76 +102,47 @@ class MainWindow:
                                command=lambda: self.handle_btn_press("toggle_output"))
 
         """ Output widgets"""
-        # self.output_widgets["scan_progress"] = ttk.Progressbar(
-        #     self.output,
-        #     orient='horizontal',
-        #     mode='indeterminate',
-        #     length=140
-        # )
-        # self.output_widgets["host_caption"] = Label(
-        #     self.output,
-        #     text="Network Name:",
-        #     foreground=self.text_color,
-        #     bg=widget_bg,
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="ridge"
-        # )
-        # self.output_widgets["host_name"] = Label(
-        #     self.output,
-        #     textvariable=self.host,
-        #     foreground=self.text_color,
-        #     bg=widget_bg,
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="ridge"
-        # )
-        # self.output_widgets["device_list"] = Listbox(
-        #     self.output,
-        #     listvariable=self.devices,
-        #     foreground=self.win_bg,
-        #     # bg=widget_bg,
-        #     # bd=0,
-        #     # highlightthickness=0,
-        #     # relief="ridge",
-        #     justify="center"
-        # )
-        # device_list = self.output_widgets["device_list"]
-        # device_list.bind('<<ListboxSelect>>', self.display_device_options)
-        #
-        # self.output_widgets["add_device"] = Button(
-        #     self.output,
-        #     text="Blacklist Device",
-        #     bg=self.frame_bg,
-        #     activebackground="white",
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="solid",
-        #     state="disabled",
-        #     command=lambda: self.handle_btn_press("add_to_bl")
-        # )
-        #
-        # self.output_widgets["remove_device"] = Button(
-        #     self.output,
-        #     text="Whitelist Device",
-        #     bg=self.frame_bg,
-        #     activebackground="white",
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="solid",
-        #     state="disabled",
-        #     command=lambda: self.handle_btn_press("remove_from_bl")
-        # )
-        #
-        # self.output_widgets["info"] = Label(
-        #     self.output,
-        #     text=preset.about_text,
-        #     foreground=self.text_color,
-        #     bg=widget_bg,
-        #     bd=0,
-        #     highlightthickness=0,
-        #     relief="ridge"
-        # )
+        self.output.set_widget("progress_bar", ttk.Progressbar,
+                               orient="horizontal",
+                               mode="indeterminate",
+                               length=140)
+
+        self.output.set_widget("host_label", CustomLabel,
+                               text="Detected Network:",
+                               foreground=self.text_color,
+                               bg=widget_bg)
+
+        self.output.vars["host_name"] = StringVar(value=self.systems.get_hostname())
+        self.output.set_widget("host_name", CustomLabel,
+                               textvariable=self.output.vars["host_name"],
+                               foreground=self.text_color,
+                               bg=widget_bg)
+
+        self.output.vars["devices"] = StringVar(value=self.systems.get_devices())
+        self.output.set_widget("devices", Listbox,
+                               listvariable=self.output.vars["devices"],
+                               foreground=self.win_bg,
+                               justify='center')
+        self.output.get_widget("devices").bind('<<ListboxSelect>>',
+                                               self.update_scan_buttons)
+
+        self.output.set_widget("new_scan", CustomButton,
+                               text="New Scan",
+                               bg=self.button_bg,
+                               command=lambda: self.handle_btn_press("run_scan"))
+
+        self.output.set_widget("blacklist", CustomButton,
+                               text="Blacklist",
+                               bg=self.frame_bg,
+                               state="disabled",
+                               command=lambda: self.handle_btn_press("blacklist"))
+
+        self.output.set_widget("whitelist", CustomButton,
+                               text="Whitelist",
+                               bg=self.frame_bg,
+                               state="disabled",
+                               command=lambda: self.handle_btn_press("whitelist"), )
+
         self.output.set_widget("info", CustomLabel,
                                text=preset.about_text,
                                bg=widget_bg,
@@ -193,10 +165,28 @@ class MainWindow:
             case "settings":
                 pass
             # Body Buttons
+            case "run_scan":
+                self.toggle_buttons()
+                self.output.set_view('scan_run')
+                self.output.display_frame(
+                    column=1, row=0,
+                    rowspan=3,
+                    sticky='nesw',
+                    padx=5, pady=5)
+                self.thread = threading.Thread(target=self.scan_thread).start()
             case "scan":
-                pass
+                if self.systems.scan_exists():
+                    self.update_devices()
+                    self.output.set_view('scan_output')
+                    self.output.display_frame(
+                        column=1, row=0,
+                        rowspan=3,
+                        sticky='nesw',
+                        padx=5, pady=5)
+                else:
+                    self.handle_btn_press("run_scan")
             case "collect":
-                pass
+                self.systems.remove_scans()
             case "upload":
                 pass
             # Footer Buttons
@@ -213,23 +203,30 @@ class MainWindow:
                     rowspan=3,
                     sticky='nesw',
                     padx=5, pady=5)
+            # Output Buttons
+            case "blacklist":
+                selected_device = self.get_selected_device()
+                selected_index = self.output.get_selected_index()
+                result = self.systems.add_to_blacklist(selected_device)
+                if result:
+                    self.output.update_selected_device(selected_index,
+                                                       bg=self.win_bg,
+                                                       foreground='white')
+                self.update_scan_buttons()
+            case "whitelist":
+                selected_device = self.get_selected_device()
+                selected_index = self.output.get_selected_index()
+                result = self.systems.remove_from_blacklist(selected_device)
+                if result:
+                    self.output.update_selected_device(selected_index,
+                                                       bg='white',
+                                                       foreground=self.frame_bg)
+                self.update_scan_buttons()
         self.update_footer_toggle()
 
         # Output Buttons
         # TBD
         # match option:
-        #     case "scan":
-        #         self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-        #         self.output_widgets["scan_progress"].grid(
-        #             column=0, columnspan=2,
-        #             row=0,
-        #             padx=10, pady=10,
-        #             sticky="n"
-        #         )
-        #         self.output_widgets["scan_progress"].start(5)
-        #         self.body.actions["scan"]["button"]["state"] = "disabled"
-        #         self.footer.widgets["toggle_output"]["state"] = "disabled"
-        #         threading.Thread(target=self.scan_thread).start()
         #     case "collect":
         #         if self.systems.can_upload():
         #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
@@ -244,46 +241,6 @@ class MainWindow:
         #                 self.win.version,
         #                 "Nothing to upload.\nTry scanning systems first.")
         #             self.output.grid_forget()
-        #     case "info":
-        #         if self.info_toggle:
-        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-        #             self.output_widgets["info"].grid(
-        #                 column=0, columnspan=2,
-        #                 row=0, rowspan=3,
-        #                 sticky='nesw', padx=5, pady=5
-        #             )
-        #             self.info_toggle = not self.info_toggle
-        #         else:
-        #             self.output_widgets["info"].grid_forget()
-        #             self.output.grid_forget()
-        #             self.info_toggle = not self.info_toggle
-        #         pass
-        #     case "add_to_bl":
-        #         print(self.selected_device)
-        #         result = self.systems.add_to_blacklist(self.selected_device)
-        #         device_list = self.output_widgets["device_list"]
-        #         if result:
-        #             device_list.selection_clear(0, 'end')
-        #             device_list.itemconfigure(
-        #                 self.selected_index,
-        #                 bg=self.win_bg,
-        #                 foreground='white')
-        #             self.disable_device_options()
-        #     case "remove_from_bl":
-        #         print(self.selected_device)
-        #         result = self.systems.remove_from_blacklist(self.selected_device)
-        #         device_list = self.output_widgets["device_list"]
-        #         if result:
-        #             device_list.selection_clear(0, 'end')
-        #             device_list.itemconfigure(
-        #                 self.selected_index,
-        #                 bg='white',
-        #                 foreground=self.win_bg)
-        #             self.disable_device_options()
-        #     case "profile":
-        #         pass
-        #     case "settings":
-        #         pass
         #     case "upload":
         #         if self.systems.metadata:
         #             is_success = self.systems.upload()
@@ -299,20 +256,6 @@ class MainWindow:
         #             messagebox.showerror(
         #                 self.win.version,
         #                 "Nothing to upload.\nTry scanning systems first.")
-        #     case "toggle_output":
-        #         print("Toggling Output")
-        #         if self.footer.get_widget("toggle_output").cget("text") == "open":
-        #             self.output.grid_forget()
-        #             self.footer.get_widget("toggle_output")["text"] = "closed"
-        #             toggle_output_icon = PhotoImage(file=preset.expand_button)
-        #             self.footer.get_widget("toggle_output")["image"] = toggle_output_icon
-        #             self.footer.get_widget("toggle_output").image = toggle_output_icon
-        #         else:
-        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
-        #             toggle_output_icon = PhotoImage(file=preset.collapse_button)
-        #             self.footer.get_widget("toggle_output")["image"] = toggle_output_icon
-        #             self.footer.get_widget("toggle_output").image = toggle_output_icon
-        #             self.footer.get_widget("toggle_output")["text"] = "open"
 
     # Output utils
     def update_footer_toggle(self):
@@ -325,62 +268,56 @@ class MainWindow:
             "toggle_output",
             "image", toggle_icon)
 
+    def update_devices(self):
+        self.output.vars['devices'].set(self.systems.get_device_names())
+
+    def toggle_buttons(self):
+        header_widgets = [self.header.get_widget(widget) for widget in self.header.get_widgets()]
+        body_widgets = [self.body.get_widget(widget) for widget in self.body.get_widgets()]
+        footer_widgets = [self.footer.get_widget(widget) for widget in self.footer.get_widgets()]
+        widgets = header_widgets + body_widgets + footer_widgets
+        for widget in widgets:
+            if widget.winfo_class() == "Button":
+                if widget["state"] == "disabled":
+                    widget["state"] = "normal"
+                else:
+                    widget["state"] = "disabled"
+
     def scan_thread(self):
-        self.systems.scan()
-        self.output_widgets["scan_progress"].stop()
-        self.body_widgets["scan"]["button"]["state"] = "normal"
-        self.footer_widgets["exit"]["state"] = "normal"
-        messagebox.showinfo(self.win.version, "Scan Complete")
-        self.output_widgets["scan_progress"].grid_forget()
-        self.display_summary()
-
-    def display_summary(self):
-        self.host.set(self.systems.host["name"])
-        device_names = [device["name"] for device in self.systems.devices]
-        self.devices.set(device_names)
-        self.output_widgets["host_caption"].grid(
-            column=0, row=0,
-            padx=5, pady=5,
-            sticky='s'
-        )
-        self.output_widgets["host_name"].grid(
+        result = self.systems.scan()
+        self.output.set_view('scan_stop')
+        self.output.display_frame(
             column=1, row=0,
-            padx=5, pady=5,
-            sticky='s'
-        )
-        self.configure_bl_device()
-        self.output_widgets["device_list"].grid(
-            column=0, columnspan=2,
-            row=1, padx=5, pady=5,
-            sticky='nesw'
-        )
-        self.output_widgets["add_device"].grid(
-            column=1,
-            row=2, padx=5, pady=5,
-            sticky='nesw'
-        )
-        self.output_widgets["remove_device"].grid(
-            column=0,
-            row=2, padx=5, pady=5,
-            sticky='nesw'
-        )
+            rowspan=3,
+            sticky='nesw',
+            padx=5, pady=5)
+        self.toggle_buttons()
+        if result:
+            messagebox.showinfo(self.win.version, "Scan Complete")
+            self.handle_btn_press("scan")
+        else:
+            messagebox.showerror(self.win.version, "!Error: Scan not successful")
 
-    def display_device_options(self, *args):
-        device_names = [device["name"] for device in self.systems.devices]
-        self.output_widgets["add_device"]["bg"] = self.text_color
-        self.output_widgets["add_device"]["state"] = 'normal'
-        self.output_widgets["remove_device"]["bg"] = self.text_color
-        self.output_widgets["remove_device"]["state"] = 'normal'
-        device_display = self.output_widgets["device_list"]
-        curr_dev = device_display.curselection()[0]
-        self.selected_index = curr_dev
-        self.selected_device = device_names[curr_dev]
+    def update_scan_buttons(self, *args):
+        selected_device_name = self.get_selected_device()
+        blacklist = self.systems.get_blacklist()
+        if not selected_device_name:
+            self.output.disable_button("blacklist", bg=self.frame_bg)
+            self.output.disable_button("whitelist")
+        elif selected_device_name in blacklist:
+            self.output.disable_button("blacklist", bg=self.frame_bg)
+            self.output.enable_button("whitelist", bg=self.button_bg)
+        else:
+            self.output.enable_button("blacklist", bg=self.button_bg)
+            self.output.disable_button("whitelist", bg=self.frame_bg)
 
-    def disable_device_options(self):
-        self.output_widgets["add_device"]["bg"] = self.frame_bg
-        self.output_widgets["add_device"]["state"] = 'disabled'
-        self.output_widgets["remove_device"]["bg"] = self.frame_bg
-        self.output_widgets["remove_device"]["state"] = 'disabled'
+    def get_selected_device(self):
+        try:
+            selected_index = self.output.get_widget("devices").curselection()[0]
+            devices = self.systems.get_device_names()
+            return devices[selected_index]
+        except IndexError as _:
+            return None
 
     def configure_bl_device(self):
         bl_devices = self.systems.get_blacklist()

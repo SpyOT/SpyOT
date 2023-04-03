@@ -28,7 +28,7 @@ class CustomContainer(ttk.Frame):
 
     def set_widget(self, name, widget_type, **kwargs):
         self.widgets[name] = widget_type(
-            frame=self,
+            self,
             **kwargs
         )
         if 'image' in kwargs:
@@ -59,3 +59,15 @@ class CustomContainer(ttk.Frame):
 
     def remove_frame(self):
         self.grid_forget()
+
+    def reset_frame(self):
+        for widget in self.widgets:
+            self.widgets[widget].grid_forget()
+
+    def disable_button(self, name, **kwargs):
+        self.get_widget(name)["state"] = "disabled"
+        self.get_widget(name).configure(**kwargs)
+
+    def enable_button(self, name, **kwargs):
+        self.get_widget(name)["state"] = "normal"
+        self.get_widget(name).configure(**kwargs)

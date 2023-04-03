@@ -14,7 +14,7 @@ class SpyOT:
         print("Welcome to SpyOT! The IoT Security System.")
         self.title = "SpyOT - " + version
         self.env = env
-        self.network = Systems()
+        self.network = Systems(self.env)
         self.app = App(self.network, self.title, self.env)
 
     def mainloop(self):
