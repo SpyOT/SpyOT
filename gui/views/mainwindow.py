@@ -1,4 +1,4 @@
-from tkinter import ttk, PhotoImage, messagebox, Listbox, StringVar
+from tkinter import ttk, PhotoImage, messagebox, Listbox, StringVar, filedialog
 import threading
 import SpyOT.gui.constants as preset
 from .frames import *
@@ -102,6 +102,11 @@ class MainWindow:
                                mode="indeterminate",
                                length=140)
 
+        self.output.set_widget("loading", CustomLabel,
+                               text="Loading...",
+                               foreground=self.text_color,
+                               bg=widget_bg)
+
         self.output.set_widget("host_label", CustomLabel,
                                text="Detected Network:",
                                foreground=self.text_color,
@@ -124,7 +129,7 @@ class MainWindow:
         self.output.set_widget("new_scan", CustomButton,
                                text="New Scan",
                                bg=self.button_bg,
-                               command=lambda: self.handle_btn_press("run_scan"))
+                               command=lambda: self.handle_btn_press("new_scan"))
 
         self.output.set_widget("blacklist", CustomButton,
                                text="Blacklist",
@@ -137,6 +142,40 @@ class MainWindow:
                                bg=self.frame_bg,
                                state="disabled",
                                command=lambda: self.handle_btn_press("whitelist"), )
+
+        self.output.set_widget("summary", CustomLabel,
+                               text="Summary",
+                               foreground=self.text_color,
+                               bg=widget_bg)
+
+        self.output.set_widget("device_summary", ttk.Treeview,
+                               columns='status')
+        self.output.get_widget("device_summary").heading('status', text='Status')
+
+        self.output.set_widget("edit", CustomButton,
+                               text="Edit List",
+                               bg=self.button_bg,
+                               command=lambda: self.handle_btn_press("scan"))
+
+        self.output.set_widget("view", CustomButton,
+                               text="View Reports",
+                               bg=self.button_bg,
+                               command=lambda: self.handle_btn_press("view"))
+
+        self.output.set_widget("save", CustomButton,
+                               text="Save Report",
+                               bg=self.button_bg,
+                               command=lambda: self.handle_btn_press("save"))
+
+        self.output.set_widget("login", CustomButton,
+                               text="Login",
+                               bg=self.button_bg,
+                               command=lambda: self.handle_btn_press("login"))
+
+        self.output.set_widget("sign_up", CustomLabel,
+                               text="Create and account at https://spyot.github.io/SpyOT/",
+                               foreground=self.text_color,
+                               bg=widget_bg)
 
         self.output.set_widget("info", CustomLabel,
                                text=preset.about_text,
@@ -160,28 +199,42 @@ class MainWindow:
             case "settings":
                 pass
             # Body Buttons
-            case "run_scan":
-                self.toggle_buttons()
-                self.output.set_view('scan_run')
-                self.output.display_frame(
-                    column=1, row=0,
-                    rowspan=3,
-                    sticky='n e s w',
-                    padx=5, pady=5)
-                self.thread = threading.Thread(target=self.scan_thread).start()
+            case "new_scan":
+                self.handle_action('scan')
             case "scan":
-                if self.systems.scan_exists():
-                    self.update_devices()
-                    self.output.set_view('scan_output')
-                    self.output.display_frame(
+                if self.handle_output(option):
+                    """ Widgets updated, display widgets"""
+                    self.output.display_action(
+                        option,
                         column=1, row=0,
-                        rowspan=3,
-                        sticky='n e s w',
+                        rowspan=3, sticky='n e s w',
                         padx=5, pady=5)
                 else:
-                    self.handle_btn_press("run_scan")
+                    """ Running scan on network """
+                    self.handle_action(option)
             case "collect":
-                self.systems.remove_scans()
+                if self.handle_output(option):
+                    """ Widgets updated, display widgets"""
+                    self.output.display_action(
+                        option,
+                        column=1, row=0,
+                        rowspan=3, sticky='n e s w',
+                        padx=5, pady=5)
+                else:
+                    """ Running scan on network """
+                    self.handle_action(option)
+            case "view":
+                local_storage_path = self.systems.get_local_path()
+                open_path = filedialog.askopenfilename(
+                    initialdir=local_storage_path,
+                    defaultextension='.txt', filetypes=[("Text files", "*.txt")])
+                self.systems.open_analysis_report(open_path)
+            case "save":
+                local_storage_path = self.systems.get_local_path()
+                save_path = filedialog.asksaveasfilename(
+                    initialdir=local_storage_path,
+                    defaultextension='.txt', filetypes=[("Text files", "*.txt")])
+                self.systems.save_analysis_report(save_path)
             case "upload":
                 pass
             # Footer Buttons
@@ -218,6 +271,49 @@ class MainWindow:
                                                        foreground=self.frame_bg)
                 self.update_scan_buttons()
         self.update_footer_toggle()
+
+    def handle_action(self, action):
+        print("!Running {}".format(action))
+        self.toggle_buttons()
+        self.output.display_action(
+            'run_action',
+            column=1, row=0,
+            rowspan=3, sticky='n e s w',
+            padx=5, pady=5)
+        self.thread = threading.Thread(target=lambda: self.action_thread(action)).start()
+
+    def handle_output(self, action):
+        """ Get action result and update output widgets """
+        print("!Updating {} output widgets".format(action))
+        match action:
+            case "scan":
+                host_name = self.systems.get_hostname()
+                device_names = self.systems.get_device_names()
+                if host_name and device_names:
+                    self.output.update_var('host_name', host_name)
+                    self.output.update_var('devices', device_names)
+                    return True
+                else:
+                    return False
+            case "collect":
+                port_output = self.systems.get_port_output()
+                if port_output:
+                    device_analysis = self.systems.device_analysis(port_output)
+                    device_summary = self.systems.device_summary(device_analysis)
+                    table = self.output.get_widget("device_summary")
+                    rows = table.get_children()
+                    if rows:
+                        for row in rows:
+                            table.delete(row)
+                    for i, data in enumerate(device_summary):
+                        device = device_summary[data]
+                        table.insert('', 'end', text=device['name'], values=(device['status']))
+                    table.column('status', width=100)
+                    return True
+                else:
+                    return False
+            case "upload":
+                pass
 
         # Output Buttons
         # TBD
@@ -278,20 +374,27 @@ class MainWindow:
                 else:
                     widget["state"] = "disabled"
 
-    def scan_thread(self):
-        result = self.systems.scan()
-        self.output.set_view('scan_stop')
-        self.output.display_frame(
+    def action_thread(self, action):
+        print("!Starting {} thread".format(action))
+        result = 0
+        match action:
+            case "scan":
+                result = self.systems.scan()
+            case "collect":
+                result = self.systems.collect()
+            case "upload":
+                result = self.systems.upload()
+        self.output.display_action(
+            'stop_action',
             column=1, row=0,
-            rowspan=3,
-            sticky='n e s w',
+            rowspan=3, sticky='n e s w',
             padx=5, pady=5)
         self.toggle_buttons()
         if result:
-            messagebox.showinfo(self.win.version, "Scan Complete")
-            self.handle_btn_press("scan")
+            messagebox.showinfo(self.win.version, "{} Complete".format(action.capitalize()))
+            self.handle_btn_press(action)
         else:
-            messagebox.showerror(self.win.version, "!Error: Scan not successful")
+            messagebox.showerror(self.win.version, "!Error: {} not successful".format(action.capitalize()))
 
     def update_scan_buttons(self, *args):
         _ = args
@@ -314,4 +417,3 @@ class MainWindow:
             return devices[selected_index]
         except IndexError as _:
             return None
-        

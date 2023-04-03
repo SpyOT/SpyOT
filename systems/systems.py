@@ -1,6 +1,6 @@
 from .network_scanner import NetworkScanner
 from .db_api import MongoAPI
-from os import listdir, mkdir, remove
+from os import listdir, mkdir, remove, system
 from os.path import isfile, join, exists
 from cryptography.fernet import Fernet
 from SpyOT.systems import constants as preset
@@ -24,6 +24,7 @@ class Systems:
         self.upload_devices = []
         self.scans = []
         self.create_local_storage()
+        self.port_output = {}
 
     def create_local_storage(self):
         """ Create a local directory to store scans and blacklist"""
@@ -58,7 +59,7 @@ class Systems:
         self.scans = listdir(preset.scans_path)
 
     def get_hostname(self):
-        hostname = 'temp'
+        hostname = ''
         try:
             recent_scan_path = preset.scans_path + self.scans[-1]
             with open(recent_scan_path, 'r') as f:
@@ -73,6 +74,9 @@ class Systems:
             if not self.is_prod:
                 print('!Error: No scans saved in local storage')
         return hostname
+
+    def get_port_output(self):
+        return self.port_output
 
     def get_devices(self):
         devices = []
@@ -90,7 +94,14 @@ class Systems:
         except IndexError as _:
             if not self.is_prod:
                 print('!Error: No scans saved in local storage')
-            return devices
+        return devices
+
+    def get_device_name(self, ip):
+        devices = self.get_devices()
+        for device in devices:
+            name, device_ip = device[0], device[1]
+            if ip == device_ip:
+                return name
 
     def get_device_names(self):
         devices = self.get_devices()
@@ -105,6 +116,19 @@ class Systems:
                 entry = ' '.join([metadata[ip][value] for value in metadata[ip]] + [ip, '\n'])
                 file.write(entry)
         self.get_local_scan_files()
+
+    def get_local_path(self):
+        return preset.local_storage_path
+
+    def generate_analysis_report(self, device_analysis):
+        # TODO: Implement Kens Report Generator Here
+        pass
+
+    def save_analysis_report(self, filepath):
+        pass
+
+    def open_analysis_report(self, filepath):
+        system("notepad.exe " + filepath)
 
     def scan(self):
         if self.log:
@@ -122,14 +146,17 @@ class Systems:
 
     def collect(self):
         print('collecting data')
-        # encrypt host IP here
-        self.host = {'name': self.metadata['host'][0], 'ip': self.metadata['host'][-1][0]}
-        for device in self.metadata['devices']:
-            if device[-1][0] not in self.device_ips:
-                # encrypt device IP here
-                self.devices.append({'name': device[0], 'ip': device[-1][0]})
-                self.device_ips.append(device[-1][0])
-        print('collection complete')
+        valid_devices = self.get_whitelist()
+        self.port_output = self.scanner.portScanner(valid_devices)
+        return self.port_output
+        # # encrypt host IP here
+        # self.host = {'name': self.metadata['host'][0], 'ip': self.metadata['host'][-1][0]}
+        # for device in self.metadata['devices']:
+        #     if device[-1][0] not in self.device_ips:
+        #         # encrypt device IP here
+        #         self.devices.append({'name': device[0], 'ip': device[-1][0]})
+        #         self.device_ips.append(device[-1][0])
+        # print('collection complete')
 
     def upload(self):
         print('starting upload')
@@ -217,6 +244,7 @@ class Systems:
         blacklist = open(preset.blacklist_path, 'w')
         blacklist.writelines(curr_list)
         blacklist.close()
+        self.port_output = {}
         return True
 
     def remove_from_blacklist(self, device):
@@ -229,6 +257,7 @@ class Systems:
         blacklist.truncate(0)
         blacklist.seek(0)
         blacklist.writelines(new_devices)
+        self.port_output = {}
         return True
 
     def get_blacklist(self):
@@ -237,6 +266,43 @@ class Systems:
             for line in f:
                 device_list.append(line.strip('\n'))
         return device_list
+
+    def get_whitelist(self):
+        blacklist = self.get_blacklist()
+        devices = self.get_devices()
+        whitelist = []
+        for device in devices:
+            try:
+                name = device[0]
+                ip = device[1]
+                if name not in blacklist:
+                    whitelist.append(ip)
+            except IndexError as _:
+                continue
+        return whitelist
+
+    def device_analysis(self, devices):
+        analysis = devices.copy()
+        for device_ip in devices:
+            ports = devices[device_ip]
+            analysis[device_ip] = {'ports': analysis[device_ip]}
+            if ports:
+                risk = 0
+                for port in ports:
+                    if ports[port] == 'open':
+                        risk += 1
+                analysis[device_ip]['status'] = 'At Risk' if risk else 'Secure'
+            else:
+                analysis[device_ip]['status'] = 'Unknown'
+        return analysis
+
+    def device_summary(self, analyzed_devices):
+        summary = {}
+        for device_ip in analyzed_devices:
+            name = self.get_device_name(device_ip)
+            status = analyzed_devices[device_ip]['status']
+            summary[device_ip] = {'name': name, 'status': status}
+        return summary
 
     def update_devices(self):
         blacklist = self.get_blacklist()

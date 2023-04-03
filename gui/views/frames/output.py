@@ -47,17 +47,22 @@ class CustomOutput(CustomContainer):
                                     column=0, columnspan=2,
                                     row=0, rowspan=3,
                                     sticky='nesw', padx=5, pady=5)
-            case "scan_run":
+            case "run_action":
                 self.display_widget("progress_bar",
                                     column=0, columnspan=2,
                                     row=1,
                                     padx=10, pady=10,
                                     sticky='ew')
+                self.display_widget("loading",
+                                    column=0, columnspan=2,
+                                    row=1,
+                                    padx=10, pady=10,
+                                    sticky='ews')
                 self.get_widget("progress_bar").start(5)
-            case "scan_stop":
+            case "stop_action":
                 self.get_widget("progress_bar").stop()
-                self.get_widget("progress_bar").grid_forget()
-            case "scan_output":
+                self.reset_frame()
+            case "scan":
                 self.display_widget("host_label",
                                     column=0, row=0,
                                     padx=5, pady=5,
@@ -84,8 +89,35 @@ class CustomOutput(CustomContainer):
                                     column=1, row=3,
                                     padx=5, pady=5,
                                     sticky='nesw')
+            case "collect":
+                self.display_widget("summary",
+                                    column=0, columnspan=2,
+                                    row=0, padx=5, pady=5,
+                                    sticky='nesw')
+                self.display_widget("device_summary",
+                                    column=0, columnspan=2,
+                                    row=1, padx=5, pady=5,
+                                    sticky='ns')
+                self.display_widget("edit",
+                                    column=0, row=2, rowspan=2,
+                                    padx=5, pady=5,
+                                    sticky='ew')
+                self.display_widget("view",
+                                    column=1, row=2,
+                                    padx=5, pady=5,
+                                    sticky='ew')
+                self.display_widget("save",
+                                    column=1, row=3,
+                                    padx=5, pady=5,
+                                    sticky='ew')
+            case "upload":
+                pass
             case "":
                 self.remove_frame()
+
+    def display_action(self, view, **kwargs):
+        self.set_view(view)
+        self.display_frame(**kwargs)
 
     def get_selected_index(self):
         return self.get_widget("devices").curselection()[0]
@@ -96,3 +128,6 @@ class CustomOutput(CustomContainer):
             **kwargs
         )
         self.get_widget("devices").selection_clear(0, 'end')
+
+    def update_var(self, name, value):
+        self.vars[name].set(value)
