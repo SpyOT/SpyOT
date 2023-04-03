@@ -1,4 +1,4 @@
-from tkinter import ttk, Frame, Button, Label, PhotoImage, messagebox, Listbox, StringVar
+from tkinter import ttk, PhotoImage, messagebox, Listbox, StringVar
 import threading
 import SpyOT.gui.constants as preset
 from .frames import *
@@ -35,10 +35,6 @@ class MainWindow:
                                    col_config={0: 1, 1: 1},
                                    row_config={0: 1})
 
-        self.devices = StringVar(value=[self.systems.devices[device]["name"] for device in self.systems.devices])
-        self.host = StringVar(value=self.systems.host["name"])
-        self.selected_device, self.selected_index = "", 0
-        self.info_toggle = 1
         self.alert_widgets = {}
         self.set_widgets()
         self.thread = None
@@ -46,7 +42,6 @@ class MainWindow:
 
     def set_widgets(self):
         widget_bg = self.frame_bg
-        button_bg = "#1DD75B"
         """ Header widgets"""
         profile_icon = PhotoImage(file=preset.profile_path)
         self.header.set_widget("profile", CustomButton,
@@ -149,10 +144,10 @@ class MainWindow:
                                foreground=self.text_color)
 
     def display_win(self):
-        self.container.grid(column=0, row=0, sticky='nesw')
-        self.header.display_frame(column=0, row=0, sticky='nesw', padx=5, pady=5)
-        self.body.display_frame(column=0, row=1, sticky='nesw', padx=5, pady=5)
-        self.footer.display_frame(column=0, row=2, sticky='nesw', padx=5, pady=5)
+        self.container.grid(column=0, row=0, sticky='n e s w')
+        self.header.display_frame(column=0, row=0, sticky='n e s w', padx=5, pady=5)
+        self.body.display_frame(column=0, row=1, sticky='n e s w', padx=5, pady=5)
+        self.footer.display_frame(column=0, row=2, sticky='n e s w', padx=5, pady=5)
 
     def handle_btn_press(self, option):
         if not self.is_prod:
@@ -171,7 +166,7 @@ class MainWindow:
                 self.output.display_frame(
                     column=1, row=0,
                     rowspan=3,
-                    sticky='nesw',
+                    sticky='n e s w',
                     padx=5, pady=5)
                 self.thread = threading.Thread(target=self.scan_thread).start()
             case "scan":
@@ -181,7 +176,7 @@ class MainWindow:
                     self.output.display_frame(
                         column=1, row=0,
                         rowspan=3,
-                        sticky='nesw',
+                        sticky='n e s w',
                         padx=5, pady=5)
                 else:
                     self.handle_btn_press("run_scan")
@@ -195,13 +190,13 @@ class MainWindow:
                 self.output.toggle_frame(
                     column=1, row=0,
                     rowspan=3,
-                    sticky='nesw',
+                    sticky='n e s w',
                     padx=5, pady=5)
             case "toggle_output":
                 self.output.toggle_frame(
                     column=1, row=0,
                     rowspan=3,
-                    sticky='nesw',
+                    sticky='n e s w',
                     padx=5, pady=5)
             # Output Buttons
             case "blacklist":
@@ -229,7 +224,7 @@ class MainWindow:
         # match option:
         #     case "collect":
         #         if self.systems.can_upload():
-        #             self.output.grid(column=1, row=0, rowspan=3, sticky='nesw', padx=5, pady=5)
+        #             self.output.grid(column=1, row=0, rowspan=3, sticky='n e s w', padx=5, pady=5)
         #             self.systems.collect()
         #             messagebox.showinfo(
         #                 self.win.version,
@@ -289,7 +284,7 @@ class MainWindow:
         self.output.display_frame(
             column=1, row=0,
             rowspan=3,
-            sticky='nesw',
+            sticky='n e s w',
             padx=5, pady=5)
         self.toggle_buttons()
         if result:
@@ -299,6 +294,7 @@ class MainWindow:
             messagebox.showerror(self.win.version, "!Error: Scan not successful")
 
     def update_scan_buttons(self, *args):
+        _ = args
         selected_device_name = self.get_selected_device()
         blacklist = self.systems.get_blacklist()
         if not selected_device_name:
@@ -318,16 +314,4 @@ class MainWindow:
             return devices[selected_index]
         except IndexError as _:
             return None
-
-    def configure_bl_device(self):
-        bl_devices = self.systems.get_blacklist()
-        bl_devices = [device.strip('\n') for device in bl_devices]
-        device_names = [device["name"] for device in self.systems.devices]
-        bl_indices = [i for i, device in enumerate(device_names) if device in bl_devices]
-        device_list = self.output_widgets["device_list"]
-        device_list.selection_clear(0, 'end')
-        for index in bl_indices:
-            device_list.itemconfigure(
-                index,
-                bg=self.win_bg,
-                foreground='white')
+        
