@@ -77,20 +77,22 @@ class NetworkScanner(object):
         print("--------------------------")
         print("Number of devices in network:", self.getDeviceCount())
 
-    def portScanner(self):
+    def deepPortScanner(self, ip_list=[]):
+        ips = ip_list if ip_list else self.getMetadata()
         try:
-            target = self.host_ips.copy()
+            targets = [ip for ip in ips]
             # Iterate through each ip address and return open ports
-            for x in range(len(target)):
+
+            for ip in targets:
                 print("-" * 50)
-                print("Scanning Target: " + str(target[x]))
+                print("Scanning Target: " + ip)
                 print("Scanning started at:" + str(datetime.now()))
-                for port in range(1, 5):  # Change number of sockets that will be scanned
+                for port in range(1, 1023):  # Change number of sockets that will be scanned
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     socket.setdefaulttimeout(1)
 
                     # returns an error indicator
-                    result = s.connect_ex((str(target[x]), port))
+                    result = s.connect_ex((ip, port))
                     if result == 0:
                         print("Port {} is open".format(port))  # print port number that is open
                     s.close()  # close port once done and iterate through to next ip address
@@ -105,70 +107,50 @@ class NetworkScanner(object):
             print("\n Server not responding !!!!")
             sys.exit()
 
-    def deepNetworkScanner(self, ips):
-        for ip in range(len(ips)):
-            self.nm.scan(hosts=ips[ip], arguments='-p 80,23,2323')  # Scans given targets (ips) and their ports
-            print(f'for ip {ips[ip]}:')
-            self.ip_port_info.append([ips[ip], 0, 0, 0])
+    def portScanner(self, ip_list=[]):
+        ips = ip_list if ip_list else self.getMetadata()
+        ips = [ip for ip in ips]
+        deep_scan_result = {}
+        for ip in ips:
             try:
-                if self.nm[ips[ip]]['tcp'][80]['state'] == 'open':  # Scans if port 80 is open
-                    print('Port 80 is OPEN----------')
-                    self.ip_port_info[ip][1] = 1
-                else:
-                    print('Port 80 CLOSED.')
-                    self.ip_port_info[ip][1] = 0
-
-                if self.nm[ips[ip]]['tcp'][23]['state'] == 'open':  # Scans if port 23 is open
-                    print('Port 23 is OPEN----------')
-                    self.ip_port_info[ip][2] = 1
-                else:
-                    print('Port 23 CLOSED.')
-                    self.ip_port_info[ip][2] = 0
-
-                if self.nm[ips[ip]]['tcp'][2323]['state'] == 'open':  # Scans if port 2323 is open
-                    print('Port 2323 is OPEN----------')
-                    self.ip_port_info[ip][3] = 1
-                else:
-                    print('Port 2323 CLOSED.')
-                    self.ip_port_info[ip][3] = 0
+                deep_scan_result[ip] = {}
+                self.nm.scan(hosts=ip, arguments='-p 80,23,2323')  # Scans given targets (ips) and their ports
+                print('for ip {}:'.format(ip))
+                for value in self.nm[ip]['tcp']:
+                    deep_scan_result[ip][value] = self.nm[ip]['tcp'][value]['state']
+                    print('\t', value, self.nm[ip]['tcp'][value]['state'])
+            except KeyError as _:
+                print("!Error: Scanning ports for ip {}".format(ip))
+        return deep_scan_result
 
 
-            except:
-                print(
-                    f'Error on ip: {ips[ip]}, attempting rescan')  # Unknown port scanning error on given target, suggested rescan
-                self.portRescan(ips[ip])  # Rescans device with error thrown
-
-        pass
-
-    def portRescan(self, ip):
-        self.nm.scan(hosts=ip, arguments='-p 80,23,2323')  # Recans the given target that threw an error
-        self.ip_port_info.append([ip, 0, 0, 0])
-        try:
-            if self.nm[ip]['tcp'][80]['state'] == 'open':  # Rescans if port 80 is open
-                print('Port 80 is OPEN----------')
-                self.ip_port_info[0][1] = 1
-            else:
-                print('Port 80 CLOSED.')
-                self.ip_port_info[0][1] = 0
-
-            if self.nm[ip]['tcp'][23]['state'] == 'open':  # Rescans if port 23 is open
-                print('Port 23 is OPEN----------')
-                self.ip_port_info[0][2] = 1
-            else:
-                print('Port 23 CLOSED.')
-                self.ip_port_info[0][2] = 0
-
-            if self.nm[ip]['tcp'][2323]['state'] == 'open':  # Rescans if port 2323 is open
-                print('Port 2323 is OPEN----------')
-                self.ip_port_info[0][3] = 1
-            else:
-                print('Port 2323 CLOSED.')
-                self.ip_port_info[0][3] = 0
-
-        except:
-            print('Rescan attempt unsuccessful.')
-
-        pass
+#    def portRescan(self, ip):
+#        self.nm.scan(hosts=ip, arguments='-p 80,23,2323')  # Recans the given target that threw an error
+#        self.ip_port_info.append([ip, 0, 0, 0])
+#        try:
+#            if self.nm[ip]['tcp'][80]['state'] == 'open':  # Rescans if port 80 is open
+#                print('Port 80 is OPEN----------')
+#                self.ip_port_info[0][1] = 1
+#            else:
+#                print('Port 80 CLOSED.')
+#                self.ip_port_info[0][1] = 0
+#
+#            if self.nm[ip]['tcp'][23]['state'] == 'open':  # Rescans if port 23 is open
+#                print('Port 23 is OPEN----------')
+#                self.ip_port_info[0][2] = 1
+#            else:
+#                print('Port 23 CLOSED.')
+#                self.ip_port_info[0][2] = 0
+#
+#            if self.nm[ip]['tcp'][2323]['state'] == 'open':  # Rescans if port 2323 is open
+#                print('Port 2323 is OPEN----------')
+#                self.ip_port_info[0][3] = 1
+#            else:
+#                print('Port 2323 CLOSED.')
+#                self.ip_port_info[0][3] = 0
+#
+#        except:
+#            print('Rescan attempt unsuccessful.')
 
 
 if __name__ == "__main__":
@@ -179,7 +161,5 @@ if __name__ == "__main__":
     else:
         print("!Error: Scan was not successful")
 
-    # network.deepNetworkScanner(IP_addresses)
-
-    # print(network.ip_port_info)
-    # network.deepNetworkScanner(IP_addresses)
+    scan_result = network.portScanner()
+    # network.deepNetworkScanner()
