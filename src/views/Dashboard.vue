@@ -17,10 +17,11 @@
   .dashboard {
     background-color: black;
     display: flex;
-    column-gap: 3em;
+    /* column-gap: 3em; */
   }
   
   .body {
+    margin-left: 3em;
     flex-grow: 1;
     margin-right: 2em;
     background-color: black;

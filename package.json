@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "chart.js": "^4.2.1",
+    "firebase": "^9.19.1",
     "vue": "^3.2.45",
     "vue-chartjs": "^5.2.0",
     "vue-router": "^4.1.6",

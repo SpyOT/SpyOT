@@ -1,10 +1,8 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
   <main>
-    <!-- <TheWelcome></TheWelcome> -->
     <h1>SpyOT</h1>
     <h3>CS 426 Senior Project in Computer Science</h3>
     <br>

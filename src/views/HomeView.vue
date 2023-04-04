@@ -15,7 +15,7 @@
       </div>
 
       <div class="right-container">
-        <div class="sign-in-container login">
+        <div class="sign-in-container login" v-if="register === false">
           <form>
             <h2>Log In</h2>
             <div class="input-container">
@@ -40,31 +40,33 @@
                 v-model="passwordValue"
               />
             </div>
-            <div class="remember">
-              <div class="remrow">
-                <label for="checkbox">Remember Me</label>
-                <input type="checkbox" v-model="checked" id="checkbox" />
-              </div>
-              <div class="forgot-password">
-                <button id="download" @click="forgotPassword">
+            <div class="forgot-row">
+                <button id="forgotPass" @click="forgotPassword" type="button">
                   Forgot Password?
                 </button>
-              </div>
+            </div>
+            <div class="alt-login-row">
+                <!-- <p1>Sign in with:v-on
+                  <img src="../assets/google_logo.png" alt="google" :click="google-trigger">
+                  <img src="../assets/github_logo.png" alt="github" v-on:click="github-trigger">
+                </p1> -->
+                
             </div>
             <div class="login">
-              <button @click="attemptLogin">Log In</button>
+              <p1 v-if="errMsg">{{ errMsg }}</p1>
+              <button @click="attemptLogin" type="button">Log In</button>
             </div>
             <div class="login-register">
               <p>Don't have an account?</p>
-              <button @click="registerAccountLink">Register</button>
+              <button @click="registerAccountLink" type="button">Register</button>
             </div>
           </form>
         </div>
 
-        <div class="sign-in-container register">
+        <div class="sign-in-container register" v-if="register">
           <form>
             <h2>Register</h2>
-            <div class="input-container">
+            <!-- <div class="input-container">
               <label for="username">Username</label>
               <span class="material-icons-outlined">person</span>
               <input
@@ -74,7 +76,7 @@
                 autocomplete="off"
                 v-model="usernameValue"
               />
-            </div>
+            </div> -->
             <div class="input-container">
               <label for="email">Email</label>
               <span class="material-icons-outlined">mail</span>
@@ -97,42 +99,36 @@
                 v-model="passwordValue"
               />
             </div>
-            <div class="remember">
-              <div class="remrow">
-                <label for="agreeCheck"
-                  >I agree to the terms and conditions</label
-                >
-                <input type="checkbox" v-model="checked" id="agreeCheck" />
-              </div>
-            </div>
             <div class="login">
-              <button @click="attemptSignUp">Sign Up</button>
+              <button @click="attemptSignUp" type="button">Sign Up</button>
             </div>
             <div class="login-register">
               <p>Already have an account?</p>
-              <button @click="loginAccountLink">Login</button>
+              <button @click="registerAccountLink" type="button">Login</button>
             </div>
           </form>
         </div>
       </div>
       </div>
     </div>
-    <div class="footer">
+    <!-- <div class="footer">
       <div class="footer-container">
         <h2>Team Website</h2>
         <button>https://spyot.github.io/SpyOt/</button>
       </div>
-  </div>
+  </div> -->
 </template>
 
 <script>
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
 export default {
   data() {
     return {
       emailValue: "",
-      usernameValue: "",
       passwordValue: "",
       checked: false,
+      register: false,
+      errMsg: ""
     };
   },
   methods: {
@@ -143,17 +139,43 @@ export default {
       console.log("Forgot Password Clicked");
     },
     attemptLogin() {
-      console.log("Login Button Clicked");
-      this.$router.push("/dashboard");
+      signInWithEmailAndPassword(getAuth(), this.emailValue, this.passwordValue)
+        .then((data) => {
+          console.log("Login Successful!");
+          this.$router.push("/dashboard");
+        })
+        .catch((error) => {
+          console.log(error.code);
+          switch (error.code) {
+            case "auth/invalid-email":
+              this.errMsg = "Invalid email";
+              break;
+            case "auth/user-not-found":
+              this.errMsg = "Account not found";
+              break;
+            case "auth/wrong-password":
+              this.errMsg = "Invalid password";
+              break;
+            default:
+              this.errMsg = "Email or password incorrect"
+              break;
+          }
+          // alert(error.message);
+        });
     },
     attemptSignUp() {
-      console.log("Signup Button Clicked");
+      createUserWithEmailAndPassword(getAuth(), this.emailValue, this.passwordValue)
+        .then((data) => {
+          console.log("Sign Up Successful!");
+          this.$router.push("/dashboard");
+        })
+        .catch((error) => {
+          console.log(error.code);
+          alert(error.code);
+        });
     },
     registerAccountLink() {
-      console.log("Register Account Clicked");
-    },
-    loginAccountLink() {
-      console.log("Login Account Clicked");
+      this.register = !this.register;
     },
     // checkPrint() {
     //     if (this.checked) {
@@ -165,6 +187,17 @@ export default {
 </script>
 
 <style scoped>
+
+p1 {
+  font-size: 1.5em;
+  color: red;
+}
+
+img  {
+  height: 35px;
+  width: 35px;
+  margin-left: 1em;
+}
 .wrapper {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -181,11 +214,15 @@ export default {
   grid-area: 2 / 1 / 3 / 4;
 
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* grid-template-columns: repeat(2, 1fr); */
+  grid-template-columns: 70% 30%;
   grid-template-rows: 1fr;
 }
 .footer {
-  grid-area: 3 / 1 / 4 / 4;
+  margin-top: 7em;
+  width: 100%;
+  bottom: 0;
+  /* grid-area: 3 / 1 / 4 / 4; */
 }
 .footer-container{
   background-color: black;
@@ -202,17 +239,16 @@ export default {
 }
 
 .left-container {
-  grid-area: 1 / 1 / 2 / 2;
+  /* grid-area: 1 / 1 / 2 / 2; */
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   align-content: center;
 }
 
 .left-container h2 {
-  color: #1DD75BFF;
+  color: var(--primary-color);
   font-size: 3rem;
   padding: 1rem;
 }
@@ -229,7 +265,7 @@ export default {
 }
 .right-container {
   grid-area: 1 / 2 / 2 / 3;
-    margin: 1em;
+  margin: 1em;
   background: transparent;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 20px;
@@ -243,17 +279,15 @@ export default {
   width: 100%;
   padding: 40px;
 }
-.right-container .sign-in-container.login {
-  /* display: none; */
-}
-.right-container .sign-in-container.register {
-  position: absolute;
-  transform: translateX(400px);
+/* .right-container .sign-in-container.login {
   display: none;
 }
+.right-container .sign-in-container.register {
+  display: none;
+} */
 .sign-in-container h2 {
   font-size: 2em;
-  color: var(--primary-color);
+  color:white;
   text-align: center;
   border-bottom: 2px solid #dee1e6ff;
 }
@@ -288,20 +322,20 @@ export default {
   border: none;
   outline: none;
   font-size: 1em;
-  color: var(--label-color);
+  color: white;
   font-weight: 600;
   margin-left: 15px;
   padding: 0 35px 0 5px;
 }
 .heading {
   grid-area: 1 / 1 / 2 / 4;
-  background-color: var(--secondary-color);
+  /* background-color: var(--secondary-color); */
 }
 .heading .logo {
   text-align: left;
   margin-left: 2em;
   font-size: 3em;
-  color: black;
+  color: white;
 }
 .input-container span {
   position: absolute;
@@ -310,27 +344,28 @@ export default {
   line-height: 50px;
 }
 
-.remember {
-  font-size: 0.9em;
-  color: var(--label-color);
-  font-weight: 500;
-  margin: -15px 0 15px;
-  display: flex;
-  justify-content: space-between;
+.alt-login-row {
+  margin: none;
+  padding: none;
 }
 
-.remember input {
-  accent-color: var(--primary-color);
-  margin-left: 5px;
+.login .forgot-row {
+  margin-top: -1em;
 }
-.forgot-password button {
-  color: red;
-  background: none;
+
+.login .forgot-row button {
+  font-size: .8rem;
+  margin-left: -.5em;
+  margin-top: -2em;
+  /* font-weight: 660; */
+  text-align: left;
+  color: var(--label-color);
   border: none;
-  margin-left: -6px;
+
 }
-.forgot-password button:hover {
+.login .forgot-row button:hover {
   text-decoration: underline;
+  text-decoration-color: red;
 }
 
 .login {
@@ -350,7 +385,7 @@ export default {
 
 .login-register {
   font-size: 1em;
-  color: var(--primary-color);
+  color: white;
   text-align: center;
   font-weight: 500;
   margin: 15px 0 10px;

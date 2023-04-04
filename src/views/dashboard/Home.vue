@@ -5,21 +5,32 @@
         </div>
         <div class="body">
             <div class="dev-sel-container">
-                <h2>Device:</h2>
-                <button>TEMPORARY THING FOR DEVICE LIST</button>
+                <ul>
+                    <li>Number of Devices: 3</li>
+                    <li>Overal Data Encrypted: 85</li>
+                    <li>Potential Vulnerabilities: 1</li>
+                </ul>
+
+                <!-- <button>TEMPORARY THING FOR DEVICE LIST</button> -->
             </div>
             <div class="table-container">
+                <h1>Device Status:</h1>
                 <Table
+                table-class-name="dash"
                 :headers="headers"
                 :items="items"
+                border-cell
             />
             </div>
             <div class="row-container">
                 <div class="graph-container">
-                    <h2>Graph Container</h2>
+                    <h2>Data Encrypted (%)</h2>
+                    <img src="../../assets/chart.PNG" alt="chart">
                 </div>
                 <div class="vuln-container">
-                    <h2>Vulnerabilities Container</h2>
+                    <h2>Potential Vulnerabilities</h2>
+                    <img src="../../assets/skull.PNG" alt="skull">
+                    <h3>Click on the vulnerabilites for more information</h3>
                 </div>
             </div>
 
@@ -30,6 +41,8 @@
 </template>
 
 <script>
+import 'vue3-easy-data-table/dist/style.css';
+import { Pie } from 'vue-chartjs';
 import Vue3EasyDataTable from 'vue3-easy-data-table';
     export default {
         components: {
@@ -59,6 +72,10 @@ h1 {
     color: var(--secondary-color);
 }
 
+h3 {
+    font-weight: bold;
+}
+
 .body {
     display: flex;
     flex-direction: column;
@@ -75,24 +92,50 @@ h1 {
     text-align: left;
 }
 .body .row-container {
+    margin-top: 6em;
     width: 100%;
 
 }
 .body .row-container .graph-container{
     width: 50%;
     float: left;
-    border-radius: 4px;
+    border-radius: 1px;
     border: solid;
-    border-color: var(--primary-color);
+    border-color: white;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    height: 300px;
     
+}
+img .skull {
+    height: 200px;
+    border: 1px solid red;
 }
 .body .row-container .vuln-container{
-    width: 50%;
+    display:flex;
+    flex-direction: column;
+    width: 40%;
+    height: 300px;
+    /* margin-right: 5em; */
     float:right;
-    border-radius: 4px;
+    border-radius: 1px;
     border: solid;
-    border-color: var(--primary-color);
+    border-color: white;
+    align-items: center
     
 }
+
+.dash {
+    border: 1px solid var(--primary-color);
+    /* border-top: 1px solid var(--primary-color); */
+    --easy-table-header-background-color: var(--primary-color);
+    --easy-table-body-row-background-color: black;
+    --easy-table-body-row-font-color: white;
+    --easy-table-footer-background-color: black;
+    --easy-table-footer-font-color: white;
+    /* header-background-color: red; */
+}
+
 
 </style>
