@@ -110,8 +110,15 @@ class CustomOutput(CustomContainer):
                                     column=1, row=3,
                                     padx=5, pady=5,
                                     sticky='ew')
-            case "upload":
-                pass
+            case "guest":
+                self.display_widget("login",
+                                    column=0, columnspan=2,
+                                    row=1, sticky='ew',
+                                    padx=5, pady=5)
+                self.display_widget("sign_up",
+                                    column=0, columnspan=2,
+                                    row=1, sticky='sew',
+                                    padx=5, pady=5)
             case "":
                 self.remove_frame()
 

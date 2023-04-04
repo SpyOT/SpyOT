@@ -4,6 +4,8 @@ import SpyOT.gui.constants as preset
 from .frames import *
 from ..widgets import *
 
+is_guest = 0
+
 
 class MainWindow:
     def __init__(self, systems, window):
@@ -51,8 +53,10 @@ class MainWindow:
         title_icon = PhotoImage(file=preset.title_path)
         self.header.set_widget("title", CustomLabel,
                                image=title_icon,
-                               bg=widget_bg
+                               bg=widget_bg,
                                )
+        self.header.get_widget("title").bind("<Button-1>", lambda event: self.handle_btn_press('set_admin'))
+        self.header.get_widget("title").bind("<Button-3>", lambda event: self.handle_btn_press('set_guest'))
         settings_icon = PhotoImage(file=preset.setting_path)
         self.header.set_widget("settings", CustomButton,
                                image=settings_icon,
@@ -107,6 +111,7 @@ class MainWindow:
                                foreground=self.text_color,
                                bg=widget_bg)
 
+        # Scan output widgets
         self.output.set_widget("host_label", CustomLabel,
                                text="Detected Network:",
                                foreground=self.text_color,
@@ -143,6 +148,7 @@ class MainWindow:
                                state="disabled",
                                command=lambda: self.handle_btn_press("whitelist"), )
 
+        # Collect output widgets
         self.output.set_widget("summary", CustomLabel,
                                text="Summary",
                                foreground=self.text_color,
@@ -167,13 +173,15 @@ class MainWindow:
                                bg=self.button_bg,
                                command=lambda: self.handle_btn_press("save"))
 
+        # Upload output widgets
         self.output.set_widget("login", CustomButton,
                                text="Login",
                                bg=self.button_bg,
                                command=lambda: self.handle_btn_press("login"))
 
         self.output.set_widget("sign_up", CustomLabel,
-                               text="Create and account at https://spyot.github.io/SpyOT/",
+                               text="Create an account at https://spyot.github.io/SpyOT/",
+                               wraplength=200,
                                foreground=self.text_color,
                                bg=widget_bg)
 
@@ -189,13 +197,23 @@ class MainWindow:
         self.footer.display_frame(column=0, row=2, sticky='n e s w', padx=5, pady=5)
 
     def handle_btn_press(self, option):
+        global is_guest
         if not self.is_prod:
             print("clicked on", option, "button")
 
         match option:
             # Header Buttons
             case "profile":
-                pass
+                if is_guest:
+                    self.output.display_action(
+                        'guest',
+                        column=1, row=0,
+                        rowspan=3, sticky='n e s w',
+                        padx=5, pady=5)
+            case "set_admin":
+                is_guest = 0
+            case "set_guest":
+                is_guest = 1
             case "settings":
                 pass
             # Body Buttons
@@ -236,7 +254,17 @@ class MainWindow:
                     defaultextension='.txt', filetypes=[("Text files", "*.txt")])
                 self.systems.save_analysis_report(save_path)
             case "upload":
-                pass
+                if is_guest:
+                    self.output.display_action(
+                        'guest',
+                        column=1, row=0,
+                        rowspan=3, sticky='n e s w',
+                        padx=5, pady=5)
+                elif self.systems.upload_success:
+                    pass
+                else:
+                    self.handle_action(option)
+
             # Footer Buttons
             case "info":
                 self.output.set_view(option)
@@ -255,7 +283,8 @@ class MainWindow:
             case "blacklist":
                 selected_device = self.get_selected_device()
                 selected_index = self.output.get_selected_index()
-                result = self.systems.add_to_blacklist(selected_device)
+                # result = self.systems.add_to_blacklist(selected_device)
+                result = self.systems.update_blacklist('add', selected_device)
                 if result:
                     self.output.update_selected_device(selected_index,
                                                        bg=self.win_bg,
@@ -264,11 +293,12 @@ class MainWindow:
             case "whitelist":
                 selected_device = self.get_selected_device()
                 selected_index = self.output.get_selected_index()
-                result = self.systems.remove_from_blacklist(selected_device)
+                # result = self.systems.remove_from_blacklist(selected_device)
+                result = self.systems.update_blacklist('remove', selected_device)
                 if result:
                     self.output.update_selected_device(selected_index,
                                                        bg='white',
-                                                       foreground=self.frame_bg)
+                                                       foreground=self.win_bg)
                 self.update_scan_buttons()
         self.update_footer_toggle()
 
@@ -315,23 +345,6 @@ class MainWindow:
             case "upload":
                 pass
 
-        # Output Buttons
-        # TBD
-        # match option:
-        #     case "collect":
-        #         if self.systems.can_upload():
-        #             self.output.grid(column=1, row=0, rowspan=3, sticky='n e s w', padx=5, pady=5)
-        #             self.systems.collect()
-        #             messagebox.showinfo(
-        #                 self.win.version,
-        #                 "Collection Complete"
-        #             )
-        #             self.display_summary()
-        #         else:
-        #             messagebox.showerror(
-        #                 self.win.version,
-        #                 "Nothing to upload.\nTry scanning systems first.")
-        #             self.output.grid_forget()
         #     case "upload":
         #         if self.systems.metadata:
         #             is_success = self.systems.upload()
@@ -402,7 +415,7 @@ class MainWindow:
         blacklist = self.systems.get_blacklist()
         if not selected_device_name:
             self.output.disable_button("blacklist", bg=self.frame_bg)
-            self.output.disable_button("whitelist")
+            self.output.disable_button("whitelist", bg=self.frame_bg)
         elif selected_device_name in blacklist:
             self.output.disable_button("blacklist", bg=self.frame_bg)
             self.output.enable_button("whitelist", bg=self.button_bg)

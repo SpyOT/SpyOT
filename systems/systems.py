@@ -25,6 +25,7 @@ class Systems:
         self.scans = []
         self.create_local_storage()
         self.port_output = {}
+        self.upload_success = False
 
     def create_local_storage(self):
         """ Create a local directory to store scans and blacklist"""
@@ -125,10 +126,12 @@ class Systems:
         pass
 
     def save_analysis_report(self, filepath):
-        pass
+        if filepath:
+            pass
 
     def open_analysis_report(self, filepath):
-        system("notepad.exe " + filepath)
+        if filepath:
+            system("notepad.exe " + filepath)
 
     def scan(self):
         if self.log:
@@ -149,14 +152,6 @@ class Systems:
         valid_devices = self.get_whitelist()
         self.port_output = self.scanner.portScanner(valid_devices)
         return self.port_output
-        # # encrypt host IP here
-        # self.host = {'name': self.metadata['host'][0], 'ip': self.metadata['host'][-1][0]}
-        # for device in self.metadata['devices']:
-        #     if device[-1][0] not in self.device_ips:
-        #         # encrypt device IP here
-        #         self.devices.append({'name': device[0], 'ip': device[-1][0]})
-        #         self.device_ips.append(device[-1][0])
-        # print('collection complete')
 
     def upload(self):
         print('starting upload')
@@ -164,9 +159,11 @@ class Systems:
         try:
             result = self.db_setup()
             print('upload complete')
+            self.upload_success = True
             return result
         except:
             print('incomplete upload')
+            self.upload_success = False
             return False
 
     def db_setup(self):
@@ -229,36 +226,63 @@ class Systems:
             return True
         return False
 
-    def add_to_blacklist(self, device):
-        blacklist = open(preset.blacklist_path, 'r')
-        lines = blacklist.readlines()
-        curr_list = []
-        for line in lines:
-            if device in line:
-                print('!Error: Device already blacklisted')
-                return False
-            curr_list.append(line)
-        print('Adding', device, 'to blacklist')
-        curr_list.append(device + '\n')
-        blacklist.close()
-        blacklist = open(preset.blacklist_path, 'w')
-        blacklist.writelines(curr_list)
-        blacklist.close()
+    def update_blacklist(self, action, device_name):
+        match action:
+            case "add":
+                with open(preset.blacklist_path, 'r+') as file:
+                    for line in file:
+                        if device_name in line:
+                            print("!Error: Device already blacklisted")
+                            return False
+                    file.write(device_name + '\n')
+            case "remove":
+                devices = []
+                with open(preset.blacklist_path, 'r') as file:
+                    flag = 0
+                    for line in file:
+                        if device_name in line:
+                            flag = 1
+                        else:
+                            devices.append(line)
+                    if not flag:
+                        return False
+                f = open(preset.blacklist_path, 'r+')
+                f.truncate(0)
+                f.seek(0)
+                f.writelines(devices)
         self.port_output = {}
         return True
 
-    def remove_from_blacklist(self, device):
-        blacklist = open(preset.blacklist_path, 'r+')
-        curr_devices = blacklist.readlines()
-        if device + '\n' not in curr_devices:
-            print('Error: Device is not blacklisted')
-            return False
-        new_devices = [line for line in curr_devices if device not in line]
-        blacklist.truncate(0)
-        blacklist.seek(0)
-        blacklist.writelines(new_devices)
-        self.port_output = {}
-        return True
+    # def add_to_blacklist(self, device):
+    #     blacklist = open(preset.blacklist_path, 'r')
+    #     lines = blacklist.readlines()
+    #     curr_list = []
+    #     for line in lines:
+    #         if device in line:
+    #             print('!Error: Device already blacklisted')
+    #             return False
+    #         curr_list.append(line)
+    #     print('Adding', device, 'to blacklist')
+    #     curr_list.append(device + '\n')
+    #     blacklist.close()
+    #     blacklist = open(preset.blacklist_path, 'w')
+    #     blacklist.writelines(curr_list)
+    #     blacklist.close()
+    #     self.port_output = {}
+    #     return True
+    #
+    # def remove_from_blacklist(self, device):
+    #     blacklist = open(preset.blacklist_path, 'r+')
+    #     curr_devices = blacklist.readlines()
+    #     if device + '\n' not in curr_devices:
+    #         print('Error: Device is not blacklisted')
+    #         return False
+    #     new_devices = [line for line in curr_devices if device not in line]
+    #     blacklist.truncate(0)
+    #     blacklist.seek(0)
+    #     blacklist.writelines(new_devices)
+    #     self.port_output = {}
+    #     return True
 
     def get_blacklist(self):
         device_list = []

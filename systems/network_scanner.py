@@ -14,6 +14,8 @@ class NetworkScanner(object):
         self.ip = ip if ip else self.default_gateway
         self.nm = nmap.PortScanner()
         self.network_metadata = {}
+        self.network_deepscan = {}
+        self.filtered_network_data = {}
         self.host_ips = []
         self.ip_port_info = []
 
@@ -123,6 +125,40 @@ class NetworkScanner(object):
                 print("!Error: Scanning ports for ip {}".format(ip))
         return deep_scan_result
 
+    def analyzePorts(self):
+        deep_scan = self.network_deepscan
+        analysis = deep_scan.copy()
+        for ip in deep_scan:
+            try:
+                if not deep_scan[ip]['ports']:
+                    analysis[ip] = {'ports':deep_scan[ip], 'status': 'Unknown'}
+                else:
+                    open_ports = sum([1 if deep_scan[ip][port] == 'open' else 0 for port in deep_scan[ip]])
+                    if open_ports:
+                        analysis[ip] = {'ports': deep_scan[ip], 'status': 'At Risk'}
+                    else:
+                        analysis[ip] = {'ports': deep_scan[ip], 'status': 'Secure'}
+            except KeyError as _:
+                pass
+        self.network_deepscan = analysis
+        return analysis
+
+    def generateSummary(self):
+        networkscan = self.network_metadata
+        portscan = self.network_deepscan
+        summary = {}
+        for ip in networkscan:
+            if networkscan[ip]['type'] == 'device':
+                name = networkscan[ip]['hostname']
+                status = portscan[ip]['status']
+                summary[ip] = {'name': name, 'status':status}
+        return summary
+
+    def filter_blacklist_ips(self, blacklist):
+        self.filtered_network_data = self.network_metadata.copy()
+        for ip in self.network_metadata:
+            if self.network_metadata[ip]['hostname'] in blacklist:
+                del self.filtered_network_data[ip]
 
 #    def portRescan(self, ip):
 #        self.nm.scan(hosts=ip, arguments='-p 80,23,2323')  # Recans the given target that threw an error
