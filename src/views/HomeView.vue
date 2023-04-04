@@ -5,19 +5,16 @@
     </div>
     <div class="body">
       <div class="left-container">
-        <div class="left-side">
-          <h2>Download the SpyOT Software to get Started</h2>
-          <div class="download-container">
-            <button id="download" @click="attemptDownload">
-              DOWNLOAD SPYoT NOW
-              <span class="material-icons-outlined">file_download</span>
-            </button>
-          </div>
+        <h2>Download the SpyOT Software to get Started</h2>
+        <div class="download-container">
+          <button id="download" @click="attemptDownload">
+            DOWNLOAD SPYoT NOW
+            <span class="material-icons-outlined">file_download</span>
+          </button>
         </div>
       </div>
 
       <div class="right-container">
-        <div class="right-side">
         <div class="sign-in-container login">
           <form>
             <h2>Log In</h2>
@@ -121,12 +118,10 @@
       </div>
     </div>
     <div class="footer">
-      <div class="foot">
+      <div class="footer-container">
         <h2>Team Website</h2>
         <button>https://spyot.github.io/SpyOt/</button>
       </div>
-
-    </div>
   </div>
 </template>
 
@@ -171,9 +166,11 @@ export default {
 
 <style scoped>
 .wrapper {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: .1fr 1fr .1fr;
+  grid-column-gap: px;
+  grid-row-gap: 0px;
 }
 
 /* .header {
@@ -181,53 +178,49 @@ export default {
 } */
 
 .body {
-  flex: 1;
-  width: 100%;
-  overflow: auto;
+  grid-area: 2 / 1 / 3 / 4;
+
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
 }
 .footer {
-  justify-content: space-between;
-  width: 100%;
-  padding-top: 2em;
-  height: 30px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
+  grid-area: 3 / 1 / 4 / 4;
 }
-.foot button {
-  width: 30%;
-  background-color: transparent;
-  color: red;
-  font-size: 2em;
-  /* padding-bottom: 3em; */
-}
-.foot{
+.footer-container{
   background-color: black;
   display: flex;
   flex-direction: row;
   padding: 1em;
-  
 }
+.footer-container button {
+  width: 30%;
+  background-color: transparent;
+  color: red;
+  font-size: 2rem;
+  /* padding-bottom: 3em; */
+}
+
 .left-container {
-  /* grid-column: 1; */
-  width: 50%;
-  float:left;
+  grid-area: 1 / 1 / 2 / 2;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
 }
 
-.left-side h2 {
-  margin-top: 139px; 
-  margin-right: 4em; 
-  width: 564px; 
-  font-size: 52px; 
-  line-height: 74px; 
-  color: #1DD75BFF; 
+.left-container h2 {
+  color: #1DD75BFF;
+  font-size: 3rem;
+  padding: 1rem;
 }
 
-.download-container {
-  margin-top: 50px;
-  margin-left: 20em;
+.left-container .download-container {
+  padding: 1rem;
 }
-.download-container button{
+.left-container .download-container button{
   font-size: 2em;
   color: var(--primary-color);
   background: transparent;
@@ -235,14 +228,8 @@ export default {
   border-radius: 5px;
 }
 .right-container {
-  /* grid-column: 1; */
-  width: 500px;
-  float: right;
-  margin-right: 40px;
-  margin-top: 5em;
-}
-.right-side {
-  height: 440px;
+  grid-area: 1 / 2 / 2 / 3;
+    margin: 1em;
   background: transparent;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 20px;
@@ -252,14 +239,14 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.right-side .sign-in-container {
+.right-container .sign-in-container {
   width: 100%;
   padding: 40px;
 }
-.right-side .sign-in-container.login {
+.right-container .sign-in-container.login {
   /* display: none; */
 }
-.right-side .sign-in-container.register {
+.right-container .sign-in-container.register {
   position: absolute;
   transform: translateX(400px);
   display: none;
@@ -307,8 +294,8 @@ export default {
   padding: 0 35px 0 5px;
 }
 .heading {
+  grid-area: 1 / 1 / 2 / 4;
   background-color: var(--secondary-color);
-
 }
 .heading .logo {
   text-align: left;
@@ -346,14 +333,19 @@ export default {
   text-decoration: underline;
 }
 
+.login {
+  align-self: center;
+  place-self: center;
+}
 .login button {
   font-size: 1.2em;
   font-weight: 500;
-  width: 100%;
+  width: 80%;
   height: 35px;
   color: var(--primary-color);
   background-color: transparent;
   border-color: var(--primary-color);
+
 }
 
 .login-register {
@@ -363,16 +355,19 @@ export default {
   font-weight: 500;
   margin: 15px 0 10px;
   display: flex;
-  /* justify-content: space-between; */
 }
-
+.login-register p {
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  width:100%;
+}
 .login-register button {
-  width: 200px;
+  width:100%;
   font-size: 1.5em;
   font-weight: 700;
   color: var(--primary-color);
   background-color: transparent;
   border: none;
-  margin-left: -45px;
 }
 </style>
