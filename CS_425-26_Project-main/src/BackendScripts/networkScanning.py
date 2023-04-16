@@ -4,15 +4,11 @@ import sys
 import socket
 from datetime import datetime
 
-
 class NetworkScanner(object):
     def __init__(self, ip=''):
-        # These two lines grab router ip address
-        # hostname = socket.gethostname()
-        # test_ip = socket.gethostbyname(hostname)
         wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
         data = wifi.decode('utf-8')
-        # print(data)
+        
         self.default_gateway = ''
         self.setDefaultGateway()
 
@@ -21,7 +17,7 @@ class NetworkScanner(object):
         self.host_list = []
         self.host_ips = []
         self.ip_port_info = []
-
+        
         self.device_list = {"devices": []}
 
         self.nm = nmap.PortScanner()
@@ -72,9 +68,8 @@ class NetworkScanner(object):
     def networkScanner(self):
         network_mask = '.'.join(self.ip.split('.')[:-1]) + '.0' + '/24'
 
-        print("Scanning IPs")  # this takes awhile.
         nm = self.nm  # nm is used to scan the network
-        nm.scan(hosts=network_mask, arguments='-sn')
+        nm.scan(hosts=network_mask, arguments='-sn')    #Scans IPs which takes awhile
 
         # Stores a list of every ip address on the network into host_list
         self.host_list = [(x, nm[x]['status']['state']) for x in nm.all_hosts()]
@@ -84,17 +79,16 @@ class NetworkScanner(object):
             if (host == self.ip):
                 try:
                     self.device_list["host"] = socket.gethostbyaddr(host)
+
                 except:
-                    print("Network is missing hostname")
-                    self.device_list["host"] = ["Unknown host", [], [self.default_gateway]]
-                print("\n List of connected devices:  ")
-                print("_______________________________")
+                    self.device_list["host"] = ["Unknown host", [], [self.default_gateway]]     #Puts devices in device list and their status ('up')
+                
             else:
                 try:
                     print(socket.gethostbyaddr(host))
                     self.device_list["devices"].append(socket.gethostbyaddr(host))
                 except:
-                    print("!Error:", host, "is missing hostname")
+                    print()
         # grabs ip addresses from host_list and adds to its list
         for i in self.host_list:
             self.host_ips.append(i[0])
@@ -131,31 +125,31 @@ class NetworkScanner(object):
     def deepNetworkScanner(self, ips):
         for ip in range(len(ips)):
             self.nm.scan(hosts=ips[ip],arguments='-p 80,23,2323') #Scans given targets (ips) and their ports
-            print(f'for ip {ips[ip]}:')
+            
             self.ip_port_info.append([ips[ip], 0, 0, 0])
             try:
                 if self.nm[ips[ip]]['tcp'][80]['state'] == 'open':  #Scans if port 80 is open
-                    print('Port 80 is OPEN----------')
                     self.ip_port_info[ip][1] = 1
+                        #Positions an open on port 80
                 else:
-                    print('Port 80 CLOSED.')
                     self.ip_port_info[ip][1] = 0
+                        #Positions a close on port 80
 
 
                 if self.nm[ips[ip]]['tcp'][23]['state'] == 'open':    #Scans if port 23 is open
-                    print('Port 23 is OPEN----------')
                     self.ip_port_info[ip][2] = 1
+                        #Positions an open on port 23
                 else:
-                    print('Port 23 CLOSED.')
                     self.ip_port_info[ip][2] = 0
+                        #Positions a close on port 23
 
 
                 if self.nm[ips[ip]]['tcp'][2323]['state'] == 'open':    #Scans if port 2323 is open
-                    print('Port 2323 is OPEN----------')
                     self.ip_port_info[ip][3] = 1
+                        #Positions an open on port 2323
                 else:
-                    print('Port 2323 CLOSED.')
                     self.ip_port_info[ip][3] = 0
+                        #Positions a close on port 2323
 
 
             except:
@@ -169,27 +163,28 @@ class NetworkScanner(object):
         self.ip_port_info.append([ip, 0, 0, 0])
         try:
             if self.nm[ip]['tcp'][80]['state'] == 'open':  #Rescans if port 80 is open
-                print('Port 80 is OPEN----------')
                 self.ip_port_info[0][1] = 1
+                    #Positions an open on port 80
             else:
-                print('Port 80 CLOSED.')
                 self.ip_port_info[0][1] = 0
+                    #Positions a close on port 80
 
 
             if self.nm[ip]['tcp'][23]['state'] == 'open':    #Rescans if port 23 is open
-                print('Port 23 is OPEN----------')
                 self.ip_port_info[0][2] = 1
+                    #Positions an open on port 23
             else:
-                print('Port 23 CLOSED.')
                 self.ip_port_info[0][2] = 0
+                    #Positions a close port 23
+                
 
 
             if self.nm[ip]['tcp'][2323]['state'] == 'open':    #Rescans if port 2323 is open
-                print('Port 2323 is OPEN----------')
                 self.ip_port_info[0][3] = 1
+                    #Positions an open on port 2323
             else:
-                print('Port 2323 CLOSED.')
                 self.ip_port_info[0][3] = 0
+                    #Positions a close port 2323
 
         except:
             print('Rescan attempt unsuccessful.')
@@ -197,11 +192,10 @@ class NetworkScanner(object):
         pass
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":      #Testing purposes
     network = NetworkScanner()
     IP_addresses = network.networkScanner()
     
     network.deepNetworkScanner(IP_addresses)
     
     print(network.ip_port_info)
-    #network.deepNetworkScanner(IP_addresses)
