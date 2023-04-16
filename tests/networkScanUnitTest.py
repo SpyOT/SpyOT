@@ -3,13 +3,13 @@
 # 03/03/23
 # networkScanUnitTest.py
 
-from main import test_main
+from ..main import TestMain
 import unittest
 
 
 class testSpyOT(unittest.TestCase):
     def test_network_config_button(self):
-        app_test = test_main()
+        app_test = TestMain()
         title_screen = app_test.curr_scene
         curr_scene = title_screen.current_scene
         curr_scene.create_profile_button.invoke()
