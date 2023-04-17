@@ -1,6 +1,6 @@
 from tkinter import Tk, ttk, PhotoImage
-from SpyOT.gui import constants as preset
-from .views import MainWindow
+from gui import constants as preset
+from .views import MainView
 
 
 class App(Tk):
@@ -13,7 +13,7 @@ class App(Tk):
         self.style.theme_use('vista')
 
         self.configure_win()
-        MainWindow(network, self)
+        MainView(network, self)
 
     def configure_win(self):
         logo = PhotoImage(file=preset.logo_img)

@@ -1,13 +1,13 @@
 from tkinter import ttk, PhotoImage, messagebox, Listbox, StringVar, filedialog
 import threading
-import SpyOT.gui.constants as preset
+import gui.constants as preset
 from .frames import *
 from ..widgets import *
 
 is_guest = 0
 
 
-class MainWindow:
+class MainView:
     def __init__(self, systems, window):
         self.systems = systems
         self.win = window
@@ -319,6 +319,7 @@ class MainWindow:
             case "scan":
                 host_name = self.systems.get_hostname()
                 device_names = self.systems.get_device_names()
+                print(host_name, device_names)
                 if host_name and device_names:
                     self.output.update_var('host_name', host_name)
                     self.output.update_var('devices', device_names)
