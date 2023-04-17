@@ -2,21 +2,11 @@ from tkinter import ttk
 
 
 class CustomContainer(ttk.Frame):
-    def __init__(self, frame, background, col_config, row_config, **kwargs):
+    def __init__(self, frame, **kwargs):
         super().__init__(
             frame,
             **kwargs
         )
-        self.style = ttk.Style()
-        self.style.configure(
-            "MyContainer.TFrame",
-            background=background,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-        )
-        self.config(style="MyContainer.TFrame")
-        self.configure_win(col_config, row_config)
         self.widgets = {}
 
     def configure_win(self, col_config, row_config):

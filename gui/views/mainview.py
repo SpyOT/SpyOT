@@ -346,22 +346,6 @@ class MainView:
             case "upload":
                 pass
 
-        #     case "upload":
-        #         if self.systems.metadata:
-        #             is_success = self.systems.upload()
-        #             if is_success:
-        #                 messagebox.showinfo(
-        #                     self.win.version,
-        #                     "Upload Complete")
-        #             else:
-        #                 messagebox.showerror(
-        #                     self.win.version,
-        #                     "Error with Upload")
-        #         else:
-        #             messagebox.showerror(
-        #                 self.win.version,
-        #                 "Nothing to upload.\nTry scanning systems first.")
-
     # Output utils
     def update_footer_toggle(self):
         state = self.output.get_state()
