@@ -1,5 +1,6 @@
-cryptography
-pymongo
-python-nmap
-python-dotenv
-pyshark
+cryptography~=40.0.2
+pymongo~=4.3.3
+python-nmap~=0.7.1
+python-dotenv~=1.0.0
+pyshark~=0.5.3
+pandas~=2.0.1
