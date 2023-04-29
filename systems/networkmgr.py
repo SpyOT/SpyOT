@@ -1,12 +1,10 @@
 import subprocess
 import nmap
-import sys
-import socket
-from datetime import datetime
-from utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage
 import pandas as pd
 from os.path import exists
-
+# import sys
+# import socket
+# from datetime import datetime
 
 class NetworkMgr(object):
     def __init__(self, ip=''):
@@ -307,8 +305,11 @@ class NetworkMgr(object):
 
 
 if __name__ == "__main__":
+    from utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage
     network = NetworkMgr()
     scan_complete = network.scan_network()
 
     scan_result = network.portScanner()
     # network.deepNetworkScanner()
+else:
+    from .utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage

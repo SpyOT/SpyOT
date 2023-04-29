@@ -1,7 +1,8 @@
 from tkinter import Tk, ttk, PhotoImage
+
 from gui import constants as preset
 # from .views import MainView
-from .views.frames import CustomContainer, CustomHeader, CustomBody, CustomFooter, CustomOutput
+from .views.frames import CustomContainer, CustomHeader
 
 WIN_BG = '#0c131e'
 FRAME_BG = '#3b3b3b'
@@ -14,11 +15,10 @@ class App(Tk):
         self.title(title)
         self.APP_ENV = env
 
-        self.configure_win()
-        # MainView(network, self)
+        self.configure_app()
         MainView(self, systems)
 
-    def configure_win(self):
+    def configure_app(self):
         logo = PhotoImage(file=preset.logo_img)
         self.iconphoto(False, logo)
         self.configure(bg=WIN_BG)
@@ -38,8 +38,11 @@ class MainView:
         self.configure_styles()
 
         self.main_container = CustomContainer(self.base, style='CustomContainer.TFrame')
-        self.main_container.configure_win(col_config={0: 2, 1: 1},
-                                          row_config={0: 1, 1: 5, 2: 3})
+        self.main_container.configure_win(col_config={'col 0': 'weight 2',
+                                                      'col 1': 'weight 1'},
+                                          row_config={'row 0': 'weight 1',
+                                                      'row 1': 'weight 5',
+                                                      'row 2': 'weight 3'})
 
         self.header = CustomHeader(self.main_container, style='CustomFrame.TFrame')
         # self.body = CustomBody(self.main_container)
@@ -57,11 +60,13 @@ class MainView:
             relief='ridge'
         )
 
+        # TFrame style inherits from Container style
         self.style.configure(
             'CustomFrame.TFrame',
             background=self.FRAME_BG
         )
 
+        # TLabel inherits from TFrame style
         self.style.configure(
             'CustomWidget.TLabel',
             background=self.WIDGET_BG,

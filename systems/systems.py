@@ -1,7 +1,5 @@
-from networkmgr import NetworkMgr
 from cryptography.fernet import Fernet
 from os import system
-import utils
 
 KEY = Fernet.generate_key()
 fernet = Fernet(KEY)
@@ -48,6 +46,7 @@ class Systems:
 
 
 def main():
+
     systems = Systems('dev')
     systems.scan()
     device_ip = systems.network_mgr.get_device_ips()[0]
@@ -57,4 +56,10 @@ def main():
 
 
 if __name__ == '__main__':
+    from networkmgr import NetworkMgr
+    import utils
     main()
+else:
+    from .networkmgr import NetworkMgr
+    from . import utils
+

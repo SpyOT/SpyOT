@@ -23,6 +23,7 @@ class SpyOT:
 
 class TestMain:
     def __init__(self):
+        # TODO: Redo this test using new project structure
         self.app = SpyOT("UnitTest")
         # Update to match new project directories and class names
         # self.frontend = self.app.frontend
