@@ -2,6 +2,8 @@ import subprocess
 import nmap
 import pandas as pd
 from os.path import exists
+
+
 # import sys
 # import socket
 # from datetime import datetime
@@ -17,7 +19,7 @@ class NetworkMgr(object):
 
         self.current_scan = get_recent_scan()
         self.report_path = None
-        self.network_metadata = None
+        self.network_metadata = pd.DataFrame()
         self.load_metadata(self.current_scan)
 
         clean_up_local_storage()
@@ -179,8 +181,16 @@ class NetworkMgr(object):
             return '0.0.0.0'
 
     def get_metadata(self):
-        return self.network_metadata
-
+        """
+        Returns network metadata as a dataframe
+        Format: Dataframe(ips, names, types, blacklist_status)
+        :return:
+        """
+        if self.network_metadata.empty:
+            print("!Error: No network metadata found")
+            return self.network_metadata
+        else:
+            return self.network_metadata
 
     @staticmethod
     def get_wifi_data():
@@ -306,6 +316,7 @@ class NetworkMgr(object):
 
 if __name__ == "__main__":
     from utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage
+
     network = NetworkMgr()
     scan_complete = network.scan_network()
 

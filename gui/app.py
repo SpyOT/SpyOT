@@ -1,85 +1,131 @@
-from tkinter import Tk, ttk, PhotoImage
+from tkinter import ttk, PhotoImage
+from .custom_widgets import CustomContainer, CustomButton, CustomLabel
+from .OutputView import OutputView
+from .MainView import MainView
 
-from gui import constants as preset
-# from .views import MainView
-from .views.frames import CustomContainer, CustomHeader
-
-WIN_BG = '#0c131e'
-FRAME_BG = '#3b3b3b'
-
-
-class App(Tk):
-    def __init__(self, systems, title, env):
-        super().__init__()
-        self.version = title
-        self.title(title)
-        self.APP_ENV = env
-
-        self.configure_app()
-        MainView(self, systems)
-
-    def configure_app(self):
-        logo = PhotoImage(file=preset.logo_img)
-        self.iconphoto(False, logo)
-        self.configure(bg=WIN_BG)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+# Constants
+PROFILE_PATH = 'gui/assets/profile_icon.png'
+TITLE_PATH = 'gui/assets/title_icon.png'
+SETTINGS_PATH = 'gui/assets/settings_icon.png'
 
 
-class MainView:
-    def __init__(self, base, systems):
-        self.base = base
+class App:
+    WIN_BG = '#0c131e'  # Black
+    FRAME_BG = '#3b3b3b'  # Dark Grey in prod
+    WIDGET_BG = FRAME_BG  # '#3b3b3b' # Dark Grey in prod
+    FRAME_MIN_WIDTH = 250
+    FRAME_MIN_HEIGHT = 5
+    TEXT_COLOR = 'white'
+
+    def __init__(self, window, systems, title, env):
+        self.window = window
         self.systems = systems
-        self.ENV = self.base.APP_ENV
-        self.is_prod = self.ENV == 'prod'
-        self.FRAME_BG = WIN_BG if self.is_prod else FRAME_BG
-        self.WIDGET_BG = self.FRAME_BG
+        self.version = title
+        self.APP_ENV = env
+        self.is_prod = self.APP_ENV == 'prod'
+
         self.style = ttk.Style()
         self.configure_styles()
 
-        self.main_container = CustomContainer(self.base, style='CustomContainer.TFrame')
-        self.main_container.configure_win(col_config={'col 0': 'weight 2',
-                                                      'col 1': 'weight 1'},
-                                          row_config={'row 0': 'weight 1',
-                                                      'row 1': 'weight 5',
-                                                      'row 2': 'weight 3'})
+        self.window.columnconfigure(0, weight=1)
+        self.window.columnconfigure(1, weight=1)
+        self.window.rowconfigure(0, weight=1)
 
-        self.header = CustomHeader(self.main_container, style='CustomFrame.TFrame')
-        # self.body = CustomBody(self.main_container)
-        # self.footer = CustomFooter(self.main_container)
-        # self.output = CustomOutput(self.main_container)
+        self.main_container = MainView(self.window,
+                                       self.systems,
+                                       height=App.FRAME_MIN_HEIGHT,
+                                       width=App.FRAME_MIN_WIDTH,
+                                       style='ttk.Frame.Home.TFrame')
 
+        self.output_container = OutputView(self.window,
+                                           self.systems,
+                                           height=App.FRAME_MIN_HEIGHT,
+                                           width=App.FRAME_MIN_WIDTH,
+                                           style='ttk.Frame.Output.TFrame')
+
+        self.set_widgets()
         self.display_win()
 
+    def display_win(self):
+        self.main_container.display_frame(column=0, row=0, sticky='n e s w')
+        self.output_container.display_frame(column=1, row=0, sticky='n e s w')
+
+    def set_widgets(self):
+        self.main_container.set_widgets(self)
+        self.output_container.set_widgets(self)
+
+    def handle_btn_press(self, command):
+        match command:
+            # MainView commands
+            case "profile":
+                print("Profile button pressed")
+                # set output containers view to profile
+                self.output_container.update_view("profile")
+            case "settings":
+                print("Settings button pressed")
+                # set output widgets for settings
+                self.output_container.update_view("settings")
+            case "info":
+                print("Info button pressed")
+                # set output widgets for info
+                self.output_container.update_view("info")
+
+            # OutputView commands
+            case "login":
+                print("Login button pressed")
+                # call systems model for firebase login
+            case "logout":
+                print("Logout button pressed")
+                # call systems model for firebase logout
+            case "new_scan":
+                print("New Scan button pressed")
+                # set output widgets for new scan
+                self.output_container.update_view("new_scan")
+            case "scan":
+                print("Scan button pressed")
+                # set output widgets for scan
+                self.output_container.update_view("scan")
+            case "collect":
+                print("Collect button pressed")
+                # set output widgets for collect
+                self.output_container.update_view("collect")
+            case "upload":
+                print("Upload button pressed")
+                # set output widgets for upload
+                self.output_container.update_view("upload")
+            case _:
+                print("Unknown button pressed")
+
     def configure_styles(self):
+        self.style.theme_use('vista')
+        # Style names are in the format 'widgetclass.stylename.widgettype'
         self.style.configure(
-            'CustomContainer.TFrame',
-            background=WIN_BG,
+            'TFrame',
             bd=0,
+            background=App.WIN_BG,
             highlightthickness=0,
             relief='ridge'
         )
 
-        # TFrame style inherits from Container style
         self.style.configure(
-            'CustomFrame.TFrame',
-            background=self.FRAME_BG
-        )
-
-        # TLabel inherits from TFrame style
-        self.style.configure(
-            'CustomWidget.TLabel',
-            background=self.WIDGET_BG,
-            relief='solid'
+            'ttk.Frame.Home.TFrame',
+            background=App.FRAME_BG,
         )
 
         self.style.configure(
-            'CustomWidget.TButton',
-            activebackground=self.WIDGET_BG,
-            background=self.WIDGET_BG,
-            relief='solid',
+            'ttk.Frame.Output.TFrame',
+            background=App.WIN_BG
         )
 
-    def display_win(self):
-        self.main_container.grid(column=0, row=0, sticky='n e s w')
-        self.header.display_frame(column=0, row=0, sticky='n e s w', padx=5, pady=5)
+        self.style.configure(
+            'ttk.Label.CustomLabel.TLabel',
+            foreground=App.TEXT_COLOR,
+            background=App.WIDGET_BG,
+            relief='none'
+        )
+
+        self.style.configure(
+            'ttk.Button.CustomButton.TButton',
+            background=App.WIDGET_BG,
+            relief='raised',
+        )

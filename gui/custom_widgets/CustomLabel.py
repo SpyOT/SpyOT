@@ -1,9 +1,10 @@
-from tkinter import ttk, Button
+from tkinter import ttk, Label
 
 
-class CustomButton(ttk.Button):
+class CustomLabel(ttk.Label):
     def __init__(self, frame, **kwargs):
         super().__init__(
             frame,
+            anchor='center',
             **kwargs
         )

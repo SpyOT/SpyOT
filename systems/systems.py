@@ -44,6 +44,24 @@ class Systems:
         # Open report in notepad
         system(f"notepad {report_path}")
 
+    def get_metadata(self):
+        return self.network_mgr.get_metadata()
+
+    def get_hostname(self):
+        metadata = self.network_mgr.get_metadata()
+        if not metadata.empty:
+            return metadata.loc[metadata['type'] == 'router', ['name']].values[0][0]
+        else:
+            return ""
+
+    def get_devices(self):
+        # Get list of devices from metadata
+        metadata = self.network_mgr.get_metadata()
+        if not metadata.empty:
+            return [name[0] for name in metadata.loc[metadata['type'] == 'device', ['name']].values]
+        else:
+            return []
+
 
 def main():
 

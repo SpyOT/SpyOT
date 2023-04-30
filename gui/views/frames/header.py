@@ -1,6 +1,6 @@
 from .frame import CustomContainer
 from gui import widgets
-from tkinter import PhotoImage
+from tkinter import PhotoImage, ttk
 from os import getcwd
 from os.path import join
 
@@ -13,33 +13,38 @@ SETTINGS_PATH = join(ASSETS_PATH, 'settings_icon.png')
 
 
 class CustomHeader(CustomContainer):
-    def __init__(self, frame, **kwargs):
+    def __init__(self, frame, model, **kwargs):
         super().__init__(
             frame,
+            model,
             **kwargs
         )
-        self.configure_win()
-        self.widgets = {}
+        self.configure_win(
+            col_config={'col 0': 'weight 1',
+                        'col 1': 'weight 8',
+                        'col 2': 'weight 1'},
+            row_config={'row 0': 'weight 1'})
         self.set_widgets()
-
-    def configure_win(self):
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=8)
-        self.columnconfigure(2, weight=1)
-        self.rowconfigure(0, weight=1)
 
     def set_widgets(self):
         """ Header widgets"""
         profile_icon = PhotoImage(file=PROFILE_PATH)
         self.set_widget("profile", widgets.CustomButton,
                         image=profile_icon,
-                        style='CustomWidget.TButton',
-                        command=lambda: self.handle_btn_press("profile"))
+                        style='ttk.Button.CustomButton.TButton',
+                        command=lambda: self.model.handle_btn_press("profile"))
         title_icon = PhotoImage(file=TITLE_PATH)
         self.set_widget("title", widgets.CustomLabel,
                         image=title_icon,
-                        style='CustomWidget.TLabel'
+                        style='ttk.Label.CustomLabel.TLabel'
                         )
+        settings_icon = PhotoImage(file=SETTINGS_PATH)
+        self.set_widget("settings", widgets.CustomButton,
+                        image=settings_icon,
+                        style='ttk.Button.CustomButton.TButton',
+                        command=lambda: self.model.handle_btn_press("settings"))
+
+        """ Profile output widgets"""
 
     #     self.get_widget("title").bind("<Button-1>", lambda event: self.handle_btn_press('set_admin'))
     #     self.get_widget("title").bind("<Button-3>", lambda event: self.handle_btn_press('set_guest'))
@@ -50,12 +55,18 @@ class CustomHeader(CustomContainer):
     #                            command=lambda: self.handle_btn_press("settings"))
 
     def display_widgets(self):
-        for i, name in enumerate(self.widgets):
-            self.display_widget(
-                name,
-                column=i, row=0,
-                padx=15, pady=15
-            )
+        self.display_widget("profile", sticky='nsew', column=0, row=0, padx=15, pady=15)
+        self.display_widget("title", sticky='ns', column=1, row=0, padx=15, pady=15)
+        self.display_widget("settings", sticky='nsew', column=2, row=0, padx=15, pady=15)
 
     def handle_btn_press(self, command):
-        pass
+        match command:
+            case "profile":
+                print("Profile")
+                # Display profile menu in output
+            case "settings":
+                print("Settings")
+            case "title":
+                print("Title")
+            case _:
+                print("Invalid command")
