@@ -1,6 +1,5 @@
 from .custom_widgets import CustomContainer, CustomButton, CustomLabel
-from tkinter import ttk, Entry, StringVar, Listbox, messagebox
-from threading import Thread
+from tkinter import ttk, Entry, StringVar, Listbox
 
 
 class OutputView(CustomContainer):
@@ -16,7 +15,7 @@ class OutputView(CustomContainer):
                                        'row 2': 'weight 1',
                                        'row 3': 'weight 1',
                                        'row 4': 'weight 1', })
-        self.view = None
+        self.view = "none"
         self.username_entry = ""
         self.password_entry = ""
         self.host_name = None
@@ -63,11 +62,13 @@ class OutputView(CustomContainer):
         self.device_list = StringVar(value=self.systems.get_devices())
         self.set_widget("devices", Listbox,
                         justify='center',
-                        listvariable=self.device_list, )
+                        listvariable=self.device_list)
+        self.get_widget("devices").bind('<<ListboxSelect>>',
+                                        self.handle_listbox_select)
         self.set_widget("new_scan", CustomButton,
                         style='ttk.Button.CustomButton.TButton',
                         text='New Scan',
-                        command=lambda: controller.handle_btn_press("new_scan"))
+                        command=lambda: controller.handle_btn_press("run_scan"))
         self.set_widget("add_to_blacklist", CustomButton,
                         style='ttk.Button.CustomButton.TButton',
                         text="Blacklist",
@@ -89,14 +90,14 @@ class OutputView(CustomContainer):
         self.view = view
 
     def update_view(self, view):
-        self.set_view(view)
         self.reset_frame()
-        self.display_widgets()
+        self.set_view(view)
+        self.display_frame(column=1, row=0, sticky='n e s w')
 
     def get_view(self):
         return self.view
 
-    def display_widgets(self):
+    def display_widgets(self, preload=False):
         match self.view:
             case "loading":
                 self.display_widget("loading_label", sticky='new',
@@ -106,7 +107,6 @@ class OutputView(CustomContainer):
                                     column=0, row=2, columnspan=2,
                                     padx=15, pady=15)
                 self.get_widget("loading_bar").start(5)
-
             case "profile":
                 self.display_widget("login_prompt", sticky='ns',
                                     column=0, columnspan=2, row=0,
@@ -122,19 +122,10 @@ class OutputView(CustomContainer):
                                     padx=15, pady=15)
             case "settings":
                 pass
-            case "new_scan":
-                # Scan start
-                print("New Scan View")
-                self.update_view("loading")
-                self.thread = Thread(target=lambda: self.run_thread("scan")).start()
-            case "scan":
-                # Scan start
-                print("Scan View")
-                if self.systems.get_metadata().empty:
-                    print("No previous data, new scan starting")
-                    self.update_view("new_scan")
+            case "output_scan":
+                # Update the host name and device list
 
-                # Scan Complete
+                self.update_scan_output()
                 self.display_widget("host_label", sticky='nsew',
                                     column=0, row=0,
                                     padx=15, pady=15)
@@ -153,26 +144,57 @@ class OutputView(CustomContainer):
                 self.display_widget("new_scan", sticky='ew',
                                     column=0, row=4, columnspan=2,
                                     padx=15, pady=15)
-
             case "collect":
                 pass
             case "upload":
                 pass
             case "about":
                 pass
-            case _:
+            case "none":
                 pass
+            case _:
+                print("Error: Invalid view name")
 
-    def run_thread(self, command):
-        match command:
-            case "scan":
-                self.systems.scan()
-                if not self.systems.get_metadata().empty:
-                    self.get_widget("loading_bar").stop()
-                    messagebox.showinfo("Scan Complete", "Scan Complete")
-                    self.update_view("scan")
-                else:
-                    messagebox.showerror("Scan Error", "Scan Error")
-            case _:
-                pass
-        return
+    def handle_listbox_select(self, _):
+        selected_device = self.get_selected_device()
+        device_metadata = self.systems.get_device_metadata(selected_device)
+        device_index = device_metadata.index.tolist()[0]
+        # Get device blacklist status from column 3
+        status = device_metadata.at[device_index, 'blacklist']
+        if status:
+            self.get_widget("add_to_blacklist").configure(state='disabled')
+            self.get_widget("add_to_whitelist").configure(state='normal')
+        else:
+            self.get_widget("add_to_blacklist").configure(state='normal')
+            self.get_widget("add_to_whitelist").configure(state='disabled')
+
+    def get_selected_device(self):
+        selected_device_index = self.get_widget("devices").curselection()[0]
+        selected_device = self.systems.get_devices()[selected_device_index]
+        return selected_device
+
+    def update_selected_device(self, **kwargs):
+        selected_device_index = self.get_widget("devices").curselection()[0]
+        self.get_widget("devices").itemconfigure(
+            selected_device_index,
+            **kwargs
+        )
+        self.get_widget("devices").selection_clear(selected_device_index)
+        self.get_widget("add_to_blacklist").configure(state='disabled')
+        self.get_widget("add_to_whitelist").configure(state='disabled')
+
+    def update_scan_output(self):
+        self.host_name.set(self.systems.get_hostname())
+        self.device_list.set(self.systems.get_devices())
+        listbox_obj = self.get_widget("devices")
+        for device_index in range(listbox_obj.size()):
+            device_name = listbox_obj.get(device_index)
+            device_status = self.systems.get_device_status(device_name)
+            if device_status:
+                listbox_obj.itemconfigure(device_index,
+                                         bg='black',
+                                         fg='white')
+            else:
+                listbox_obj.itemconfigure(device_index,
+                                         bg='white',
+                                         fg='black')

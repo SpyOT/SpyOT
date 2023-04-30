@@ -11,7 +11,7 @@ LOCAL_STORAGE_PATH = join(CWD, 'systems', 'local')
 LOCAL_SCANS_PATH = join(LOCAL_STORAGE_PATH, 'scans')
 LOCAL_REPORTS_PATH = join(LOCAL_STORAGE_PATH, 'reports')
 BLACKLIST_PATH = join(LOCAL_STORAGE_PATH, 'blacklist.txt')
-FILE_COUNT_LIMIT = 10
+FILE_COUNT_LIMIT = 5
 FILE_TIME_LIMIT = 5
 
 
@@ -109,7 +109,7 @@ def purge_old_files(path, count_limit=10, time_limit=14):
     path_files = listdir(path)
     # sort the files by date
     path_files.sort(key=lambda x: datetime.strptime(x.strip('.txt').strip('scan-').strip('report-'),
-                                                    '%Y-%m-%d-%H-%M-%S'))
+                                                    '%Y-%m-%d-%H-%M-%S'), reverse=True)
     if exists(path):
         for i, file in enumerate(path_files):
             # strip the file name of the extension and 'scan-' or 'report-'

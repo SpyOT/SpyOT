@@ -1,7 +1,8 @@
-from tkinter import ttk, PhotoImage
+from tkinter import ttk, PhotoImage, messagebox
 from .custom_widgets import CustomContainer, CustomButton, CustomLabel
 from .OutputView import OutputView
 from .MainView import MainView
+from threading import Thread
 
 # Constants
 PROFILE_PATH = 'gui/assets/profile_icon.png'
@@ -44,11 +45,8 @@ class App:
                                            style='ttk.Frame.Output.TFrame')
 
         self.set_widgets()
-        self.display_win()
-
-    def display_win(self):
         self.main_container.display_frame(column=0, row=0, sticky='n e s w')
-        self.output_container.display_frame(column=1, row=0, sticky='n e s w')
+        self.thread = None
 
     def set_widgets(self):
         self.main_container.set_widgets(self)
@@ -77,14 +75,17 @@ class App:
             case "logout":
                 print("Logout button pressed")
                 # call systems model for firebase logout
-            case "new_scan":
+            case "run_scan":
                 print("New Scan button pressed")
-                # set output widgets for new scan
-                self.output_container.update_view("new_scan")
-            case "scan":
+                self.output_container.update_view("loading")
+                self.thread = Thread(target=lambda: self.run_thread("scan")).start()
+            case "output_scan":
                 print("Scan button pressed")
                 # set output widgets for scan
-                self.output_container.update_view("scan")
+                if self.systems.metadata_available():
+                    self.output_container.update_view("output_scan")
+                else:
+                    self.handle_btn_press("run_scan")
             case "collect":
                 print("Collect button pressed")
                 # set output widgets for collect
@@ -93,6 +94,26 @@ class App:
                 print("Upload button pressed")
                 # set output widgets for upload
                 self.output_container.update_view("upload")
+            case "blacklist":
+                print("Blacklist button pressed")
+                selected_device_name = self.output_container.get_selected_device()
+                selected_device_ip = self.systems.get_device_ip(selected_device_name)
+                self.systems.update_device_blacklist_status(selected_device_ip, True)
+                self.output_container.update_selected_device(
+                    bg=App.WIDGET_BG,
+                    foreground=App.TEXT_COLOR
+                )
+                self.output_container.update_view("output_scan")
+            case "whitelist":
+                print("Whitelist button pressed")
+                selected_device_name = self.output_container.get_selected_device()
+                selected_device_ip = self.systems.get_device_ip(selected_device_name)
+                self.systems.update_device_blacklist_status(selected_device_ip, False)
+                self.output_container.update_selected_device(
+                    bg=App.TEXT_COLOR,
+                    foreground=App.WIDGET_BG
+                )
+                self.output_container.update_view("output_scan")
             case _:
                 print("Unknown button pressed")
 
@@ -129,3 +150,17 @@ class App:
             background=App.WIDGET_BG,
             relief='raised',
         )
+
+    def run_thread(self, command):
+        match command:
+            case "scan":
+                self.systems.scan()
+                self.output_container.get_widget("loading_bar").stop()
+                if self.systems.metadata_available():
+                    messagebox.showinfo("Scan Complete", "Scan complete.")
+                    self.output_container.update_view("output_scan")
+                else:
+                    messagebox.showerror("Error", "Scan incomplete. Please try again.")
+                    self.output_container.update_view("none")
+            case _:
+                print("Unknown thread command")

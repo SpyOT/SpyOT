@@ -116,6 +116,7 @@ class NetworkMgr(object):
         """
         with open(self.current_scan, 'w') as f:
             self.network_metadata.to_csv(f, sep=',', index=False, header=False, lineterminator='\n')
+        clean_up_local_storage()
 
     def set_current_scan_path(self, scan_path):
         self.current_scan = scan_path

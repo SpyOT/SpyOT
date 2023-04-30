@@ -68,7 +68,7 @@ class MainView(CustomContainer):
         self.set_widget("scan_btn", CustomButton,
                         image=scan_button,
                         style='ttk.Button.CustomButton.TButton',
-                        command=lambda: controller.handle_btn_press("scan"))
+                        command=lambda: controller.handle_btn_press("output_scan"))
 
         # collect icon and button
         collect_icon = PhotoImage(file=COLLECT_ICON_PATH)
@@ -146,7 +146,6 @@ class MainView(CustomContainer):
         self.display_widget("info_icon", sticky='nsew',
                             column=0, row=4,
                             padx=15, pady=15)
-        print(self.toggle_icon)
         if self.toggle_icon == "expand":
             self.display_widget("expand_output_icon", sticky='nsew',
                                 column=3, row=4,

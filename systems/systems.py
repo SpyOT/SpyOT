@@ -44,6 +44,9 @@ class Systems:
         # Open report in notepad
         system(f"notepad {report_path}")
 
+    def metadata_available(self):
+        return not self.network_mgr.get_metadata().empty
+
     def get_metadata(self):
         return self.network_mgr.get_metadata()
 
@@ -62,6 +65,26 @@ class Systems:
         else:
             return []
 
+    def get_device_metadata(self, name):
+        metadata = self.network_mgr.get_metadata()
+        if not metadata.empty:
+            return metadata.loc[metadata['name'] == name]
+        else:
+            return None
+
+    def get_device_ip(self, name):
+        metadata = self.network_mgr.get_metadata()
+        if not metadata.empty:
+            return metadata.loc[metadata['name'] == name, ['ip']].values[0][0]
+        else:
+            return None
+
+    def get_device_status(self, name):
+        metadata = self.network_mgr.get_metadata()
+        if not metadata.empty:
+            return metadata.loc[metadata['name'] == name, ['blacklist']].values[0][0]
+        else:
+            return None
 
 def main():
 
