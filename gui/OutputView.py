@@ -1,13 +1,10 @@
 from .custom_widgets import CustomContainer, CustomButton, CustomLabel
-from tkinter import ttk, Entry, StringVar, Listbox
-
-BLACKLISTED_BG = 'black'
-BLACKLISTED_FG = 'white'
-NORMAL_BG = 'white'
-NORMAL_FG = 'black'
+from tkinter import ttk, Entry, StringVar, Listbox, PhotoImage
+from gui import constants as const
 
 
 class OutputView(CustomContainer):
+
     def __init__(self, frame, systems, **kwargs):
         super().__init__(
             frame,
@@ -27,6 +24,9 @@ class OutputView(CustomContainer):
         self.device_list = None
         self.thread = None
 
+        self.light_mode_icon = PhotoImage(file=const.LIGHT_MODE_ICON)
+        self.dark_mode_icon = PhotoImage(file=const.DARK_MODE_ICON)
+
     # override this method from CustomContainer
     def set_widgets(self, controller):
         """ Profile Widgets """
@@ -40,11 +40,15 @@ class OutputView(CustomContainer):
                         textvariable=self.password_entry,
                         show='*')
         self.set_widget("login_btn", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text='Login',
                         command=lambda: controller.handle_btn_press("login"))
 
         """ Settings Widgets """
+        self.set_widget("toggle_theme", CustomButton,
+                        style=const.BUTTON_STYLE,
+                        image=self.dark_mode_icon,
+                        command=lambda: controller.handle_btn_press("toggle_theme"))
 
         """ Loading Widgets """
         self.set_widget("loading_bar", ttk.Progressbar,
@@ -71,16 +75,16 @@ class OutputView(CustomContainer):
         self.get_widget("devices").bind('<<ListboxSelect>>',
                                         self.handle_listbox_select)
         self.set_widget("new_scan", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text='New Scan',
                         command=lambda: controller.handle_btn_press("run_scan"))
         self.set_widget("add_to_blacklist", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text="Blacklist",
                         state='disabled',
                         command=lambda: controller.handle_btn_press("blacklist"))
         self.set_widget("add_to_whitelist", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text="Whitelist",
                         state='disabled',
                         command=lambda: controller.handle_btn_press("whitelist"))
@@ -96,15 +100,15 @@ class OutputView(CustomContainer):
         self.get_widget("device_summary").column('Status', anchor='center')
         self.get_widget("device_summary").heading('Status', text='Status')
         self.set_widget("edit_list", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text='Edit List',
                         command=lambda: controller.handle_btn_press("output_scan"))
         self.set_widget("view_report", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text='View Report',
                         command=lambda: controller.handle_btn_press("view_report"))
         self.set_widget("save_report", CustomButton,
-                        style='ttk.Button.CustomButton.TButton',
+                        style=const.BUTTON_STYLE,
                         text='Save Report',
                         command=lambda: controller.handle_btn_press("save_report"))
 
@@ -148,7 +152,9 @@ class OutputView(CustomContainer):
                                     padx=15, pady=15,
                                     ipadx=15)
             case "settings":
-                pass
+                self.display_widget("toggle_theme", sticky='nsew',
+                                    column=0, row=0, columnspan=2, rowspan=2,
+                                    padx=15, pady=15)
             case "blacklist":
                 self.set_selected_device_status(True)
                 self.update_view("output_scan")
@@ -265,6 +271,13 @@ class OutputView(CustomContainer):
         selected_device_ip = self.systems.get_device_ip(selected_device_name)
         self.systems.update_device_blacklist_status(selected_device_ip, status)
         if status:
-            self.update_selected_device(bg=BLACKLISTED_BG, fg=BLACKLISTED_FG)
+            self.update_selected_device(bg=const.BLACKLIST_PRIMARY, fg=const.BLACKLIST_SECONDARY)
         else:
-            self.update_selected_device(bg=NORMAL_BG, fg=NORMAL_FG)
+            self.update_selected_device(bg=const.WHITELIST_PRIMARY, fg=const.WHITELIST_SECONDARY)
+
+    def toggle_theme(self, value):
+        if value == "DARK":
+            self.update_widget_value("toggle_theme", "image", self.light_mode_icon)
+        else:
+            self.update_widget_value("toggle_theme", "image", self.dark_mode_icon)
+        self.set_view("settings")

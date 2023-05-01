@@ -1,6 +1,6 @@
 from .frame import CustomContainer
 from gui import widgets
-from tkinter import PhotoImage, ttk
+from tkinter import PhotoImage
 from os import getcwd
 from os.path import join
 

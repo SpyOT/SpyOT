@@ -2,8 +2,7 @@ from gui import App
 from systems import Systems
 from tkinter import Tk, PhotoImage
 from sys import argv
-from os import getcwd
-from os.path import join
+from gui.constants import LOGO_PATH, WIN_BG
 
 """
 sources:
@@ -11,9 +10,6 @@ https://tkdocs.com/tutorial/index.html
 https://tkdocs.com/widgets/
 https://www.pythontutorial.net/tkinter/tkinter-grid/
 """
-CWD = getcwd()
-ASSETS_PATH = join(CWD, "gui", "assets")
-LOGO_PATH = join(ASSETS_PATH, "logo.png")
 
 
 class SpyOT(Tk):
@@ -37,7 +33,7 @@ class SpyOT(Tk):
         self.title(self.version)
         logo = PhotoImage(file=LOGO_PATH)
         self.iconphoto(False, logo)
-        self.configure(bg=App.WIN_BG)
+        self.configure(bg=WIN_BG)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 

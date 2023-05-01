@@ -1,27 +1,66 @@
-# Constants
-default_width, default_height = 800, 600
-default_res = default_width, default_height
-default_geometry = str(default_width) + 'x' + str(default_height)
-default_text_size = 18
-default_font = "Helvetica"
-padding = (3, 3, 12, 12)
-asset_path = "SpyOT\\gui\\assets\\"
-logo_img = asset_path + "logo.png"
-profile_path = asset_path + "profile_icon.png"
-setting_path = asset_path + "settings_icon.png"
-title_path = asset_path + "title_icon.png"
-info_path = asset_path + "info_icon.png"
-scan_path = asset_path + "scan_icon.png"
-collect_path = asset_path + "collect_icon.png"
-upload_path = asset_path + "upload_icon.png"
-exit_path = asset_path + "exit_icon.png"
-scan_button = asset_path + "scan_button.png"
-collect_button = asset_path + "collect_button.png"
-upload_button = asset_path + "upload_button.png"
-expand_button = asset_path + "expand_output.png"
-collapse_button = asset_path + "collapse_output.png"
-light_mode = asset_path + "light_mode.png" #<<Settings 
-dark_mode = asset_path + "dark_mode.png"
+from os import getcwd
+from os.path import join
+
+""" GUI CONSTANTS """
+FRAME_MIN_WIDTH = 250
+FRAME_MIN_HEIGHT = 5
+
+""" THEME CONSTANTS """
+
+BUTTON_STYLE = "ttk.Button.CustomButton.TButton"
+IMG_BUTTON_STYLE = "ttk.Button.ImgCustomButton.TButton"
+LABEL_STYLE = "ttk.Label.CustomLabel.TLabel"
+
+BLACKLIST_PRIMARY = "black"
+BLACKLIST_SECONDARY = "white"
+
+WHITELIST_PRIMARY = "white"
+WHITELIST_SECONDARY = "black"
+
+WIN_BG = "black"
+
+FRAME_DARK_PRIMARY = "black"
+FRAME_LIGHT_PRIMARY = "white"
+FRAME_DARK_SECONDARY = "black"
+FRAME_LIGHT_SECONDARY = "white"
+
+IMG_BUTTON_LIGHT_PRIMARY = "white"
+IMG_BUTTON_LIGHT_SECONDARY = "black"
+IMG_BUTTON_DARK_PRIMARY = "black"
+IMG_BUTTON_DARK_SECONDARY = "black"
+
+BUTTON_LIGHT_PRIMARY = "white"
+BUTTON_LIGHT_SECONDARY = "black"
+BUTTON_DARK_PRIMARY = "black"
+BUTTON_DARK_SECONDARY = "white"
+
+LABEL_LIGHT_PRIMARY = "white"
+LABEL_LIGHT_SECONDARY = "black"
+LABEL_DARK_PRIMARY = "black"
+LABEL_DARK_SECONDARY = "white"
+
+""" ASSET PATH CONSTANTS"""
+CWD = getcwd()
+ASSETS_PATH = join(CWD, "gui", "assets")
+
+LOGO_PATH = join(ASSETS_PATH, "logo.png")
+PROFILE_PATH = join(ASSETS_PATH, "profile_icon.png")
+SETTINGS_PATH = join(ASSETS_PATH, "settings_icon.png")
+TITLE_PATH = join(ASSETS_PATH, "title_icon.png")
+INFO_ICON_PATH = join(ASSETS_PATH, "info_icon.png")
+SCAN_ICON_PATH = join(ASSETS_PATH, "scan_icon.png")
+COLLECT_ICON_PATH = join(ASSETS_PATH, "collect_icon.png")
+UPLOAD_ICON_PATH = join(ASSETS_PATH, "upload_icon.png")
+SCAN_BUTTON_PATH = join(ASSETS_PATH, "scan_button.png")
+COLLECT_BUTTON_PATH = join(ASSETS_PATH, "collect_button.png")
+UPLOAD_BUTTON_PATH = join(ASSETS_PATH, "upload_button.png")
+LIGHT_MODE_ICON = join(ASSETS_PATH, "light_mode.png")
+DARK_MODE_ICON = join(ASSETS_PATH, "dark_mode.png")
+EXPAND_OUTPUT_ICON_PATH = join(ASSETS_PATH, "expand_output.png")
+COLLAPSE_OUTPUT_ICON_PATH = join(ASSETS_PATH, "collapse_output.png")
+
+""" MISC. CONSTANTS """
+
 about_text = """
         Instructions -
         scan systems: Performs a light weight scan on your 
@@ -42,3 +81,10 @@ about_text = """
         complete, a message will appear stating whether your data
         was successfully uploaded or not.
         """
+
+default_width, default_height = 800, 600
+default_res = default_width, default_height
+default_geometry = str(default_width) + 'x' + str(default_height)
+default_text_size = 18
+default_font = "Helvetica"
+padding = (3, 3, 12, 12)

@@ -1,26 +1,11 @@
-from tkinter import ttk, PhotoImage, messagebox
+from tkinter import ttk, messagebox
 from .OutputView import OutputView
 from .MainView import MainView
 from threading import Thread
-from os import getcwd
-from os.path import join
-
-# Constants
-CWD = getcwd()
-ASSETS_PATH = join(CWD, 'gui', 'assets')
-PROFILE_PATH = join(ASSETS_PATH, 'profile_icon.png')
-TITLE_PATH = join(ASSETS_PATH, 'title_icon.png')
-SETTINGS_PATH = join(ASSETS_PATH, 'settings_icon.png')
+from gui import constants as const
 
 
 class App:
-    WIN_BG = '#0c131e'  # Black
-    FRAME_BG = '#3b3b3b'  # Dark Grey in prod
-    WIDGET_BG = FRAME_BG  # '#3b3b3b' # Dark Grey in prod
-    FRAME_MIN_WIDTH = 250
-    FRAME_MIN_HEIGHT = 5
-    TEXT_COLOR = 'white'
-
     def __init__(self, window, systems, title, env):
         self.window = window
         self.systems = systems
@@ -28,6 +13,7 @@ class App:
         self.APP_ENV = env
         self.is_prod = self.APP_ENV == 'prod'
 
+        self.theme = "LIGHT"
         self.style = ttk.Style()
         self.configure_styles()
 
@@ -37,14 +23,14 @@ class App:
 
         self.main_container = MainView(self.window,
                                        self.systems,
-                                       height=App.FRAME_MIN_HEIGHT,
-                                       width=App.FRAME_MIN_WIDTH,
+                                       height=const.FRAME_MIN_HEIGHT,
+                                       width=const.FRAME_MIN_WIDTH,
                                        style='ttk.Frame.Home.TFrame')
 
         self.output_container = OutputView(self.window,
                                            self.systems,
-                                           height=App.FRAME_MIN_HEIGHT,
-                                           width=App.FRAME_MIN_WIDTH,
+                                           height=const.FRAME_MIN_HEIGHT,
+                                           width=const.FRAME_MIN_WIDTH,
                                            style='ttk.Frame.Output.TFrame')
 
         self.set_widgets()
@@ -99,6 +85,9 @@ class App:
                 print("Upload button pressed")
                 # set output widgets for upload
                 self.output_container.update_view("upload")
+            case "toggle_theme":
+                print("Toggle theme button pressed")
+                self.toggle_theme()
             case "blacklist":
                 print("Blacklist button pressed")
                 self.output_container.update_view("blacklist")
@@ -118,33 +107,65 @@ class App:
         self.style.configure(
             'TFrame',
             bd=0,
-            background=App.WIN_BG,
             highlightthickness=0,
             relief='ridge'
         )
 
         self.style.configure(
             'ttk.Frame.Home.TFrame',
-            background=App.FRAME_BG,
+            background=const.FRAME_LIGHT_PRIMARY
         )
 
         self.style.configure(
             'ttk.Frame.Output.TFrame',
-            background=App.WIN_BG
+            background=const.FRAME_LIGHT_SECONDARY
         )
 
         self.style.configure(
             'ttk.Label.CustomLabel.TLabel',
-            foreground=App.TEXT_COLOR,
-            background=App.WIDGET_BG,
+            background=const.LABEL_LIGHT_PRIMARY,
+            foreground=const.LABEL_LIGHT_SECONDARY,
             relief='none'
         )
 
         self.style.configure(
             'ttk.Button.CustomButton.TButton',
-            background=App.WIDGET_BG,
+            background=const.BUTTON_LIGHT_PRIMARY,
+            foreground=const.BUTTON_LIGHT_SECONDARY,
             relief='raised',
         )
+
+        self.style.configure(
+            'ttk.Button.ImgCustomButton.TButton',
+            background=const.IMG_BUTTON_LIGHT_PRIMARY,
+            foreground=const.IMG_BUTTON_LIGHT_SECONDARY,
+        )
+
+    def toggle_theme(self):
+        is_light = self.theme == "LIGHT"
+        self.theme = "DARK" if is_light else "LIGHT"
+
+        win_primary = const.FRAME_DARK_PRIMARY if is_light else const.FRAME_LIGHT_PRIMARY
+        win_secondary = const.FRAME_DARK_SECONDARY if is_light else const.FRAME_LIGHT_SECONDARY
+        label_primary = const.LABEL_DARK_PRIMARY if is_light else const.LABEL_LIGHT_PRIMARY
+        label_secondary = const.LABEL_DARK_SECONDARY if is_light else const.LABEL_LIGHT_SECONDARY
+        button_primary = const.BUTTON_DARK_PRIMARY if is_light else const.BUTTON_LIGHT_PRIMARY
+        button_secondary = const.BUTTON_DARK_SECONDARY if is_light else const.BUTTON_LIGHT_SECONDARY
+        img_button_primary = const.IMG_BUTTON_DARK_PRIMARY if is_light else const.IMG_BUTTON_LIGHT_PRIMARY
+        img_button_secondary = const.IMG_BUTTON_DARK_SECONDARY if is_light else const.IMG_BUTTON_LIGHT_SECONDARY
+
+        self.style.configure("ttk.Frame.Home.TFrame", background=win_primary)
+        self.style.configure("ttk.Frame.Output.TFrame", background=win_secondary)
+        self.style.configure("ttk.Label.CustomLabel.TLabel",
+                             background=label_primary,
+                             foreground=label_secondary)
+        self.style.configure(const.BUTTON_STYLE,
+                             background=button_primary,
+                             foreground=button_secondary)
+        self.style.configure(const.IMG_BUTTON_STYLE,
+                             background=img_button_primary,
+                             foreground=img_button_secondary)
+        self.output_container.toggle_theme(self.theme)
 
     def run_thread(self, command):
         """
