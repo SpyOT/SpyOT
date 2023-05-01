@@ -1,5 +1,5 @@
-from cryptography.fernet import Fernet
 from os import system
+from cryptography.fernet import Fernet
 
 KEY = Fernet.generate_key()
 fernet = Fernet(KEY)

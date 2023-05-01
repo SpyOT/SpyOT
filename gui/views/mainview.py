@@ -1,6 +1,6 @@
 from tkinter import ttk, PhotoImage, messagebox, Listbox, StringVar, filedialog
 import threading
-import gui.constants as preset
+from gui import constants as preset
 from .frames import *
 from ..widgets import *
 
@@ -46,6 +46,7 @@ class MainView:
         widget_bg = self.frame_bg
         """ Header widgets"""
         profile_icon = PhotoImage(file=preset.profile_path)
+
         self.header.set_widget("profile", CustomButton,
                                image=profile_icon,
                                bg=widget_bg,
@@ -58,7 +59,7 @@ class MainView:
         self.header.get_widget("title").bind("<Button-1>", lambda event: self.handle_btn_press('set_admin'))
         self.header.get_widget("title").bind("<Button-3>", lambda event: self.handle_btn_press('set_guest'))
         settings_icon = PhotoImage(file=preset.setting_path)
-        self.header.set_widget("settings", CustomButton,
+        self.header.set_widget("settings", CustomButton,  # This is the widget for the gear icon
                                image=settings_icon,
                                bg=widget_bg,
                                command=lambda: self.handle_btn_press("settings"))
@@ -110,6 +111,13 @@ class MainView:
                                text="Loading...",
                                foreground=self.text_color,
                                bg=widget_bg)
+        # Header output widgets
+        toggle_dark_and_light_mode = PhotoImage(file=preset.dark_mode)
+        self.output.set_widget("dark and light mode", CustomButton,
+                               image=toggle_dark_and_light_mode,
+                               bg=widget_bg,
+                               command=lambda: self.handle_btn_press(
+                                   "toggle dark and light mode"))  # widget_bg is a default green color we use
 
         # Scan output widgets
         self.output.set_widget("host_label", CustomLabel,
@@ -196,10 +204,10 @@ class MainView:
         self.body.display_frame(column=0, row=1, sticky='n e s w', padx=5, pady=5)
         self.footer.display_frame(column=0, row=2, sticky='n e s w', padx=5, pady=5)
 
-    def handle_btn_press(self, option):
+    def handle_btn_press(self, option):  # Grabbing button command
         global is_guest
         if not self.is_prod:
-            print("clicked on", option, "button")
+            print("clicked on", option, "button")  # Debugging purposes
 
         match option:
             # Header Buttons
@@ -214,7 +222,29 @@ class MainView:
                 is_guest = 0
             case "set_guest":
                 is_guest = 1
-            case "settings":
+            case "settings":  # (Start) Behavior of when you click the gear icon
+                self.output.display_action(option,
+                                           column=1, row=0,
+                                           rowspan=3, sticky='n e s w',
+                                           padx=5, pady=5)
+                pass
+            case "toggle dark and light mode":
+                # Handles light/dark mode behavior
+                if self.dark_light_mode:
+                    self.frame_bg = "#d3d3d3"
+                    lm_frame_clr = "#d3d3d3"
+                    lm_background_clr = "#a9a9a9"
+                    self.container.edit_window_background_color(lm_background_clr)
+                    self.header.edit_frame_background_color(lm_frame_clr)
+                    self.dark_light_mode = False
+                else:
+                    self.frame_bg = "#3b3b3b"
+                    dm_frame_clr = "#3b3b3b"
+                    dm_background_clr = "#0c131e"
+                    self.container.edit_window_background_color(dm_background_clr)
+                    self.header.edit_frame_background_color(dm_frame_clr)
+                    self.dark_light_mode = True
+
                 pass
             # Body Buttons
             case "new_scan":
@@ -222,7 +252,7 @@ class MainView:
             case "scan":
                 if self.handle_output(option):
                     """ Widgets updated, display widgets"""
-                    self.output.display_action(
+                    self.output.display_action(  # Grabs widget output specific to command
                         option,
                         column=1, row=0,
                         rowspan=3, sticky='n e s w',
@@ -301,6 +331,7 @@ class MainView:
                                                        foreground=self.win_bg)
                 self.update_scan_buttons()
         self.update_footer_toggle()
+        self.update_dark_light_mode_toggle()
 
     def handle_action(self, action):
         print("!Running {}".format(action))
@@ -312,14 +343,14 @@ class MainView:
             padx=5, pady=5)
         self.thread = threading.Thread(target=lambda: self.action_thread(action)).start()
 
-    def handle_output(self, action):
+    def handle_output(self, action):  # You don't need a handle output for 'settings'
         """ Get action result and update output widgets """
         print("!Updating {} output widgets".format(action))
         match action:
             case "scan":
                 host_name = self.systems.get_hostname()
                 device_names = self.systems.get_device_names()
-                print(host_name, device_names)
+                print(1, host_name, 2, device_names)
                 if host_name and device_names:
                     self.output.update_var('host_name', host_name)
                     self.output.update_var('devices', device_names)
@@ -346,16 +377,326 @@ class MainView:
             case "upload":
                 pass
 
-    # Output utils
+        #     case "upload":
+        #         if self.systems.metadata:
+        #             is_success = self.systems.upload()
+        #             if is_success:
+        #                 messagebox.showinfo(
+        #                     self.win.version,
+        #                     "Upload Complete")
+        #             else:
+        #                 messagebox.showerror(
+        #                     self.win.version,
+        #                     "Error with Upload")
+        #         else:
+        #             messagebox.showerror(
+        #                 self.win.version,
+        #                 "Nothing to upload.\nTry scanning systems first.")
+
+    # Header utils
+    # Profile image
+    def update_profile_background(self):
+        state = True
+
+        if state:
+            profile_icon = PhotoImage(file=preset.profile_path)
+        else:
+            profile_icon = PhotoImage(file=preset.profile_path)
+
+        self.header.update_widget_value(
+            "profile",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.header.update_widget_value(
+                "profile",
+                "activebackground", active_background)
+
+        self.header.update_widget_value(
+            "profile",
+            "image", profile_icon)
+
+    # SpyOT title
+    def update_title_background(self):
+        state = True
+
+        if state:
+            title_icon = PhotoImage(file=preset.title_path)
+        else:
+            title_icon = PhotoImage(file=preset.title_path)
+
+        self.header.update_widget_value(
+            "title",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.header.update_widget_value(
+                "title",
+                "activebackground", active_background)
+
+        self.header.update_widget_value(
+            "title",
+            "image", title_icon)
+
+    # Settings button
+    def update_settings_background(self):
+        state = True
+
+        if state:
+            settings_icon = PhotoImage(file=preset.setting_path)
+        else:
+            settings_icon = PhotoImage(file=preset.setting_path)
+
+        self.header.update_widget_value(
+            "settings",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.header.update_widget_value(
+                "settings",
+                "activebackground", active_background)
+
+        self.header.update_widget_value(
+            "settings",
+            "image", settings_icon)
+
+    # Dark and light mode
+    def update_dark_light_mode_toggle(self):
+        state = self.dark_light_mode
+
+        if state:  # Dark mode
+            toggle_icon = PhotoImage(file=preset.dark_mode)
+        else:  # Light mode
+            toggle_icon = PhotoImage(file=preset.light_mode)
+
+        self.output.update_widget_value(
+            "dark and light mode",
+            "background", self.frame_bg)
+
+        self.output.update_widget_value(
+            "dark and light mode",
+            "image", toggle_icon)
+
+        # All the changed images here:
+        self.update_profile_background()
+        self.update_title_background()
+        self.update_settings_background()
+        self.update_scan_label_background()
+        self.update_scan_button_background()
+        self.update_collect_label_background()
+        self.update_collect_button_background()
+        self.update_upload_label_background()
+        self.update_upload_button_background()
+        self.update_info_background()
+        self.update_info_text_background()
+
+    # Body utils
+    # Side buttons
+    def update_scan_label_background(self):
+        state = True
+
+        if state:
+            scan_icon = PhotoImage(file=preset.scan_path)
+        else:
+            scan_icon = PhotoImage(file=preset.scan_path)
+
+        self.body.update_widget_value(
+            "scan_label",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "scan_label",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "scan_label",
+            "image", scan_icon)
+
+    def update_scan_button_background(self):
+        state = True
+
+        if state:
+            scan_icon = PhotoImage(file=preset.scan_button)
+        else:
+            scan_icon = PhotoImage(file=preset.scan_button)
+
+        self.body.update_widget_value(
+            "scan_button",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "scan_button",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "scan_button",
+            "image", scan_icon)
+
+    def update_collect_label_background(self):
+        state = True
+
+        if state:
+            collect_icon = PhotoImage(file=preset.collect_path)
+        else:
+            collect_icon = PhotoImage(file=preset.collect_path)
+
+        self.body.update_widget_value(
+            "collect_label",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "collect_label",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "collect_label",
+            "image", collect_icon)
+
+    def update_collect_button_background(self):
+        state = True
+
+        if state:
+            collect_icon = PhotoImage(file=preset.collect_button)
+        else:
+            collect_icon = PhotoImage(file=preset.collect_button)
+
+        self.body.update_widget_value(
+            "collect_button",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "collect_button",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "collect_button",
+            "image", collect_icon)
+
+    def update_upload_label_background(self):
+        state = True
+
+        if state:
+            upload_icon = PhotoImage(file=preset.upload_path)
+        else:
+            upload_icon = PhotoImage(file=preset.upload_path)
+
+        self.body.update_widget_value(
+            "upload_label",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "upload_label",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "upload_label",
+            "image", upload_icon)
+
+    def update_upload_button_background(self):
+        state = True
+
+        if state:
+            upload_icon = PhotoImage(file=preset.upload_button)
+        else:
+            upload_icon = PhotoImage(file=preset.upload_button)
+
+        self.body.update_widget_value(
+            "upload_button",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.body.update_widget_value(
+                "upload_button",
+                "activebackground", active_background)
+
+        self.body.update_widget_value(
+            "upload_button",
+            "image", upload_icon)
+
+    def update_info_background(self):
+        state = True
+
+        if state:
+            info_icon = PhotoImage(file=preset.info_path)
+        else:
+            info_icon = PhotoImage(file=preset.info_path)
+
+        self.footer.update_widget_value(
+            "info",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.footer.update_widget_value(
+                "info",
+                "activebackground", active_background)
+
+        self.footer.update_widget_value(
+            "info",
+            "image", info_icon)
+
+    # Footers utils
+
+    # Collapsing arrow
     def update_footer_toggle(self):
         state = self.output.get_state()
+
         if state:
             toggle_icon = PhotoImage(file=preset.collapse_button)
         else:
             toggle_icon = PhotoImage(file=preset.expand_button)
+
+        self.footer.update_widget_value(
+            "toggle_output",
+            "background", self.frame_bg)
+
+        active_background = ""
+        if self.dark_light_mode:
+            active_background = "#a9a9a9"
+            self.footer.update_widget_value(
+                "toggle_output",
+                "activebackground", active_background)
+
         self.footer.update_widget_value(
             "toggle_output",
             "image", toggle_icon)
+
+    # Output utils
+    #  About section
+
+    def update_info_text_background(self):
+        black_text = "#000000"
+        self.output.update_widget_value(
+            "info",
+            "background", self.frame_bg)
+
+        self.output.update_widget_value(
+            "info",
+            "foreground", black_text)
 
     def update_devices(self):
         self.output.vars['devices'].set(self.systems.get_device_names())

@@ -1,5 +1,4 @@
 from tkinter import ttk, PhotoImage, messagebox
-from .custom_widgets import CustomContainer, CustomButton, CustomLabel
 from .OutputView import OutputView
 from .MainView import MainView
 from threading import Thread

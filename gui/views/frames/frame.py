@@ -32,7 +32,7 @@ class CustomContainer(ttk.Frame):
         if 'image' in kwargs:
             self.widgets[name].image = kwargs['image']
 
-    def update_widget_value(self, name, val, new_val):
+    def update_widget_value(self, name, val, new_val):  #Changes widget button
         self.widgets[name][val] = new_val
         if val == 'image':
             self.widgets[name].image = new_val
@@ -69,3 +69,8 @@ class CustomContainer(ttk.Frame):
     def enable_button(self, name, **kwargs):
         self.get_widget(name)["state"] = "normal"
         self.get_widget(name).configure(**kwargs)
+
+    def edit_window_background_color(self, primary):
+        self.style.configure(
+            "MyContainer.TFrame",
+            background=primary)

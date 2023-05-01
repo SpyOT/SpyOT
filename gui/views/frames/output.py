@@ -119,8 +119,14 @@ class CustomOutput(CustomContainer):
                                     column=0, columnspan=2,
                                     row=1, sticky='sew',
                                     padx=5, pady=5)
+            case "settings":                                    #<<< Relative to output frame
+                self.display_widget("dark and light mode",
+                                    column=0, columnspan=2,
+                                    row=0, sticky='ew',
+                                    padx=5, pady=5)
             case "":
                 self.remove_frame()
+
 
     def display_action(self, view, **kwargs):
         self.set_view(view)

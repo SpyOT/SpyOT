@@ -5,7 +5,7 @@ default_geometry = str(default_width) + 'x' + str(default_height)
 default_text_size = 18
 default_font = "Helvetica"
 padding = (3, 3, 12, 12)
-asset_path = "gui/assets/"
+asset_path = "SpyOT\\gui\\assets\\"
 logo_img = asset_path + "logo.png"
 profile_path = asset_path + "profile_icon.png"
 setting_path = asset_path + "settings_icon.png"
@@ -20,6 +20,8 @@ collect_button = asset_path + "collect_button.png"
 upload_button = asset_path + "upload_button.png"
 expand_button = asset_path + "expand_output.png"
 collapse_button = asset_path + "collapse_output.png"
+light_mode = asset_path + "light_mode.png" #<<Settings 
+dark_mode = asset_path + "dark_mode.png"
 about_text = """
         Instructions -
         scan systems: Performs a light weight scan on your 

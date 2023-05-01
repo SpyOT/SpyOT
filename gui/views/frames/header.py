@@ -55,18 +55,14 @@ class CustomHeader(CustomContainer):
     #                            command=lambda: self.handle_btn_press("settings"))
 
     def display_widgets(self):
-        self.display_widget("profile", sticky='nsew', column=0, row=0, padx=15, pady=15)
-        self.display_widget("title", sticky='ns', column=1, row=0, padx=15, pady=15)
-        self.display_widget("settings", sticky='nsew', column=2, row=0, padx=15, pady=15)
+        for i, name in enumerate(self.widgets):
+            self.display_widget(
+                name,
+                column=i, row=0,
+                padx=15, pady=15
+            )
 
-    def handle_btn_press(self, command):
-        match command:
-            case "profile":
-                print("Profile")
-                # Display profile menu in output
-            case "settings":
-                print("Settings")
-            case "title":
-                print("Title")
-            case _:
-                print("Invalid command")
+    def edit_frame_background_color(self, secondary):
+        self.style.configure(
+            "MyFrame.TFrame",
+            background=secondary)
