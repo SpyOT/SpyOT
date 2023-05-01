@@ -15,7 +15,7 @@
   
   <style scoped>
   .dashboard {
-    background-color: black;
+    /* background-color: #202F42; */
     display: flex;
     /* column-gap: 3em; */
   }
@@ -24,8 +24,8 @@
     margin-left: 3em;
     flex-grow: 1;
     margin-right: 2em;
-    background-color: black;
-    /* margin-bottom: 5em; */
+    /* background-color: #202F42; */
+
   }
   
   

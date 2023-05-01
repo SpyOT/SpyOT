@@ -4,10 +4,11 @@ import router from './router'
 import './assets/main.css'
 
 import { initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
+import { getDatabase, ref, push } from "firebase/database";
 const firebaseConfig = {
   apiKey: "AIzaSyDoBEoypPjsbvU-n3-b_30Xw_P2Z6x3rAU",
   authDomain: "spyot-56f6e.firebaseapp.com",
+  databaseURL: "https://spyot-56f6e-default-rtdb.firebaseio.com",
   projectId: "spyot-56f6e",
   storageBucket: "spyot-56f6e.appspot.com",
   messagingSenderId: "869272684117",
@@ -15,11 +16,14 @@ const firebaseConfig = {
   measurementId: "G-YW1WX5YERW"
 };
 
-initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
 
-const app = createApp(App)
+// Initialize the Firebase App
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-app.use(router)
+export {db}
 
-app.mount('#app')
+// Create Vue.js app instance and mount it to the DOM
+const vueApp = createApp(App);
+vueApp.use(router)
+vueApp.mount('#app')

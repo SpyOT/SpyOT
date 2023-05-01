@@ -53,7 +53,7 @@
                 
             </div>
             <div class="login">
-              <p1 v-if="errMsg">{{ errMsg }}</p1>
+              <p v-if="errMsg">{{ errMsg }}</p>
               <button @click="attemptLogin" type="button">Log In</button>
             </div>
             <div class="login-register">
@@ -121,6 +121,9 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
+import {ref, set } from "firebase/database";
+import {db} from "../main.js"
+
 export default {
   data() {
     return {
@@ -128,19 +131,19 @@ export default {
       passwordValue: "",
       checked: false,
       register: false,
-      errMsg: ""
+      errMsg: "",
     };
   },
   methods: {
     attemptDownload() {
-      console.log("Download Button Clicked");
+      console.log("Download SpyOT Button Clicked");
     },
     forgotPassword() {
       console.log("Forgot Password Clicked");
     },
     attemptLogin() {
       signInWithEmailAndPassword(getAuth(), this.emailValue, this.passwordValue)
-        .then((data) => {
+        .then((userCredential) => {
           console.log("Login Successful!");
           this.$router.push("/dashboard");
         })
@@ -165,8 +168,20 @@ export default {
     },
     attemptSignUp() {
       createUserWithEmailAndPassword(getAuth(), this.emailValue, this.passwordValue)
-        .then((data) => {
+        .then((userCredential) => {
           console.log("Sign Up Successful!");
+
+          //Save user Info to RealTime Database
+          const userId = userCredential.user.uid;
+          const userRef = ref(db, `users/${userId}`);
+          set(userRef, {
+            email: this.emailValue,
+            hasEmail: true,
+            hasIpAddresses: false,
+            hasOpenPorts: false,
+            hasMacAddresses: false,
+            hasPotentialVulnerabilities: false,
+          });
           this.$router.push("/dashboard");
         })
         .catch((error) => {
@@ -188,7 +203,7 @@ export default {
 
 <style scoped>
 
-p1 {
+p {
   font-size: 1.5em;
   color: red;
 }
@@ -240,7 +255,6 @@ img  {
 
 .left-container {
   /* grid-area: 1 / 1 / 2 / 2; */
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,6 +265,7 @@ img  {
   color: var(--primary-color);
   font-size: 3rem;
   padding: 1rem;
+  user-select: none;
 }
 
 .left-container .download-container {
@@ -266,11 +281,11 @@ img  {
 .right-container {
   grid-area: 1 / 2 / 2 / 3;
   margin: 1em;
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: var(--color-background-soft);
+  /* border: 2px solid rgba(255, 255, 255, 0.5); */
   border-radius: 20px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 3em rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -290,6 +305,7 @@ img  {
   color:white;
   text-align: center;
   border-bottom: 2px solid #dee1e6ff;
+  user-select: none;
 }
 .input-container {
   position: relative;
@@ -342,6 +358,7 @@ img  {
   font-size: 1.2em;
   color: var(--label-color);
   line-height: 50px;
+  user-select: none;
 }
 
 .alt-login-row {

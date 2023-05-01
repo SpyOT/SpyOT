@@ -6,8 +6,8 @@
         <div class="body">
             <div class="dev-sel-container">
                 <ul>
-                    <li>Number of Devices: 3</li>
-                    <li>Overal Data Encrypted: 85</li>
+                    <li>Number of Device(s): 3</li>
+                    <li>Overall Data Encrypted: 85</li>
                     <li>Potential Vulnerabilities: 1</li>
                 </ul>
 
@@ -68,8 +68,15 @@ import Vue3EasyDataTable from 'vue3-easy-data-table';
 
 
 <style>
-h1 {
-    color: var(--secondary-color);
+.header h1 {
+    color: white;
+}
+.table-container h1 {
+    color: white;
+}
+li {
+    color: white;
+    font-size: 1.5em;
 }
 
 h3 {
@@ -129,7 +136,8 @@ img .skull {
 .dash {
     border: 1px solid var(--primary-color);
     /* border-top: 1px solid var(--primary-color); */
-    --easy-table-header-background-color: var(--primary-color);
+    --easy-table-header-background-color: black;
+    --easy-table-header-font-color: white;
     --easy-table-body-row-background-color: black;
     --easy-table-body-row-font-color: white;
     --easy-table-footer-background-color: black;
