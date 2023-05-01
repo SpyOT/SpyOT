@@ -7,6 +7,7 @@ import DashboardAnalyze from "../views/dashboard/Analyze.vue";
 import DashboardGenerate from "../views/dashboard/Generate.vue";
 import DashboardView from "../views/dashboard/View.vue";
 import DashboardSettings from "../views/dashboard/Settings.vue";
+import DashboardInfo from "../views/dashboard/Info.vue";
 
 
 const router = createRouter({
@@ -48,6 +49,10 @@ const router = createRouter({
         {
           path: "settings",
           component: DashboardSettings,
+        },
+        {
+          path: "info",
+          component: DashboardInfo,
         },
       ],
     },

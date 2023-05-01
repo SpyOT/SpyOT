@@ -6,7 +6,7 @@
         <div class="body">
             <div class="dev-sel-container">
                 <ul>
-                    <li>Number of Device(s): 3</li>
+                    <li>Number of Devices: 3</li>
                     <li>Overall Data Encrypted: 85</li>
                     <li>Potential Vulnerabilities: 1</li>
                 </ul>
@@ -29,7 +29,7 @@
                 </div>
                 <div class="vuln-container">
                     <h2>Potential Vulnerabilities</h2>
-                    <img src="../../assets/skull.PNG" alt="skull">
+                    <img v-on:click="mirai" src="../../assets/skull.PNG" alt="skull">
                     <h3>Click on the vulnerabilites for more information</h3>
                 </div>
             </div>
@@ -60,9 +60,17 @@ import Vue3EasyDataTable from 'vue3-easy-data-table';
           { "ip_address": "314.321.32", "open_ports": 180, "mac_address": 75},
           { "ip_address": "412.521.63", "open_ports": 181, "mac_address": 73}
         ],
+        click: ""
       }
     },
+    methods: {
+        mirai(){
+            this.$router.push("/dashboard/info");
+            console.log("PUT INFO HERE");
+        }
+    }
     };
+    
 
 </script>
 
@@ -136,8 +144,7 @@ img .skull {
 .dash {
     border: 1px solid var(--primary-color);
     /* border-top: 1px solid var(--primary-color); */
-    --easy-table-header-background-color: black;
-    --easy-table-header-font-color: white;
+    --easy-table-header-background-color: var(--primary-color);
     --easy-table-body-row-background-color: black;
     --easy-table-body-row-font-color: white;
     --easy-table-footer-background-color: black;

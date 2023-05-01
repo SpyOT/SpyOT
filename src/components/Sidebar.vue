@@ -26,6 +26,10 @@
         <span class="material-icons-outlined">dns</span>
         <span class="text">View Report</span>
       </router-link>
+      <router-link class="button" to="/dashboard/info">
+        <span class="material-icons-outlined">info</span>
+        <span class="text">Information</span>
+      </router-link>
       <router-link class="button" to="/dashboard/settings">
         <span class="material-icons-outlined">settings</span>
         <span class="text">Settings</span>
