@@ -24,3 +24,8 @@ class CustomHeader(CustomContainer):
                 column=i, row=0,
                 padx=15, pady=15
             )
+    def edit_frame_background_color(self, secondary):
+        self.style.configure(
+            "MyFrame.TFrame",
+            background=secondary)
+        pass

@@ -1,9 +1,9 @@
-from .network_scanner import NetworkScanner
+from systems.network_scanner import NetworkScanner
 from .db_api import MongoAPI
-from os import listdir, mkdir, remove, system
+from os import listdir, mkdir, remove, system, getcwd
 from os.path import isfile, join, exists
 from cryptography.fernet import Fernet
-from SpyOT.systems import constants as preset
+from systems import constants as preset
 
 key = Fernet.generate_key()
 fernet = Fernet(key)
@@ -29,8 +29,10 @@ class Systems:
 
     def create_local_storage(self):
         """ Create a local directory to store scans and blacklist"""
+        local = getcwd()
+        local_path = join(local, preset.local_storage_path)
         try:
-            mkdir(preset.local_storage_path)
+            mkdir(local_path)
             if not self.is_prod:
                 print('Created local storage')
         except FileExistsError as _:

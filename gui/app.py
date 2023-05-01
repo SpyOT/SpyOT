@@ -1,5 +1,5 @@
 from tkinter import Tk, ttk, PhotoImage
-from SpyOT.gui import constants as preset
+from gui import constants as preset
 from .views import MainWindow
 
 

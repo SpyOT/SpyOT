@@ -10,7 +10,7 @@ class NetworkScanner(object):
         wifi = subprocess.check_output(['netsh', 'WLAN', 'show', 'interfaces'])
         data = wifi.decode('utf-8')
         # print(data)
-        self.default_gateway = self.getDefaultGateway()
+        self.default_gateway = self.getDefaultGateway().split()[-1]
         self.ip = ip if ip else self.default_gateway
         self.nm = nmap.PortScanner()
         self.network_metadata = {}
@@ -52,10 +52,12 @@ class NetworkScanner(object):
             nm.scan(hosts=network_mask, arguments='-sn')
             print("Scanning Complete")
             scanned_ips = nm.all_hosts()
-
-            for host_ip in scanned_ips:
+            print('bro')
+            for i, host_ip in enumerate(scanned_ips):
                 hostname = nm[host_ip]['hostnames'][0]['name']
+                hostname = hostname if hostname else 'device{}'.format(i)
                 host_type = 'device' if host_ip != self.default_gateway else 'router'
+                print(self.default_gateway, host_ip)
                 if hostname:
                     self.network_metadata[host_ip] = {
                         'type': host_type,
