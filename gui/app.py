@@ -2,11 +2,15 @@ from tkinter import ttk, PhotoImage, messagebox
 from .OutputView import OutputView
 from .MainView import MainView
 from threading import Thread
+from os import getcwd
+from os.path import join
 
 # Constants
-PROFILE_PATH = 'gui/assets/profile_icon.png'
-TITLE_PATH = 'gui/assets/title_icon.png'
-SETTINGS_PATH = 'gui/assets/settings_icon.png'
+CWD = getcwd()
+ASSETS_PATH = join(CWD, 'gui', 'assets')
+PROFILE_PATH = join(ASSETS_PATH, 'profile_icon.png')
+TITLE_PATH = join(ASSETS_PATH, 'title_icon.png')
+SETTINGS_PATH = join(ASSETS_PATH, 'settings_icon.png')
 
 
 class App:
