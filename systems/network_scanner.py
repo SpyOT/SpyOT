@@ -133,7 +133,7 @@ class NetworkScanner(object):
         for ip in deep_scan:
             try:
                 if not deep_scan[ip]['ports']:
-                    analysis[ip] = {'ports':deep_scan[ip], 'status': 'Unknown'}
+                    analysis[ip] = {'ports': deep_scan[ip], 'status': 'Unknown'}
                 else:
                     open_ports = sum([1 if deep_scan[ip][port] == 'open' else 0 for port in deep_scan[ip]])
                     if open_ports:
@@ -153,7 +153,7 @@ class NetworkScanner(object):
             if networkscan[ip]['type'] == 'device':
                 name = networkscan[ip]['hostname']
                 status = portscan[ip]['status']
-                summary[ip] = {'name': name, 'status':status}
+                summary[ip] = {'name': name, 'status': status}
         return summary
 
     def filter_blacklist_ips(self, blacklist):
@@ -161,6 +161,7 @@ class NetworkScanner(object):
         for ip in self.network_metadata:
             if self.network_metadata[ip]['hostname'] in blacklist:
                 del self.filtered_network_data[ip]
+
 
 #    def portRescan(self, ip):
 #        self.nm.scan(hosts=ip, arguments='-p 80,23,2323')  # Recans the given target that threw an error

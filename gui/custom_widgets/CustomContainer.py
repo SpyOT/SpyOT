@@ -2,13 +2,13 @@ from tkinter import ttk
 
 
 class CustomContainer(ttk.Frame):
-    def __init__(self, frame, model, **kwargs):
+    def __init__(self, frame, systems, **kwargs):
         super().__init__(
             frame,
             **kwargs
         )
         self.widgets = {}
-        self.model = model
+        self.systems = systems
 
     def configure_win(self, col_config, row_config):
         """
@@ -32,7 +32,11 @@ class CustomContainer(ttk.Frame):
         if 'image' in kwargs:
             self.widgets[name].image = kwargs['image']
 
-    def update_widget_value(self, name, val, new_val):  #Changes widget button
+    # Override this method in child classes
+    def set_widgets(self, controller):
+        pass
+
+    def update_widget_value(self, name, val, new_val):
         self.widgets[name][val] = new_val
         if val == 'image':
             self.widgets[name].image = new_val
@@ -70,7 +74,5 @@ class CustomContainer(ttk.Frame):
         self.get_widget(name)["state"] = "normal"
         self.get_widget(name).configure(**kwargs)
 
-    def edit_window_background_color(self, primary):
-        self.style.configure(
-            "MyContainer.TFrame",
-            background=primary)
+    def is_hidden(self):
+        return self.grid_slaves() == []

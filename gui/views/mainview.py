@@ -7,16 +7,15 @@ from ..widgets import *
 is_guest = 0
 
 
-class MainWindow:
+class MainView:
     def __init__(self, systems, window):
         self.systems = systems
         self.win = window
         self.is_prod = self.win.APP_ENV == "prod"
-        self.win_bg = self.win.configure("bg")[-1]      #0c131e color for window background
-        self.frame_bg = self.win_bg if self.is_prod else "#3b3b3b"  #3b3b3b color for frame 
-        self.button_bg = "#1DD75B"      #1DD75B color four output container buttons
-        self.text_color = "#5EFF5E"     #5EFF5E color for text
-        self.dark_light_mode = True     #True = Dark mode toggled
+        self.win_bg = self.win.configure("bg")[-1]
+        self.frame_bg = self.win_bg if self.is_prod else "#3b3b3b"
+        self.button_bg = "#1DD75B"
+        self.text_color = "#5EFF5E"
 
         self.container = CustomContainer(frame=self.win, background=self.win_bg,
                                          col_config={0: 2, 1: 1},
@@ -60,7 +59,7 @@ class MainWindow:
         self.header.get_widget("title").bind("<Button-1>", lambda event: self.handle_btn_press('set_admin'))
         self.header.get_widget("title").bind("<Button-3>", lambda event: self.handle_btn_press('set_guest'))
         settings_icon = PhotoImage(file=preset.setting_path)
-        self.header.set_widget("settings", CustomButton,            #This is the widget for the gear icon
+        self.header.set_widget("settings", CustomButton,  # This is the widget for the gear icon
                                image=settings_icon,
                                bg=widget_bg,
                                command=lambda: self.handle_btn_press("settings"))
@@ -113,12 +112,12 @@ class MainWindow:
                                foreground=self.text_color,
                                bg=widget_bg)
         # Header output widgets
-        toggle_dark_and_light_mode = PhotoImage(file= preset.dark_mode)
+        toggle_dark_and_light_mode = PhotoImage(file=preset.dark_mode)
         self.output.set_widget("dark and light mode", CustomButton,
                                image=toggle_dark_and_light_mode,
                                bg=widget_bg,
-                               command=lambda: self.handle_btn_press("toggle dark and light mode")) #widget_bg is a default green color we use
-
+                               command=lambda: self.handle_btn_press(
+                                   "toggle dark and light mode"))  # widget_bg is a default green color we use
 
         # Scan output widgets
         self.output.set_widget("host_label", CustomLabel,
@@ -205,10 +204,10 @@ class MainWindow:
         self.body.display_frame(column=0, row=1, sticky='n e s w', padx=5, pady=5)
         self.footer.display_frame(column=0, row=2, sticky='n e s w', padx=5, pady=5)
 
-    def handle_btn_press(self, option):             #Grabbing button command
+    def handle_btn_press(self, option):  # Grabbing button command
         global is_guest
         if not self.is_prod:
-            print("clicked on", option, "button")   #Debugging purposes
+            print("clicked on", option, "button")  # Debugging purposes
 
         match option:
             # Header Buttons
@@ -223,14 +222,14 @@ class MainWindow:
                 is_guest = 0
             case "set_guest":
                 is_guest = 1
-            case "settings":        #(Start) Behavior of when you click the gear icon
-                self.output.display_action(option, 
-                        column=1, row=0,
-                        rowspan=3, sticky='n e s w',
-                        padx=5, pady=5)
+            case "settings":  # (Start) Behavior of when you click the gear icon
+                self.output.display_action(option,
+                                           column=1, row=0,
+                                           rowspan=3, sticky='n e s w',
+                                           padx=5, pady=5)
                 pass
             case "toggle dark and light mode":
-                #Handles light/dark mode behavior
+                # Handles light/dark mode behavior
                 if self.dark_light_mode:
                     self.frame_bg = "#d3d3d3"
                     lm_frame_clr = "#d3d3d3"
@@ -253,7 +252,7 @@ class MainWindow:
             case "scan":
                 if self.handle_output(option):
                     """ Widgets updated, display widgets"""
-                    self.output.display_action(             #Grabs widget output specific to command
+                    self.output.display_action(  # Grabs widget output specific to command
                         option,
                         column=1, row=0,
                         rowspan=3, sticky='n e s w',
@@ -344,7 +343,7 @@ class MainWindow:
             padx=5, pady=5)
         self.thread = threading.Thread(target=lambda: self.action_thread(action)).start()
 
-    def handle_output(self, action):                #You don't need a handle output for 'settings'
+    def handle_output(self, action):  # You don't need a handle output for 'settings'
         """ Get action result and update output widgets """
         print("!Updating {} output widgets".format(action))
         match action:
@@ -394,9 +393,7 @@ class MainWindow:
         #                 self.win.version,
         #                 "Nothing to upload.\nTry scanning systems first.")
 
-
-        
-    #Header utils
+    # Header utils
     # Profile image
     def update_profile_background(self):
         state = True
@@ -407,16 +404,16 @@ class MainWindow:
             profile_icon = PhotoImage(file=preset.profile_path)
 
         self.header.update_widget_value(
-            "profile", 
+            "profile",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.header.update_widget_value(
-                "profile", 
+                "profile",
                 "activebackground", active_background)
-        
+
         self.header.update_widget_value(
             "profile",
             "image", profile_icon)
@@ -431,21 +428,21 @@ class MainWindow:
             title_icon = PhotoImage(file=preset.title_path)
 
         self.header.update_widget_value(
-            "title", 
+            "title",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.header.update_widget_value(
-                "title", 
+                "title",
                 "activebackground", active_background)
-        
+
         self.header.update_widget_value(
             "title",
             "image", title_icon)
 
-    #Settings button
+    # Settings button
     def update_settings_background(self):
         state = True
 
@@ -455,16 +452,16 @@ class MainWindow:
             settings_icon = PhotoImage(file=preset.setting_path)
 
         self.header.update_widget_value(
-            "settings", 
+            "settings",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.header.update_widget_value(
-                "settings", 
+                "settings",
                 "activebackground", active_background)
-        
+
         self.header.update_widget_value(
             "settings",
             "image", settings_icon)
@@ -473,20 +470,20 @@ class MainWindow:
     def update_dark_light_mode_toggle(self):
         state = self.dark_light_mode
 
-        if state:       #Dark mode
+        if state:  # Dark mode
             toggle_icon = PhotoImage(file=preset.dark_mode)
-        else:           #Light mode
+        else:  # Light mode
             toggle_icon = PhotoImage(file=preset.light_mode)
-            
+
         self.output.update_widget_value(
-            "dark and light mode", 
+            "dark and light mode",
             "background", self.frame_bg)
-        
+
         self.output.update_widget_value(
             "dark and light mode",
             "image", toggle_icon)
-    
-        #All the changed images here:
+
+        # All the changed images here:
         self.update_profile_background()
         self.update_title_background()
         self.update_settings_background()
@@ -499,7 +496,7 @@ class MainWindow:
         self.update_info_background()
         self.update_info_text_background()
 
-    #Body utils
+    # Body utils
     # Side buttons
     def update_scan_label_background(self):
         state = True
@@ -510,20 +507,20 @@ class MainWindow:
             scan_icon = PhotoImage(file=preset.scan_path)
 
         self.body.update_widget_value(
-            "scan_label", 
+            "scan_label",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "scan_label", 
+                "scan_label",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "scan_label",
             "image", scan_icon)
-    
+
     def update_scan_button_background(self):
         state = True
 
@@ -533,16 +530,16 @@ class MainWindow:
             scan_icon = PhotoImage(file=preset.scan_button)
 
         self.body.update_widget_value(
-            "scan_button", 
+            "scan_button",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "scan_button", 
+                "scan_button",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "scan_button",
             "image", scan_icon)
@@ -556,20 +553,20 @@ class MainWindow:
             collect_icon = PhotoImage(file=preset.collect_path)
 
         self.body.update_widget_value(
-            "collect_label", 
+            "collect_label",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "collect_label", 
+                "collect_label",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "collect_label",
             "image", collect_icon)
-    
+
     def update_collect_button_background(self):
         state = True
 
@@ -579,16 +576,16 @@ class MainWindow:
             collect_icon = PhotoImage(file=preset.collect_button)
 
         self.body.update_widget_value(
-            "collect_button", 
+            "collect_button",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "collect_button", 
+                "collect_button",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "collect_button",
             "image", collect_icon)
@@ -602,20 +599,20 @@ class MainWindow:
             upload_icon = PhotoImage(file=preset.upload_path)
 
         self.body.update_widget_value(
-            "upload_label", 
+            "upload_label",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "upload_label", 
+                "upload_label",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "upload_label",
             "image", upload_icon)
-    
+
     def update_upload_button_background(self):
         state = True
 
@@ -625,16 +622,16 @@ class MainWindow:
             upload_icon = PhotoImage(file=preset.upload_button)
 
         self.body.update_widget_value(
-            "upload_button", 
+            "upload_button",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.body.update_widget_value(
-                "upload_button", 
+                "upload_button",
                 "activebackground", active_background)
-        
+
         self.body.update_widget_value(
             "upload_button",
             "image", upload_icon)
@@ -648,20 +645,22 @@ class MainWindow:
             info_icon = PhotoImage(file=preset.info_path)
 
         self.footer.update_widget_value(
-            "info", 
+            "info",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.footer.update_widget_value(
-                "info", 
+                "info",
                 "activebackground", active_background)
-        
+
         self.footer.update_widget_value(
             "info",
             "image", info_icon)
-    #Footers utils
+
+    # Footers utils
+
     # Collapsing arrow
     def update_footer_toggle(self):
         state = self.output.get_state()
@@ -672,33 +671,33 @@ class MainWindow:
             toggle_icon = PhotoImage(file=preset.expand_button)
 
         self.footer.update_widget_value(
-            "toggle_output", 
+            "toggle_output",
             "background", self.frame_bg)
-        
+
         active_background = ""
         if self.dark_light_mode:
             active_background = "#a9a9a9"
             self.footer.update_widget_value(
-                "toggle_output", 
+                "toggle_output",
                 "activebackground", active_background)
-        
+
         self.footer.update_widget_value(
             "toggle_output",
             "image", toggle_icon)
 
-    #Output utils
+    # Output utils
     #  About section
 
     def update_info_text_background(self):
         black_text = "#000000"
         self.output.update_widget_value(
-            "info", 
+            "info",
             "background", self.frame_bg)
-        
+
         self.output.update_widget_value(
-            "info", 
+            "info",
             "foreground", black_text)
-        
+
     def update_devices(self):
         self.output.vars['devices'].set(self.systems.get_device_names())
 
