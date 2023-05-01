@@ -21,11 +21,9 @@ class NetworkMgr(object):
         self.report_path = None
         self.network_metadata = pd.DataFrame()
         self.load_metadata(self.current_scan)
+        self.device_summary = {}
 
         clean_up_local_storage()
-        self.deep_scan_data = None
-
-        self.network_deepscan = {}
 
     def scan_network(self):
         network_mask = '.'.join(self.default_gateway.split('.')[:-1]) + '.0' + '/24'
@@ -50,27 +48,25 @@ class NetworkMgr(object):
 
     def collect_data(self):
         """
-        TODO:
-            Collects data from each device in the network
-            1. Filter metadata by blacklist status and device type
-            2. Run deep scan on each device
-            3. Generate detailed report analyzing deep scan data
-            4. Store report in local storage
+        Collects data from each device on the network
         """
         try:
             # Filter metadata by blacklist status
             filtered_network_data = self.network_metadata[self.network_metadata['blacklist'] == False]
-            # Get only device data
-            filtered_network_data = filtered_network_data[filtered_network_data['type'] == 'device']
-
-            # Run deep scan on each host
-
-            # Generate Detailed Report
-            # self.generate_report() # Create a report and store in local storage
-            self.report_path = new_report_path()
-            # Create file if it doesn't exist
-            open(self.report_path, 'w').close()
-
+            # Get ips only device data
+            filtered_device_ips = filtered_network_data[filtered_network_data['type'] == 'device']['ip'].values
+            # Run deep scan on each host to check for open ports
+            print("Deep Scanning Devices")
+            deep_scan_data = self.deep_scan_devices(filtered_device_ips)
+            # Run packet sniffing on each host to check for packet encryption
+            print("Sniffing Packets")
+            packet_data = {}  # TODO: Packet analysis
+            print("Generating Report")
+            # Generate Analysis Report
+            report = self.generate_report(deep_scan_data,
+                                          packet_data)
+            # Store report in local storage
+            self.store_report(report)
             return True
         except TypeError as e:
             print(f"!{e}: No data to collect")
@@ -88,6 +84,8 @@ class NetworkMgr(object):
         Formats scan data into a dataframe
         """
         data = {'ip': [], 'name': [], 'type': [], 'blacklist': []}
+        for ip in self.nm.all_hosts():
+            print(ip, self.nm[ip].hostname(), self.nm[ip].state())
         for i, host_ip in enumerate(self.nm.all_hosts()):
             name_val = self.nm[host_ip]['hostnames'][0]['name']
             device_name = name_val if name_val else 'Unnamed Device ' + str(i)
@@ -108,6 +106,63 @@ class NetworkMgr(object):
             data['blacklist'].append(False)
 
         return pd.DataFrame(data)
+
+    def generate_report(self, port_data, packet_data):
+        # analyze data
+        port_analysis = self.analyze_port_data(port_data)
+        packet_analysis = self.analyze_packet_capture(packet_data)
+        self.device_summary = port_analysis['device_status']
+
+        # build report
+        # format header
+        header = '\n'.join([
+            "Network Analysis Report",
+            '-' * 25,
+            "Summary",
+            '-' * 25,
+            f"Network Name: {self.get_hostname()}",
+            f"# of Devices Analyzed: {port_analysis['num_devices']}",
+            f"Overall Data Encryption: {packet_analysis['encryption_percentage']}",
+            f"Potential Vulnerabilities: {port_analysis['total_open_ports'] + packet_analysis['total_unencrypted_packets']}",
+            '-' * 25])
+        # format body
+        body = f"Devices:\n{'-' * 25}\n"
+        # Port Analysis
+        devices = []
+        for device_ip in port_data:
+            name = self.get_device_name(device_ip)
+            port_entries = '\n'.join([
+                f"\tPort {port} Status:\t\t{port_data[device_ip][port]}" for port in port_data[device_ip]
+            ])
+
+            device_status = '\n'.join([
+                f"Name: {name}",
+                f"IP: {device_ip}",
+                f"{port_entries}",
+                f"Status: {port_analysis['device_status'][device_ip]}",
+                "\n"])
+            devices.append(device_status)
+        devices = ''.join(devices)
+
+        # Packet Analysis
+        packets = ' '.join([
+            "Percentage of Encrypted Data:",
+            f"{packet_analysis['encryption_percentage']}\n",
+            '-' * 25])
+
+        body += devices + packets
+
+        report = '\n'.join([header, body])
+        return report
+
+    def store_report(self, report):
+        """
+        Stores report in a new text file.
+        """
+        self.report_path = new_report_path()
+        with open(self.report_path, 'w') as f:
+            f.write(report)
+        clean_up_local_storage()
 
     def store_metadata(self):
         """
@@ -140,6 +195,24 @@ class NetworkMgr(object):
         """
         try:
             return self.network_metadata[self.network_metadata['type'] == 'device']['ip'].tolist()
+        except TypeError:
+            print("!Error: No network metadata found")
+            return []
+
+    def get_hostname(self):
+        return self.network_metadata[self.network_metadata['type'] == 'router']['name'].values[0]
+
+    def get_device_name(self, ip):
+        return self.network_metadata[self.network_metadata['ip'] == ip]['name'].tolist()[0]
+
+    def get_filtered_device_ips(self):
+        """
+        Returns a list of device ips
+        """
+        try:
+            return self.network_metadata[
+                (self.network_metadata['type'] == 'device') & (self.network_metadata['blacklist'] == False)][
+                'ip'].tolist()
         except TypeError:
             print("!Error: No network metadata found")
             return []
@@ -192,6 +265,69 @@ class NetworkMgr(object):
             return self.network_metadata
         else:
             return self.network_metadata
+
+    def deep_scan_devices(self, device_ip_list):
+        """
+        Scans devices for open ports
+        deep_scan_data : {
+            ip: { port: status }
+            }
+        """
+        deep_scan_data = {}
+        PORTS = ['23', '80', '2323']
+        port_arg = ','.join(PORTS)
+        for ip in device_ip_list:
+            result = self.nm.scan(ip, arguments=' '.join(['-p ', port_arg]))  # Scan for open ports
+            if result['scan']:
+                port_info = result['scan'][ip]['tcp']
+                deep_scan_data[ip] = {port: port_info[int(port)]['state'] for port in PORTS}
+            else:
+                print(f"!Error: Host {ip} is down or not responding")
+                deep_scan_data[ip] = {port: 'down' for port in PORTS}
+        return deep_scan_data
+
+    def get_device_summary(self):
+        """
+        Returns a summary of the data on devices generated by collect_data()
+        :return: Dictionary of network summary
+        device_summary = { 'device_name': 'status' , ...}
+        """
+        return self.device_summary
+
+    @staticmethod
+    def analyze_port_data(port_data):
+        """
+        Analyzes port data and returns a report
+        TODO: Maybe add more port analysis
+            : Add more ports to scan
+            : Close ports that are open
+        """
+        analysis = {'device_status': {},
+                    'total_open_ports': 0,
+                    'num_devices': len(port_data),
+                    }
+        for ip, ports in port_data.items():
+            analysis['device_status'][ip] = 'Secure'
+            for port, status in ports.items():
+                if status == 'open':
+                    analysis['total_open_ports'] += 1
+                    analysis['device_status'][ip] = 'At Risk'
+                elif status == 'down':
+                    analysis['device_status'][ip] = 'Unknown'
+        return analysis
+
+    @staticmethod
+    def analyze_packet_capture(packet_capture):
+        """
+        Analyzes packet capture and returns a dictionary of results
+        TODO: Implement packet capture analysis
+            : Encrypt unencrypted packets
+        """
+        analysis = {'encryption_percentage': 0,
+                    'total_encrypted_packets': 0,
+                    'total_unencrypted_packets': 0}
+
+        return analysis
 
     @staticmethod
     def get_wifi_data():
@@ -273,17 +409,6 @@ class NetworkMgr(object):
     #             pass
     #     self.network_deepscan = analysis
     #     return analysis
-    #
-    # def generateSummary(self):
-    #     networkscan = self.network_metadata
-    #     portscan = self.network_deepscan
-    #     summary = {}
-    #     for ip in networkscan:
-    #         if networkscan[ip]['type'] == 'device':
-    #             name = networkscan[ip]['hostname']
-    #             status = portscan[ip]['status']
-    #             summary[ip] = {'name': name, 'status': status}
-    #     return summary
 
 
 #    def portRescan(self, ip):
@@ -319,9 +444,9 @@ if __name__ == "__main__":
     from utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage
 
     network = NetworkMgr()
-    scan_complete = network.scan_network()
+    # scan_complete = network.scan_network()
+    collect_complete = network.collect_data()
+    # scan_complete = network.deep_scan_devices(network.get_device_ips())
 
-    scan_result = network.portScanner()
-    # network.deepNetworkScanner()
 else:
     from .utils import new_scan_path, get_recent_scan, new_report_path, clean_up_local_storage

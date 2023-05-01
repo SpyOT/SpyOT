@@ -21,6 +21,7 @@ class Systems:
                          src_succ="Scan complete",
                          src_err="Scan failed",
                          show=self.show_log)
+        return success
 
     def collect(self):
         utils.print_log("Collecting data...", self.show_log)
@@ -29,6 +30,16 @@ class Systems:
                          src_succ="Collection complete",
                          src_err="Collection failed",
                          show=self.show_log)
+        return success
+
+    def upload(self):
+        utils.print_log("Uploading data...", self.show_log)
+        success = self.network_mgr.upload_data()
+        utils.output_log(success,
+                         src_succ="Upload complete",
+                         src_err="Upload failed",
+                         show=self.show_log)
+        return success
 
     def update_device_blacklist_status(self, ip, value):
         utils.print_log(f"Updating blacklist status {ip}...", self.show_log)
@@ -38,8 +49,9 @@ class Systems:
                          src_err="Blacklist status update failed",
                          show=self.show_log)
 
-    def view_report(self):
-        report_path = self.network_mgr.report_path
+    def view_recent_report(self, report_path=''):
+        if not report_path:
+            report_path = self.network_mgr.report_path
         utils.print_log(f"Viewing report {report_path}...", self.show_log)
         # Open report in notepad
         system(f"notepad {report_path}")
@@ -53,7 +65,7 @@ class Systems:
     def get_hostname(self):
         metadata = self.network_mgr.get_metadata()
         if not metadata.empty:
-            return metadata.loc[metadata['type'] == 'router', ['name']].values[0][0]
+            return self.network_mgr.get_hostname()
         else:
             return ""
 
@@ -86,8 +98,16 @@ class Systems:
         else:
             return None
 
-def main():
+    def get_device_summary(self):
+        utils.print_log("Getting device summary...", self.show_log)
+        ip_to_status = self.network_mgr.get_device_summary()
+        device_summary = {ip: {'hostname': self.network_mgr.get_device_name(ip),
+                               'status': ip_to_status[ip]}
+                          for ip in ip_to_status}
+        return device_summary
 
+
+def main():
     systems = Systems('dev')
     systems.scan()
     device_ip = systems.network_mgr.get_device_ips()[0]
@@ -99,8 +119,8 @@ def main():
 if __name__ == '__main__':
     from networkmgr import NetworkMgr
     import utils
+
     main()
 else:
     from .networkmgr import NetworkMgr
     from . import utils
-

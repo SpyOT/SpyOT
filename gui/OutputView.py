@@ -1,6 +1,11 @@
 from .custom_widgets import CustomContainer, CustomButton, CustomLabel
 from tkinter import ttk, Entry, StringVar, Listbox
 
+BLACKLISTED_BG = 'black'
+BLACKLISTED_FG = 'white'
+NORMAL_BG = 'white'
+NORMAL_FG = 'black'
+
 
 class OutputView(CustomContainer):
     def __init__(self, frame, systems, **kwargs):
@@ -81,6 +86,27 @@ class OutputView(CustomContainer):
                         command=lambda: controller.handle_btn_press("whitelist"))
 
         """ Collect Widgets """
+        self.set_widget("summary_label", CustomLabel,
+                        style='ttk.Label.CustomLabel.TLabel',
+                        text='Summary:')
+        self.set_widget("device_summary", ttk.Treeview,
+                        columns='Status')
+        self.get_widget("device_summary").column('#0', stretch='no')
+        self.get_widget("device_summary").heading('#0', text='Device')
+        self.get_widget("device_summary").column('Status', anchor='center')
+        self.get_widget("device_summary").heading('Status', text='Status')
+        self.set_widget("edit_list", CustomButton,
+                        style='ttk.Button.CustomButton.TButton',
+                        text='Edit List',
+                        command=lambda: controller.handle_btn_press("output_scan"))
+        self.set_widget("view_report", CustomButton,
+                        style='ttk.Button.CustomButton.TButton',
+                        text='View Report',
+                        command=lambda: controller.handle_btn_press("view_report"))
+        self.set_widget("save_report", CustomButton,
+                        style='ttk.Button.CustomButton.TButton',
+                        text='Save Report',
+                        command=lambda: controller.handle_btn_press("save_report"))
 
         """ Upload Widgets """
 
@@ -97,7 +123,7 @@ class OutputView(CustomContainer):
     def get_view(self):
         return self.view
 
-    def display_widgets(self, preload=False):
+    def display_widgets(self):
         match self.view:
             case "loading":
                 self.display_widget("loading_label", sticky='new',
@@ -117,15 +143,22 @@ class OutputView(CustomContainer):
                 self.display_widget("password_entry", sticky='ew',
                                     column=0, columnspan=2, row=2,
                                     padx=15, pady=15)
-                self.display_widget("login_btn", sticky='nsew',
+                self.display_widget("login_btn",  # sticky='nsew',
                                     column=0, columnspan=2, row=3,
-                                    padx=15, pady=15)
+                                    padx=15, pady=15,
+                                    ipadx=15)
             case "settings":
                 pass
+            case "blacklist":
+                self.set_selected_device_status(True)
+                self.update_view("output_scan")
+            case "whitelist":
+                self.set_selected_device_status(False)
+                self.update_view("output_scan")
             case "output_scan":
-                # Update the host name and device list
+                self.update_scan_output()  # Update host_name, device_list, and
+                # device list bindings
 
-                self.update_scan_output()
                 self.display_widget("host_label", sticky='nsew',
                                     column=0, row=0,
                                     padx=15, pady=15)
@@ -144,9 +177,24 @@ class OutputView(CustomContainer):
                 self.display_widget("new_scan", sticky='ew',
                                     column=0, row=4, columnspan=2,
                                     padx=15, pady=15)
-            case "collect":
-                pass
-            case "upload":
+            case "output_collect":
+                self.update_collect_output()
+                self.display_widget("summary_label", sticky='nsew',
+                                    column=0, row=0, columnspan=2,
+                                    padx=15, pady=15)
+                self.display_widget("device_summary", sticky='nsew',
+                                    column=0, row=1, columnspan=2, rowspan=2,
+                                    padx=15, pady=15)
+                self.display_widget("view_report", sticky='nsew',
+                                    column=0, row=3,
+                                    padx=15, pady=15)
+                self.display_widget("save_report", sticky='nsew',
+                                    column=1, row=3,
+                                    padx=15, pady=15)
+                self.display_widget("edit_list", sticky='nsew',
+                                    column=0, row=4, columnspan=2,
+                                    padx=15, pady=15)
+            case "output_upload":
                 pass
             case "about":
                 pass
@@ -154,6 +202,8 @@ class OutputView(CustomContainer):
                 pass
             case _:
                 print("Error: Invalid view name")
+
+    """ Utils """
 
     def handle_listbox_select(self, _):
         selected_device = self.get_selected_device()
@@ -192,9 +242,29 @@ class OutputView(CustomContainer):
             device_status = self.systems.get_device_status(device_name)
             if device_status:
                 listbox_obj.itemconfigure(device_index,
-                                         bg='black',
-                                         fg='white')
+                                          bg='black',
+                                          fg='white')
             else:
                 listbox_obj.itemconfigure(device_index,
-                                         bg='white',
-                                         fg='black')
+                                          bg='white',
+                                          fg='black')
+
+    def update_collect_output(self):
+        device_summary_tree = self.get_widget("device_summary")
+        if device_summary_tree.get_children():
+            device_summary_tree.delete(*device_summary_tree.get_children())
+        # Get device summary metadata from systems
+        device_summary_values = self.systems.get_device_summary()
+        # Insert device summary into treeview
+        for _, device_metadata in device_summary_values.items():
+            device_summary_tree.insert('', 'end', text=device_metadata['hostname'],
+                                       values=(device_metadata['status']))
+
+    def set_selected_device_status(self, status):
+        selected_device_name = self.get_selected_device()
+        selected_device_ip = self.systems.get_device_ip(selected_device_name)
+        self.systems.update_device_blacklist_status(selected_device_ip, status)
+        if status:
+            self.update_selected_device(bg=BLACKLISTED_BG, fg=BLACKLISTED_FG)
+        else:
+            self.update_selected_device(bg=NORMAL_BG, fg=NORMAL_FG)

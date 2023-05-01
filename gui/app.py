@@ -46,6 +46,7 @@ class App:
 
         self.set_widgets()
         self.main_container.display_frame(column=0, row=0, sticky='n e s w')
+        self.output_container.display_frame(column=1, row=0, sticky='n e s w')
         self.thread = None
 
     def set_widgets(self):
@@ -89,31 +90,22 @@ class App:
             case "collect":
                 print("Collect button pressed")
                 # set output widgets for collect
-                self.output_container.update_view("collect")
+                self.output_container.update_view("loading")
+                self.thread = Thread(target=lambda: self.run_thread("collect")).start()
             case "upload":
                 print("Upload button pressed")
                 # set output widgets for upload
                 self.output_container.update_view("upload")
             case "blacklist":
                 print("Blacklist button pressed")
-                selected_device_name = self.output_container.get_selected_device()
-                selected_device_ip = self.systems.get_device_ip(selected_device_name)
-                self.systems.update_device_blacklist_status(selected_device_ip, True)
-                self.output_container.update_selected_device(
-                    bg=App.WIDGET_BG,
-                    foreground=App.TEXT_COLOR
-                )
-                self.output_container.update_view("output_scan")
+                self.output_container.update_view("blacklist")
             case "whitelist":
                 print("Whitelist button pressed")
-                selected_device_name = self.output_container.get_selected_device()
-                selected_device_ip = self.systems.get_device_ip(selected_device_name)
-                self.systems.update_device_blacklist_status(selected_device_ip, False)
-                self.output_container.update_selected_device(
-                    bg=App.TEXT_COLOR,
-                    foreground=App.WIDGET_BG
-                )
-                self.output_container.update_view("output_scan")
+                self.output_container.update_view("whitelist")
+            case "view_report":
+                self.systems.view_recent_report()
+            case "save_report":
+                pass
             case _:
                 print("Unknown button pressed")
 
@@ -152,15 +144,42 @@ class App:
         )
 
     def run_thread(self, command):
+        """
+        Runs a thread for the given command
+        Format:
+            Conditional for checking if self.systems.command()
+            self.output_container.get_widget("loading_bar").stop()
+            If successful, display success message and update output view to command
+            If unsuccessful, display error message and update output view to none
+        """
         match command:
             case "scan":
-                self.systems.scan()
+                success = self.systems.scan()
                 self.output_container.get_widget("loading_bar").stop()
-                if self.systems.metadata_available():
+                if success:
                     messagebox.showinfo("Scan Complete", "Scan complete.")
                     self.output_container.update_view("output_scan")
                 else:
                     messagebox.showerror("Error", "Scan incomplete. Please try again.")
                     self.output_container.update_view("none")
+            case "collect":
+                success = self.systems.collect()
+                self.output_container.get_widget("loading_bar").stop()
+                if success:
+                    messagebox.showinfo("Collect Complete", "Collect complete.")
+                    self.output_container.update_view("output_collect")
+                else:
+                    messagebox.showerror("Error", "Collect incomplete. Please try again.")
+                    self.output_container.update_view("none")
+            case "upload":
+                success = self.systems.upload()
+                self.output_container.get_widget("loading_bar").stop()
+                if success:
+                    messagebox.showinfo("Upload Complete", "Upload complete.")
+                    self.output_container.update_view("output_upload")
+                else:
+                    messagebox.showerror("Error", "Upload incomplete. Please try again.")
+                    self.output_container.update_view("none")
             case _:
                 print("Unknown thread command")
+                self.output_container.update_view("none")
