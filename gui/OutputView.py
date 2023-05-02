@@ -30,34 +30,33 @@ class OutputView(CustomContainer):
     # override this method from CustomContainer
     def set_widgets(self, controller):
         """ Login Widgets """
+        login_prompt = PhotoImage(file=const.LOGIN_DARK_PROMPT)
         self.set_widget("login_prompt", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
-                        text="""Please enter a valid email and password to login
-                        or create a new account."""
-                        )
+                        image=login_prompt)
+        email_label = PhotoImage(file=const.EMAIL_DARK_LABEL)
         self.set_widget("email_label", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
-                        text='Email:')
+                        image=email_label)
         self.set_widget("email_entry", Entry,
-                        textvariable=self.email_entry, )
+                        textvariable=self.email_entry)
+        password_label = PhotoImage(file=const.PASSWORD_DARK_LABEL)
         self.set_widget("password_label", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
-                        text='Password:')
+                        image=password_label)
         self.set_widget("password_entry", Entry,
                         textvariable=self.password_entry,
                         show='*')
+        login_icon = PhotoImage(file=const.LOGIN_ICON_PATH)
         self.set_widget("login_btn", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='Login',
+                        image=login_icon,
                         command=lambda: controller.handle_btn_press("login"))
-        self.set_widget("register_btn", CustomButton,
-                        style=const.BUTTON_STYLE,
-                        text='Create Account',
-                        command=lambda: controller.handle_btn_press("register"))
         """ Profile Widgets """
+        logout_icon = PhotoImage(file=const.LOGOUT_ICON_PATH)
         self.set_widget("logout_btn", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='Logout',
+                        image=logout_icon,
                         command=lambda: controller.handle_btn_press("logout"))
         """ Settings Widgets """
         self.set_widget("toggle_theme", CustomButton,
@@ -70,19 +69,21 @@ class OutputView(CustomContainer):
                         orient='horizontal',
                         mode='indeterminate',
                         length=200)
+        loading_icon = PhotoImage(file=const.LOADING_DARK_ICON_PATH)
         self.set_widget("loading_label", CustomLabel,
-                        style='ttk.Label.CustomLabel.TLabel',
-                        font='default 12 bold',
-                        text='Loading...')
+                        style=const.BUTTON_STYLE,
+                        image=loading_icon)
+        cancel_icon = PhotoImage(file=const.CANCEL_ICON_PATH)
         self.set_widget("cancel", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='Cancel',
+                        image=cancel_icon,
                         command=lambda: controller.handle_btn_press("cancel"))
 
         """ Scan Widgets """
+        scan_label = PhotoImage(file=const.SCAN_DARK_LABEL)
         self.set_widget("host_label", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
-                        text='Detected Network:')
+                        image=scan_label)
         self.host_name = StringVar(value=self.systems.get_hostname())
         self.set_widget("host_name", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
@@ -93,18 +94,21 @@ class OutputView(CustomContainer):
                         listvariable=self.device_list)
         self.get_widget("devices").bind('<<ListboxSelect>>',
                                         self.handle_listbox_select)
+        new_scan_icon = PhotoImage(file=const.NEW_SCAN_ICON_PATH)
         self.set_widget("new_scan", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='New Scan',
+                        image=new_scan_icon,
                         command=lambda: controller.handle_btn_press("run_scan"))
+        blacklist_icon = PhotoImage(file=const.BLACKLIST_ICON_PATH)
         self.set_widget("add_to_blacklist", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text="Blacklist",
+                        image=blacklist_icon,
                         state='disabled',
                         command=lambda: controller.handle_btn_press("blacklist"))
+        whitelist_icon = PhotoImage(file=const.WHITELIST_ICON_PATH)
         self.set_widget("add_to_whitelist", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text="Whitelist",
+                        image=whitelist_icon,
                         state='disabled',
                         command=lambda: controller.handle_btn_press("whitelist"))
 
@@ -118,17 +122,20 @@ class OutputView(CustomContainer):
         self.get_widget("device_summary").heading('#0', text='Device')
         self.get_widget("device_summary").column('Status', anchor='center')
         self.get_widget("device_summary").heading('Status', text='Status')
+        edit_list_icon = PhotoImage(file=const.EDIT_LIST_ICON_PATH)
         self.set_widget("edit_list", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='Edit List',
+                        image=edit_list_icon,
                         command=lambda: controller.handle_btn_press("output_scan"))
+        view_report_icon = PhotoImage(file=const.VIEW_REPORT_ICON_PATH)
         self.set_widget("view_report", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='View Report',
+                        image=view_report_icon,
                         command=lambda: controller.handle_btn_press("view_report"))
+        save_report_icon = PhotoImage(file=const.SAVE_REPORT_ICON_PATH)
         self.set_widget("save_report", CustomButton,
                         style=const.BUTTON_STYLE,
-                        text='Save Report',
+                        image=save_report_icon,
                         command=lambda: controller.handle_btn_press("save_report"))
 
         """ Upload Widgets """
@@ -156,7 +163,7 @@ class OutputView(CustomContainer):
                 self.display_widget("loading_bar", sticky='sew',
                                     column=0, row=2, columnspan=2,
                                     padx=15, pady=15)
-                self.display_widget("cancel", #sticky='',
+                self.display_widget("cancel",  # sticky='',
                                     column=0, row=3, columnspan=2,
                                     padx=15, pady=15)
                 self.get_widget("loading_bar").start(5)
@@ -178,12 +185,8 @@ class OutputView(CustomContainer):
                 self.display_widget("password_entry", sticky='ew',
                                     column=0, columnspan=2, row=2, rowspan=2,
                                     padx=15, pady=15)
-                self.display_widget("login_btn",  sticky='s',
+                self.display_widget("login_btn", sticky='s',
                                     column=0, columnspan=2, row=3,
-                                    padx=15, pady=15,
-                                    ipadx=15)
-                self.display_widget("register_btn",  sticky='n',
-                                    column=0, columnspan=2, row=4,
                                     padx=15, pady=15,
                                     ipadx=15)
             case "profile":
@@ -302,9 +305,9 @@ class OutputView(CustomContainer):
         # Get device summary metadata from systems
         device_summary_values = self.systems.get_device_summary()
         # Insert device summary into treeview
-        for _, device_metadata in device_summary_values.items():
-            device_summary_tree.insert('', 'end', text=device_metadata['hostname'],
-                                       values=(device_metadata['status']))
+        for device_name in device_summary_values:
+            device_summary_tree.insert('', 'end', text=device_name,
+                                       values=(device_summary_values[device_name]))
 
     def set_selected_device_status(self, status):
         selected_device_name = self.get_selected_device()

@@ -52,15 +52,6 @@ class FireBase:
             print(data)
             return False
 
-    def create_user(self, email, password):
-        print("Creating User with email: " + email + " and password: " + password)
-        try:
-            self.auth.create_user_with_email_and_password(email, password)
-            return True
-        except Exception as e:
-            print(e)
-            return False
-
     def signin_user(self, email, password):
         print("Signing in User with email: " + email + " and password: " + password)
         try:

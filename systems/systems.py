@@ -37,7 +37,7 @@ class Systems:
         utils.print_log("Uploading data...", self.show_log)
         data = self.network_mgr.format_upload_data()
         try:
-            assert(data is not None)
+            assert (data is not None)
             success = self.firebase.upload_to_db(data)
             utils.output_log(success,
                              src_succ="Upload complete",
@@ -49,15 +49,6 @@ class Systems:
         except Exception as e:
             utils.print_error(e, self.show_log)
             success = False
-        return success
-
-    def create_user(self, email, password):
-        utils.print_log("Creating profile...", self.show_log)
-        success = self.firebase.create_user(email, password)
-        utils.output_log(success,
-                         src_succ="Profile created",
-                         src_err="Profile creation failed",
-                         show=self.show_log)
         return success
 
     def signin_user(self, email, password):

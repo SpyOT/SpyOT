@@ -1,4 +1,4 @@
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, PhotoImage
 from .OutputView import OutputView
 from .MainView import MainView
 from threading import Thread, Event
@@ -74,20 +74,6 @@ class App:
                 else:
                     messagebox.showerror("Login Failed", "Invalid email or password")
                     self.output_container.update_view("login")
-            case "register":
-                print("Register button pressed")
-                email, password = self.output_container.get_login_info()
-                command_success = self.systems.create_user(email, password)
-                if command_success:
-                    messagebox.showinfo("Registration Successful", "Welcome!")
-                    self.systems.signin_user(email, password)
-                    self.output_container.update_view("none")
-                else:
-                    err_msg = """\tInvalid email or password.
-                    Email must be a valid email address.
-                    Password must be at least 6 characters long."""
-                    messagebox.showerror("Registration Failed", err_msg)
-                    self.output_container.update_view("login")
             case "logout":
                 print("Logout button pressed")
                 command_success = self.systems.signout_user()
@@ -142,7 +128,7 @@ class App:
                 print("Unknown button pressed")
 
     def configure_styles(self):
-        self.style.theme_use('vista')
+        self.style.theme_use('clam')
         # Custom Style names are in the format 'widgetclass.stylename.widgettype'
         self.style.configure(
             'TFrame',
@@ -172,13 +158,14 @@ class App:
             'ttk.Button.CustomButton.TButton',
             background=const.BUTTON_LIGHT_PRIMARY,
             foreground=const.BUTTON_LIGHT_SECONDARY,
-            relief='raised',
+            font=('Helvetica', 12, 'normal'),
         )
 
         self.style.configure(
             'ttk.Button.ImgCustomButton.TButton',
             background=const.IMG_BUTTON_LIGHT_PRIMARY,
             foreground=const.IMG_BUTTON_LIGHT_SECONDARY,
+            relief='none',
         )
 
     def toggle_theme(self):
@@ -193,7 +180,25 @@ class App:
         button_secondary = const.BUTTON_DARK_SECONDARY if is_light else const.BUTTON_LIGHT_SECONDARY
         img_button_primary = const.IMG_BUTTON_DARK_PRIMARY if is_light else const.IMG_BUTTON_LIGHT_PRIMARY
         img_button_secondary = const.IMG_BUTTON_DARK_SECONDARY if is_light else const.IMG_BUTTON_LIGHT_SECONDARY
+        title_img_path = const.TITLE_PATH if is_light else const.TITLE_DARK_PATH
+        loading_img_path = const.LOADING_ICON_PATH if is_light else const.LOADING_DARK_ICON_PATH
+        email_label_path = const.EMAIL_LABEL if is_light else const.EMAIL_DARK_LABEL
+        password_label_path = const.PASSWORD_LABEL if is_light else const.PASSWORD_DARK_LABEL
+        login_prompt_path = const.LOGIN_PROMPT if is_light else const.LOGIN_DARK_PROMPT
+        scan_label_path = const.SCAN_LABEL if is_light else const.SCAN_DARK_LABEL
 
+        title_img = PhotoImage(file=title_img_path)
+        loading_img = PhotoImage(file=loading_img_path)
+        email_label = PhotoImage(file=email_label_path)
+        password_label = PhotoImage(file=password_label_path)
+        login_prompt = PhotoImage(file=login_prompt_path)
+        scan_label = PhotoImage(file=scan_label_path)
+        self.main_container.update_widget_value("title", "image", title_img)
+        self.output_container.update_widget_value("loading_label", "image", loading_img)
+        self.output_container.update_widget_value("email_label", "image", email_label)
+        self.output_container.update_widget_value("password_label", "image", password_label)
+        self.output_container.update_widget_value("login_prompt", "image", login_prompt)
+        self.output_container.update_widget_value("host_label", "image", scan_label)
         self.style.configure("ttk.Frame.Home.TFrame", background=win_primary)
         self.style.configure("ttk.Frame.Output.TFrame", background=win_secondary)
         self.style.configure("ttk.Label.CustomLabel.TLabel",

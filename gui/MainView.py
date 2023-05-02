@@ -3,6 +3,8 @@ from tkinter import PhotoImage
 from gui import constants as const
 
 const.BUTTON_STYLE = const.IMG_BUTTON_STYLE
+
+
 class MainView(CustomContainer):
     def __init__(self, frame, systems, **kwargs):
         super().__init__(
@@ -34,7 +36,7 @@ class MainView(CustomContainer):
                         style=const.BUTTON_STYLE,
                         command=lambda: controller.handle_btn_press("profile"))
 
-        title_icon = PhotoImage(file=const.TITLE_PATH)
+        title_icon = PhotoImage(file=const.TITLE_DARK_PATH)
         self.set_widget("title", CustomLabel,
                         image=title_icon,
                         style='ttk.Label.CustomLabel.TLabel')
@@ -71,7 +73,7 @@ class MainView(CustomContainer):
         upload_icon = PhotoImage(file=const.UPLOAD_ICON_PATH)
         self.set_widget("upload_icon", CustomLabel,
                         image=upload_icon,
-                        style=const.BUTTON_STYLE)
+                        style='ttk.Label.CustomLabel.TLabel')
         upload_button = PhotoImage(file=const.UPLOAD_BUTTON_PATH)
         self.set_widget("upload_btn", CustomButton,
                         image=upload_button,
