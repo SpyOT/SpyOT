@@ -11,8 +11,10 @@ BUTTON_STYLE = "ttk.Button.CustomButton.TButton"
 IMG_BUTTON_STYLE = "ttk.Button.ImgCustomButton.TButton"
 LABEL_STYLE = "ttk.Label.CustomLabel.TLabel"
 
+EGGSHELL_WHITE = "#F0EAD6"
+LIGHT_GRAY = "#ADADAD"
 DARK_BG_PRIMARY = "#1E313B"
-LIGHT_BG_PRIMARY = "#F0EAD6"
+LIGHT_BG_PRIMARY = LIGHT_GRAY
 LIGHT_BG_SECONDARY = "white"
 
 BLACKLIST_PRIMARY = DARK_BG_PRIMARY
@@ -62,6 +64,7 @@ COLLECT_BUTTON_PATH = join(ASSETS_PATH, "collect_button.png")
 UPLOAD_BUTTON_PATH = join(ASSETS_PATH, "upload_button.png")
 EXPAND_OUTPUT_ICON_PATH = join(ASSETS_PATH, "expand_output.png")
 COLLAPSE_OUTPUT_ICON_PATH = join(ASSETS_PATH, "collapse_output.png")
+EXIT_ICON_PATH = join(ASSETS_PATH, "exit_icon.png")
 
 """ Settings ASSETS """
 LIGHT_MODE_ICON = join(ASSETS_PATH, "light_mode.png")
@@ -90,7 +93,7 @@ SCAN_DARK_LABEL = join(ASSETS_PATH, "scan_dark_label.png")
 
 """ MISC. CONSTANTS """
 
-about_text = """
+ABOUT_TEXT = """
         Instructions -
         scan systems: Performs a light weight scan on your 
         systems with the help of the Nmap library. Once complete,

@@ -115,6 +115,7 @@ class OutputView(CustomContainer):
         """ Collect Widgets """
         self.set_widget("summary_label", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
+                        font='Helvetica 10 bold',
                         text='Summary:')
         self.set_widget("device_summary", ttk.Treeview,
                         columns='Status')
@@ -141,6 +142,10 @@ class OutputView(CustomContainer):
         """ Upload Widgets """
 
         """ About Widgets """
+        self.set_widget("about_label", CustomLabel,
+                        style='ttk.Label.CustomLabel.TLabel',
+                        font='Helvetica 10 bold',
+                        text=const.ABOUT_TEXT)
 
     def set_view(self, view):
         self.view = view
@@ -246,7 +251,9 @@ class OutputView(CustomContainer):
             case "output_upload":
                 pass
             case "about":
-                pass
+                self.display_widget("about_label", sticky='nsew',
+                                    column=0, row=0, columnspan=2,
+                                    padx=15, pady=15)
             case "none":
                 pass
             case _:

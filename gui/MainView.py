@@ -85,7 +85,7 @@ class MainView(CustomContainer):
         self.set_widget("info_icon", CustomButton,
                         image=info_icon,
                         style=const.BUTTON_STYLE,
-                        command=lambda: controller.handle_btn_press("info"))
+                        command=lambda: controller.handle_btn_press("about"))
         expand_output_icon = PhotoImage(file=const.EXPAND_OUTPUT_ICON_PATH)
         self.set_widget("expand_output_icon", CustomButton,
                         image=expand_output_icon,
@@ -97,6 +97,12 @@ class MainView(CustomContainer):
                         style=const.BUTTON_STYLE,
                         command=lambda: controller.handle_btn_press("toggle_output"))
         self.toggle_icon = "expand"
+
+        exit_icon = PhotoImage(file=const.EXIT_ICON_PATH)
+        self.set_widget("exit_icon", CustomButton,
+                        image=exit_icon,
+                        style=const.BUTTON_STYLE,
+                        command=lambda: controller.handle_btn_press("exit"))
 
     def display_widgets(self):
         """ Display Header Widgets """
@@ -134,7 +140,11 @@ class MainView(CustomContainer):
         self.display_widget("info_icon", sticky='nsew',
                             column=0, row=4,
                             padx=15, pady=15)
-        if self.toggle_icon == "expand":
+        self.display_widget("exit_icon", sticky='nsew',
+                            column=3, row=4,
+                            padx=15, pady=15)
+        """
+         if self.toggle_icon == "expand":
             self.display_widget("expand_output_icon", sticky='nsew',
                                 column=3, row=4,
                                 padx=15, pady=15)
@@ -142,3 +152,4 @@ class MainView(CustomContainer):
             self.display_widget("collapse_output_icon", sticky='nsew',
                                 column=3, row=4,
                                 padx=15, pady=15)
+        """

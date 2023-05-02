@@ -59,10 +59,10 @@ class App:
                 print("Settings button pressed")
                 # set output widgets for settings
                 self.output_container.update_view("settings")
-            case "info":
+            case "about":
                 print("Info button pressed")
                 # set output widgets for info
-                self.output_container.update_view("info")
+                self.output_container.update_view("about")
             # OutputView commands
             case "login":
                 print("Login button pressed")
@@ -124,6 +124,8 @@ class App:
                 self.output_container.get_widget("loading_bar").stop()
                 self.output_container.update_view("none")
                 self.window.destroy()
+            case "exit":
+                self.window.destroy()
             case _:
                 print("Unknown button pressed")
 
@@ -151,7 +153,8 @@ class App:
             'ttk.Label.CustomLabel.TLabel',
             background=const.LABEL_LIGHT_PRIMARY,
             foreground=const.LABEL_LIGHT_SECONDARY,
-            relief='none'
+            relief='none',
+            font=('Helvetica', 8, 'bold'),
         )
 
         self.style.configure(
@@ -222,8 +225,8 @@ class App:
         """
         Runs a thread for the given command
         Format:
-            Conditional for checking if self.systems.command()
-            self.output_container.get_widget("loading_bar").stop()
+            Conditional for checking if self.systems.command() was successful
+            Stopping loading bar animation self.output_container.get_widget("loading_bar").stop()
             If successful, display success message and update output view to command
             If unsuccessful, display error message and update output view to none
         """
