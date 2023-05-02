@@ -152,10 +152,7 @@ class Systems:
 
     def get_device_summary(self):
         utils.print_log("Getting device summary...", self.show_log)
-        ip_to_status = self.network_mgr.get_device_summary()
-        device_summary = {ip: {'hostname': self.network_mgr.get_device_name(ip),
-                               'status': ip_to_status[ip]}
-                          for ip in ip_to_status}
+        device_summary = self.network_mgr.get_device_summary()
         return device_summary
 
 
