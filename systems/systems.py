@@ -13,6 +13,7 @@ class Systems:
         utils.setup_local_storage(self.show_log)
 
         self.network_mgr = NetworkMgr()
+        self.firebase = FireBase()
 
     def scan(self):
         utils.print_log("Scanning network...", self.show_log)
@@ -34,12 +35,60 @@ class Systems:
 
     def upload(self):
         utils.print_log("Uploading data...", self.show_log)
-        success = self.network_mgr.upload_data()
+        data = self.network_mgr.get_upload_data()
+        success = self.firebase.upload_to_db(data)
         utils.output_log(success,
                          src_succ="Upload complete",
                          src_err="Upload failed",
                          show=self.show_log)
         return success
+
+    def create_user(self, email, password):
+        utils.print_log("Creating profile...", self.show_log)
+        if utils.validate_email(email) and utils.validate_password(password):
+            success = self.firebase.create_user(email, password)
+        else:
+            success = False
+        utils.output_log(success,
+                         src_succ="Profile created",
+                         src_err="Profile creation failed",
+                         show=self.show_log)
+        return success
+
+    def signin_user(self, email, password):
+        utils.print_log("Signing in...", self.show_log)
+        if utils.validate_email(email) and utils.validate_password(password):
+            success = self.firebase.signin_user(email, password)
+        else:
+            success = False
+        utils.output_log(success,
+                         src_succ="Signed in",
+                         src_err="Sign in failed",
+                         show=self.show_log)
+        return success
+
+    def signout_user(self):
+        utils.print_log("Signing out...", self.show_log)
+        success = self.firebase.signout_user()
+        utils.output_log(success,
+                         src_succ="Signed out",
+                         src_err="Sign out failed",
+                         show=self.show_log)
+        return success
+
+    def refresh_session(self):
+        utils.print_log("Refreshing session...", self.show_log)
+        success = self.firebase.refresh_session()
+        utils.output_log(success,
+                         src_succ="Session refreshed",
+                         src_err="Session refresh failed",
+                         show=self.show_log)
+        return success
+
+    def is_logged_in(self):
+        if self.firebase.get_user() is not None:
+            self.refresh_session()
+        return self.firebase.get_user() is not None
 
     def update_device_blacklist_status(self, ip, value):
         utils.print_log(f"Updating blacklist status {ip}...", self.show_log)
@@ -48,6 +97,7 @@ class Systems:
                          src_succ="Blacklist status updated",
                          src_err="Blacklist status update failed",
                          show=self.show_log)
+        return success
 
     def view_recent_report(self, report_path=''):
         if not report_path:
@@ -118,9 +168,11 @@ def main():
 
 if __name__ == '__main__':
     from networkmgr import NetworkMgr
+    from firebase import FireBase
     import utils
 
     main()
 else:
     from .networkmgr import NetworkMgr
+    from .firebase import FireBase
     from . import utils

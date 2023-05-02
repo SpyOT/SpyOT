@@ -18,7 +18,7 @@ class OutputView(CustomContainer):
                                        'row 3': 'weight 1',
                                        'row 4': 'weight 1', })
         self.view = "none"
-        self.username_entry = ""
+        self.email_entry = ""
         self.password_entry = ""
         self.host_name = None
         self.device_list = None
@@ -29,13 +29,20 @@ class OutputView(CustomContainer):
 
     # override this method from CustomContainer
     def set_widgets(self, controller):
-        """ Profile Widgets """
+        """ Login Widgets """
         self.set_widget("login_prompt", CustomLabel,
                         style='ttk.Label.CustomLabel.TLabel',
-                        text='Please enter your username and password',
+                        text="""Please enter a valid email and password to login
+                        or create a new account."""
                         )
-        self.set_widget("username_entry", Entry,
-                        textvariable=self.username_entry, )
+        self.set_widget("email_label", CustomLabel,
+                        style='ttk.Label.CustomLabel.TLabel',
+                        text='Email:')
+        self.set_widget("email_entry", Entry,
+                        textvariable=self.email_entry, )
+        self.set_widget("password_label", CustomLabel,
+                        style='ttk.Label.CustomLabel.TLabel',
+                        text='Password:')
         self.set_widget("password_entry", Entry,
                         textvariable=self.password_entry,
                         show='*')
@@ -43,7 +50,15 @@ class OutputView(CustomContainer):
                         style=const.BUTTON_STYLE,
                         text='Login',
                         command=lambda: controller.handle_btn_press("login"))
-
+        self.set_widget("register_btn", CustomButton,
+                        style=const.BUTTON_STYLE,
+                        text='Create Account',
+                        command=lambda: controller.handle_btn_press("register"))
+        """ Profile Widgets """
+        self.set_widget("logout_btn", CustomButton,
+                        style=const.BUTTON_STYLE,
+                        text='Logout',
+                        command=lambda: controller.handle_btn_press("logout"))
         """ Settings Widgets """
         self.set_widget("toggle_theme", CustomButton,
                         style=const.BUTTON_STYLE,
@@ -137,20 +152,37 @@ class OutputView(CustomContainer):
                                     column=0, row=2, columnspan=2,
                                     padx=15, pady=15)
                 self.get_widget("loading_bar").start(5)
-            case "profile":
+            case "login":
+                self.get_widget("email_entry").delete(0, "end")
+                self.get_widget("password_entry").delete(0, "end")
                 self.display_widget("login_prompt", sticky='ns',
                                     column=0, columnspan=2, row=0,
                                     padx=15, pady=15)
-                self.display_widget("username_entry", sticky='ew',
-                                    column=0, columnspan=2, row=1,
+                self.display_widget("email_label", sticky='w',
+                                    column=0, row=1,
+                                    padx=15, pady=15)
+                self.display_widget("email_entry", sticky='ew',
+                                    column=0, columnspan=2, row=1, rowspan=2,
+                                    padx=15, pady=15)
+                self.display_widget("password_label", sticky='w',
+                                    column=0, row=2,
                                     padx=15, pady=15)
                 self.display_widget("password_entry", sticky='ew',
-                                    column=0, columnspan=2, row=2,
+                                    column=0, columnspan=2, row=2, rowspan=2,
                                     padx=15, pady=15)
-                self.display_widget("login_btn",  # sticky='nsew',
+                self.display_widget("login_btn",  sticky='s',
                                     column=0, columnspan=2, row=3,
                                     padx=15, pady=15,
                                     ipadx=15)
+                self.display_widget("register_btn",  sticky='n',
+                                    column=0, columnspan=2, row=4,
+                                    padx=15, pady=15,
+                                    ipadx=15)
+            case "profile":
+                self.display_widget("logout_btn", sticky='n',
+                                    column=0, row=4,
+                                    padx=15, pady=15)
+
             case "settings":
                 self.display_widget("toggle_theme", sticky='nsew',
                                     column=0, row=0, columnspan=2, rowspan=2,
@@ -281,3 +313,8 @@ class OutputView(CustomContainer):
         else:
             self.update_widget_value("toggle_theme", "image", self.dark_mode_icon)
         self.set_view("settings")
+
+    def get_login_info(self):
+        email = self.get_widget("email_entry").get()
+        password = self.get_widget("password_entry").get()
+        return email, password

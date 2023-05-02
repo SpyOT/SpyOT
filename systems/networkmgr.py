@@ -75,9 +75,12 @@ class NetworkMgr(object):
             print("!Error:", e)
             return False
 
-    def upload_data(self):
-        # TODO: Upload data to database
-        pass
+    def get_upload_data(self):
+        summary = self.get_device_summary()
+        data = {
+            self.get_device_name(ip): summary[ip] for ip in summary
+        }
+        return data
 
     def format_scan_data(self):
         """

@@ -47,8 +47,12 @@ class App:
             # MainView commands
             case "profile":
                 print("Profile button pressed")
-                # set output containers view to profile
-                self.output_container.update_view("profile")
+                if self.systems.is_logged_in():
+                    print("logged in, show profile screen")
+                    self.output_container.update_view("profile")
+                else:
+                    print("not logged in, show login screen")
+                    self.output_container.update_view("login")
             case "settings":
                 print("Settings button pressed")
                 # set output widgets for settings
@@ -57,14 +61,40 @@ class App:
                 print("Info button pressed")
                 # set output widgets for info
                 self.output_container.update_view("info")
-
             # OutputView commands
             case "login":
                 print("Login button pressed")
-                # call systems model for firebase login
+                email, password = self.output_container.get_login_info()
+                command_success = self.systems.signin_user(email, password)
+                if command_success:
+                    messagebox.showinfo("Login Successful", "Welcome back!")
+                    self.output_container.update_view("none")
+                else:
+                    messagebox.showerror("Login Failed", "Invalid email or password")
+                    self.output_container.update_view("login")
+            case "register":
+                print("Register button pressed")
+                email, password = self.output_container.get_login_info()
+                command_success = self.systems.create_user(email, password)
+                if command_success:
+                    messagebox.showinfo("Registration Successful", "Welcome!")
+                    self.systems.signin_user(email, password)
+                    self.output_container.update_view("none")
+                else:
+                    err_msg = """\tInvalid email or password.
+                    Email must be a valid email address.
+                    Password must be at least 6 characters long."""
+                    messagebox.showerror("Registration Failed", err_msg)
+                    self.output_container.update_view("login")
             case "logout":
                 print("Logout button pressed")
-                # call systems model for firebase logout
+                command_success = self.systems.signout_user()
+                if command_success:
+                    messagebox.showinfo("Logout Successful", "Goodbye!")
+                    self.output_container.update_view("login")
+                else:
+                    messagebox.showerror("Logout Failed", "Something went wrong, closing session.")
+                    self.output_container.update_view("login")
             case "run_scan":
                 print("New Scan button pressed")
                 self.output_container.update_view("loading")
@@ -84,7 +114,11 @@ class App:
             case "upload":
                 print("Upload button pressed")
                 # set output widgets for upload
-                self.output_container.update_view("upload")
+                if self.systems.is_logged_in():
+                    self.output_container.update_view("loading")
+                    self.thread = Thread(target=lambda: self.run_thread("upload")).start()
+                else:
+                    self.output_container.update_view("login")
             case "toggle_theme":
                 print("Toggle theme button pressed")
                 self.toggle_theme()
@@ -103,7 +137,7 @@ class App:
 
     def configure_styles(self):
         self.style.theme_use('vista')
-        # Style names are in the format 'widgetclass.stylename.widgettype'
+        # Custom Style names are in the format 'widgetclass.stylename.widgettype'
         self.style.configure(
             'TFrame',
             bd=0,

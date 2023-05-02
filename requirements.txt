@@ -4,3 +4,4 @@ python-nmap
 python-dotenv
 pyshark
 psutil
+pirebase
