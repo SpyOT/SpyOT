@@ -35,20 +35,25 @@ class Systems:
 
     def upload(self):
         utils.print_log("Uploading data...", self.show_log)
-        data = self.network_mgr.get_upload_data()
-        success = self.firebase.upload_to_db(data)
-        utils.output_log(success,
-                         src_succ="Upload complete",
-                         src_err="Upload failed",
-                         show=self.show_log)
+        data = self.network_mgr.format_upload_data()
+        try:
+            assert(data is not None)
+            success = self.firebase.upload_to_db(data)
+            utils.output_log(success,
+                             src_succ="Upload complete",
+                             src_err="Upload failed",
+                             show=self.show_log)
+        except AssertionError:
+            utils.print_error("No data to upload", self.show_log)
+            success = False
+        except Exception as e:
+            utils.print_error(e, self.show_log)
+            success = False
         return success
 
     def create_user(self, email, password):
         utils.print_log("Creating profile...", self.show_log)
-        if utils.validate_email(email) and utils.validate_password(password):
-            success = self.firebase.create_user(email, password)
-        else:
-            success = False
+        success = self.firebase.create_user(email, password)
         utils.output_log(success,
                          src_succ="Profile created",
                          src_err="Profile creation failed",
@@ -57,10 +62,7 @@ class Systems:
 
     def signin_user(self, email, password):
         utils.print_log("Signing in...", self.show_log)
-        if utils.validate_email(email) and utils.validate_password(password):
-            success = self.firebase.signin_user(email, password)
-        else:
-            success = False
+        success = self.firebase.signin_user(email, password)
         utils.output_log(success,
                          src_succ="Signed in",
                          src_err="Sign in failed",

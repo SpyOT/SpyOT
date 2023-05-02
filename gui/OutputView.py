@@ -137,6 +137,7 @@ class OutputView(CustomContainer):
     def update_view(self, view):
         self.reset_frame()
         self.set_view(view)
+        self.configure(width=const.FRAME_MIN_WIDTH, height=const.FRAME_MIN_HEIGHT)
         self.display_frame(column=1, row=0, sticky='n e s w')
 
     def get_view(self):
@@ -180,7 +181,7 @@ class OutputView(CustomContainer):
                                     ipadx=15)
             case "profile":
                 self.display_widget("logout_btn", sticky='n',
-                                    column=0, row=4,
+                                    column=0, row=4, columnspan=2,
                                     padx=15, pady=15)
 
             case "settings":

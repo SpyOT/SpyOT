@@ -1,7 +1,7 @@
 import subprocess
 import nmap
 import pandas as pd
-from os.path import exists
+from os.path import exists, basename
 
 
 # import sys
@@ -75,12 +75,20 @@ class NetworkMgr(object):
             print("!Error:", e)
             return False
 
-    def get_upload_data(self):
-        summary = self.get_device_summary()
-        data = {
-            self.get_device_name(ip): summary[ip] for ip in summary
-        }
-        return data
+    def format_upload_data(self):
+        try:
+            device_summary = self.get_device_summary()
+            assert (device_summary is not None)
+            data = {'id': self.get_report_name(),
+                    'devices': {
+                        self.get_device_name(device_ip).split('.')[0]: device_summary[device_ip]
+                        for device_ip in device_summary
+                        }
+                    }
+            return data
+        except AssertionError:
+            print("!Error: No collect data to format")
+            return None
 
     def format_scan_data(self):
         """
@@ -201,6 +209,10 @@ class NetworkMgr(object):
         except TypeError:
             print("!Error: No network metadata found")
             return []
+
+    def get_report_name(self):
+        report_name = basename(self.report_path)
+        return report_name.split('.')[0]
 
     def get_hostname(self):
         return self.network_metadata[self.network_metadata['type'] == 'router']['name'].values[0]

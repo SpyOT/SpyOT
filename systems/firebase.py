@@ -20,12 +20,25 @@ class FireBase:
         self.user = None
 
     def upload_to_db(self, data):
+        """
+        Uploads data to firebase database
+        :param data = {
+                        "id": Collection Report Name,
+                        "devices": {
+                            device_name : device_status
+                            }
+                        }
+        """
         print("Pushing data to database...")
         try:
-            self.db.child("users").push(data)
+            self.db.child('reports')\
+                .child(self.user['userId'])\
+                .child(data['id'])\
+                .set(data['devices'])
             return True
         except Exception as e:
             print(e)
+            print(data)
             return False
 
     def create_user(self, email, password):
@@ -40,7 +53,8 @@ class FireBase:
     def signin_user(self, email, password):
         print("Signing in User with email: " + email + " and password: " + password)
         try:
-            self.user = self.auth.sign_in_with_email_and_password(email, password)
+            self.auth.sign_in_with_email_and_password(email, password)
+            self.user = self.auth.current_user
             return True
         except Exception as e:
             print(e)
