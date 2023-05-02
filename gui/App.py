@@ -17,7 +17,7 @@ class App:
         self.style = ttk.Style()
         self.configure_styles()
 
-        self.window.columnconfigure(0, weight=1)
+        self.window.columnconfigure(0, weight=2)
         self.window.columnconfigure(1, weight=1)
         self.window.rowconfigure(0, weight=1)
 
@@ -33,14 +33,15 @@ class App:
                                            width=const.FRAME_MIN_WIDTH,
                                            style='ttk.Frame.Output.TFrame')
 
-        self.set_widgets()
-        self.main_container.display_frame(column=0, row=0, sticky='n e s w')
-        self.output_container.display_frame(column=1, row=0, sticky='n e s w')
+        self.set_win()
+
         self.thread = None
 
-    def set_widgets(self):
+    def set_win(self):
         self.main_container.set_widgets(self)
         self.output_container.set_widgets(self)
+        self.main_container.display_frame(column=0, row=0, sticky='n e s w')
+        self.output_container.display_frame(column=1, row=0, sticky='n e s w')
 
     def handle_btn_press(self, command):
         match command:

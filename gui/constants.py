@@ -2,8 +2,8 @@ from os import getcwd
 from os.path import join
 
 """ GUI CONSTANTS """
-FRAME_MIN_WIDTH = 250
-FRAME_MIN_HEIGHT = 5
+FRAME_MIN_WIDTH = 275
+FRAME_MIN_HEIGHT = 200
 
 """ THEME CONSTANTS """
 
