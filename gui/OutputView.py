@@ -74,6 +74,10 @@ class OutputView(CustomContainer):
                         style='ttk.Label.CustomLabel.TLabel',
                         font='default 12 bold',
                         text='Loading...')
+        self.set_widget("cancel", CustomButton,
+                        style=const.BUTTON_STYLE,
+                        text='Cancel',
+                        command=lambda: controller.handle_btn_press("cancel"))
 
         """ Scan Widgets """
         self.set_widget("host_label", CustomLabel,
@@ -151,6 +155,9 @@ class OutputView(CustomContainer):
                                     padx=15, pady=15)
                 self.display_widget("loading_bar", sticky='sew',
                                     column=0, row=2, columnspan=2,
+                                    padx=15, pady=15)
+                self.display_widget("cancel", #sticky='',
+                                    column=0, row=3, columnspan=2,
                                     padx=15, pady=15)
                 self.get_widget("loading_bar").start(5)
             case "login":

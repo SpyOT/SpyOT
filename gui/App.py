@@ -1,7 +1,7 @@
 from tkinter import ttk, messagebox
 from .OutputView import OutputView
 from .MainView import MainView
-from threading import Thread
+from threading import Thread, Event
 from gui import constants as const
 
 
@@ -35,6 +35,7 @@ class App:
 
         self.set_win()
 
+        self.stop_thread = Event()
         self.thread = None
 
     def set_win(self):
@@ -99,7 +100,7 @@ class App:
             case "run_scan":
                 print("New Scan button pressed")
                 self.output_container.update_view("loading")
-                self.thread = Thread(target=lambda: self.run_thread("scan")).start()
+                self.setup_thread("scan")
             case "output_scan":
                 print("Scan button pressed")
                 # set output widgets for scan
@@ -111,13 +112,13 @@ class App:
                 print("Collect button pressed")
                 # set output widgets for collect
                 self.output_container.update_view("loading")
-                self.thread = Thread(target=lambda: self.run_thread("collect")).start()
+                self.setup_thread("collect")
             case "upload":
                 print("Upload button pressed")
                 # set output widgets for upload
                 if self.systems.is_logged_in():
                     self.output_container.update_view("loading")
-                    self.thread = Thread(target=lambda: self.run_thread("upload")).start()
+                    self.setup_thread("upload")
                 else:
                     self.output_container.update_view("login")
             case "toggle_theme":
@@ -133,6 +134,10 @@ class App:
                 self.systems.view_recent_report()
             case "save_report":
                 pass
+            case "cancel":
+                self.output_container.get_widget("loading_bar").stop()
+                self.output_container.update_view("none")
+                self.window.destroy()
             case _:
                 print("Unknown button pressed")
 
@@ -201,6 +206,12 @@ class App:
                              background=img_button_primary,
                              foreground=img_button_secondary)
         self.output_container.toggle_theme(self.theme)
+
+    def setup_thread(self, command):
+        self.stop_thread.clear()
+        self.thread = Thread(target=lambda: self.run_thread(command))
+        self.thread.daemon = True
+        self.thread.start()
 
     def run_thread(self, command):
         """
