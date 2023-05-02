@@ -161,6 +161,7 @@ class App:
             'ttk.Button.CustomButton.TButton',
             background=const.BUTTON_LIGHT_PRIMARY,
             foreground=const.BUTTON_LIGHT_SECONDARY,
+            borderwidth=0,
             font=('Helvetica', 12, 'normal'),
         )
 
@@ -168,6 +169,12 @@ class App:
             'ttk.Button.ImgCustomButton.TButton',
             background=const.IMG_BUTTON_LIGHT_PRIMARY,
             foreground=const.IMG_BUTTON_LIGHT_SECONDARY,
+            relief='none',
+        )
+
+        self.style.configure(
+            'ttk.Button.MainButton.TButton',
+            background=const.MAIN_BTTN_LIGHT_PRIMARY,
             relief='none',
         )
 
@@ -183,6 +190,8 @@ class App:
         button_secondary = const.BUTTON_DARK_SECONDARY if is_light else const.BUTTON_LIGHT_SECONDARY
         img_button_primary = const.IMG_BUTTON_DARK_PRIMARY if is_light else const.IMG_BUTTON_LIGHT_PRIMARY
         img_button_secondary = const.IMG_BUTTON_DARK_SECONDARY if is_light else const.IMG_BUTTON_LIGHT_SECONDARY
+        main_button_primary = const.MAIN_BTTN_DARK_PRIMARY if is_light else const.MAIN_BTTN_LIGHT_PRIMARY
+
         title_img_path = const.TITLE_PATH if is_light else const.TITLE_DARK_PATH
         loading_img_path = const.LOADING_ICON_PATH if is_light else const.LOADING_DARK_ICON_PATH
         email_label_path = const.EMAIL_LABEL if is_light else const.EMAIL_DARK_LABEL
@@ -213,6 +222,9 @@ class App:
         self.style.configure(const.IMG_BUTTON_STYLE,
                              background=img_button_primary,
                              foreground=img_button_secondary)
+        self.style.configure(const.MAIN_BUTTON_STYLE,
+                             background=main_button_primary)
+
         self.output_container.toggle_theme(self.theme)
 
     def setup_thread(self, command):
