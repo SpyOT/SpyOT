@@ -4,9 +4,9 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 h1 {
-    color: var(--secondary-color);
+    color: var(--color-text);
 }
 
 </style>

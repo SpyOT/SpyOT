@@ -121,8 +121,8 @@
 
 <script>
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
-import {ref, set } from "firebase/database";
-import {db} from "../main.js"
+import {ref, set, child, get } from "firebase/database";
+import {db} from "../main.js";
 
 export default {
   data() {
@@ -135,10 +135,27 @@ export default {
     };
   },
   methods: {
+    //UnUsed BUT WILL MOVE USERDATA
+    moveData() {
+      const userRef = ref(db, `users/VjRRKZ8e8hfQdGPqspUA3L2xdv83`);
+      const dbRef = ref(db);
+      get(child(dbRef, `users/0RsK1Yy9N6dN0CJpVGiA4wHHiL93`)).then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log(snapshot.val());
+          const tdata = snapshot.val();
+          set(userRef, tdata);
+        } else {
+          console.log("No data available");
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
     attemptDownload() {
       console.log("Download SpyOT Button Clicked");
     },
     forgotPassword() {
+      this.$router.push("/forgot_password");
       console.log("Forgot Password Clicked");
     },
     attemptLogin() {
@@ -146,6 +163,7 @@ export default {
         .then((userCredential) => {
           console.log("Login Successful!");
           this.$router.push("/dashboard");
+          this.getCurrentUser();
         })
         .catch((error) => {
           console.log(error.code);
@@ -183,11 +201,20 @@ export default {
             hasPotentialVulnerabilities: false,
           });
           this.$router.push("/dashboard");
+          this.getCurrentUser();
         })
         .catch((error) => {
           console.log(error.code);
           alert(error.code);
         });
+    },
+    getCurrentUser() {
+      const auth = getAuth();
+      if (auth.currentUser) {
+        console.log("Current user:", auth.currentUser);
+      } else {
+        console.log("No user is currently signed in.");
+      }
     },
     registerAccountLink() {
       this.register = !this.register;

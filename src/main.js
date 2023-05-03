@@ -4,6 +4,7 @@ import router from './router'
 import './assets/main.css'
 
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getDatabase, ref, push } from "firebase/database";
 const firebaseConfig = {
   apiKey: "AIzaSyDoBEoypPjsbvU-n3-b_30Xw_P2Z6x3rAU",
@@ -20,7 +21,14 @@ const firebaseConfig = {
 // Initialize the Firebase App
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
+const auth = getAuth();
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log('User is logged in!');
+  } else {
+    console.log('User is not logged in!');
+  }
+});
 export {db}
 
 // Create Vue.js app instance and mount it to the DOM

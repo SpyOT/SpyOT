@@ -34,6 +34,10 @@
         <span class="material-icons-outlined">settings</span>
         <span class="text">Settings</span>
       </router-link>
+      <router-link class="button" to="/" @click="logout">
+        <span class="material-icons-outlined">logout</span>
+        <span class="text">Logout</span>
+      </router-link>
     </div>
 
     <div class="padding"></div>
@@ -46,6 +50,20 @@
 
 <script setup>
 import { ref } from "vue";
+import { getAuth, signOut } from 'firebase/auth';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const logout = async () => {
+  try {
+    await signOut(getAuth());
+    router.push({ name: 'home' });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 
 const is_expanded = ref(localStorage.getItem("is_expanded") === "true");
 
@@ -76,7 +94,7 @@ aside {
   display: flex;
   flex-direction: column;
   background-color: rgb(26, 25, 25);
-  color: var(--primary-color);
+  color: var(--color-text);
   width: calc(2rem + 32px);
   overflow: hidden;
   min-height: 100vh;
@@ -140,7 +158,7 @@ aside.is_expanded h3,
 aside.is_expanded .button .text {
   opacity: 1;
   display: inline;
-  color: var(--primary-color);
+  color: var(--color-text);
   transition: 0.2s ease-out;
   padding-right: 3em;
 }
@@ -174,11 +192,11 @@ aside.is_expanded .logo {
 .menu .button:hover .text,
 .menu .button.router-link-exact-active .material-icons-outlined,
 .menu .button.router-link-exact-active .text {
-  color: var(--primary-color);
+  color: var(--color-text);
 }
 
 .menu .button.router-link-exact-active {
-  border-right: 5px solid var(--primary-color);
+  border-right: 5px solid var(--color-text);
   background: var(--secondary-color); 
   font-size: 1.3em;
   font-weight: 900;
@@ -192,12 +210,12 @@ aside.is_expanded .menu .button.router-link-exact-active{
 
 .menu .button .material-icons-outlined {
   font-size: rem;
-  color: var(--primary-color);
+  color: var(--color-text);
   transition: 0.2s ease-out;
   
 }
 .material-icons-outlined {
-  color: var(--primary-color);
+  color: var(--color-text);
 }
 .menu .button .text {
   display: none;

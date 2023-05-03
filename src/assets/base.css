@@ -8,17 +8,30 @@
   --primary-color: white;
   --secondary-color: rgb(16, 96, 43);
   --label-color: #bfc0bf;
+  --text-color: white;
+  --opps : black;
+  --opps2 : white;
 
 }
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-black);
-  --color-background-soft: var(--vt-c-black-soft);
-  --color-heading: var(--vt-c-text-dark-1);
-  --color-text: var(--vt-c-text-dark-2);
+  --primary-color: white;
+  --secondary-color: rgb(16, 96, 43);
+  --color-background: #05120a;
+  --color-background-soft: #08160ea3;
+  --color-text: white;
 
   --section-gap: 160px;
+}
+[data-color-mode="light"] {
+  --primary-color: black;
+  --secondary-color: rgb(16, 96, 43);
+  --color-background: white;
+  --color-background-soft: rgba(207, 204, 204, 0.879);
+  --color-text: white;
+  --opps : white;
+  --opps2 : black;
 }
 
 
