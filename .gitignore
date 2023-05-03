@@ -295,5 +295,6 @@ __pycache__
 *.pyc
 *.pcap
 .idea/
-systems/local/*
+local/*
 /TODO.py
+/local/

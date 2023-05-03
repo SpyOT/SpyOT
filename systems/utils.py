@@ -5,9 +5,7 @@ from os.path import isfile, join, exists
 # Constants
 GEN_ERROR = 'Unknown error!'
 CWD = getcwd()
-if 'systems' in CWD:
-    CWD = join(CWD, '..')
-LOCAL_STORAGE_PATH = join(CWD, 'systems', 'local')
+LOCAL_STORAGE_PATH = join(CWD, 'local')
 LOCAL_SCANS_PATH = join(LOCAL_STORAGE_PATH, 'scans')
 LOCAL_REPORTS_PATH = join(LOCAL_STORAGE_PATH, 'reports')
 BLACKLIST_PATH = join(LOCAL_STORAGE_PATH, 'blacklist.txt')
@@ -30,8 +28,11 @@ def create_dir(dir_path, show):
         mkdir(dir_path)
         action = ' '.join(['create directory', dir_path])
         print_success(action, show)
-    except OSError:
+    except FileExistsError:
         src = ' '.join(['dir exists', dir_path])
+        print_error(src, show)
+    except OSError:
+        src = ' '.join(['dir error', dir_path])
         print_error(src, show)
     except:
         src = ' '.join([GEN_ERROR, dir_path])

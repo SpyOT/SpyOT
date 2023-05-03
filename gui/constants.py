@@ -47,7 +47,7 @@ LABEL_DARK_SECONDARY = LIGHT_BG_PRIMARY
 
 """ ASSET PATH CONSTANTS"""
 CWD = getcwd()
-ASSETS_PATH = join(CWD, "gui", "assets")
+ASSETS_PATH = join(CWD, "assets")
 
 """ MainView ASSETS"""
 LOGO_PATH = join(ASSETS_PATH, "logo.png")
