@@ -1,9 +1,0 @@
-192.168.1.1,80:78:71:A4:C9:8A,SAC2V1K.lan,router,False
-192.168.1.106,EE:9D:C8:48:00:AA,Javier-s-Note10.lan,device,False
-192.168.1.12,9C:76:13:1E:03:EE,RingStickUpCam-ee.lan,device,False
-192.168.1.120,0:0:0:0:0:0,Tony-PC-19.lan,device,False
-192.168.1.148,B0:7D:64:72:DC:8D,JP-Laptop.lan,device,False
-192.168.1.174,9A:C5:65:A3:81:4C,Unnamed Device 5,device,False
-192.168.1.216,00:F6:20:6C:91:F7,Google-Home-Mini.lan,device,False
-192.168.1.225,72:57:09:8E:4F:AB,Unnamed Device 7,device,False
-192.168.1.46,0:0:0:0:0:0,Tony-PC.lan,device,False
