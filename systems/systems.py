@@ -99,6 +99,18 @@ class Systems:
         # Open report in notepad
         system(f"notepad {report_path}")
 
+    def save_report(self, report_path=''):
+        if not report_path:
+            utils.print_error("No report path specified", self.show_log)
+            return
+        utils.print_log(f"Saving report {report_path}...", self.show_log)
+        success = self.network_mgr.save_report(report_path)
+        utils.output_log(success,
+                         src_succ="Report saved",
+                         src_err="Report save failed",
+                         show=self.show_log)
+        return success
+
     def metadata_available(self):
         return not self.network_mgr.get_metadata().empty
 
@@ -145,6 +157,10 @@ class Systems:
         utils.print_log("Getting device summary...", self.show_log)
         device_summary = self.network_mgr.get_device_summary()
         return device_summary
+
+    @staticmethod
+    def get_reports_path():
+        return utils.LOCAL_REPORTS_PATH
 
 
 def main():

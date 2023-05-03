@@ -1,4 +1,4 @@
-from tkinter import ttk, messagebox, PhotoImage
+from tkinter import ttk, messagebox, PhotoImage, filedialog
 from .OutputView import OutputView
 from .MainView import MainView
 from threading import Thread, Event
@@ -119,7 +119,12 @@ class App:
             case "view_report":
                 self.systems.view_recent_report()
             case "save_report":
-                pass
+                save_path = filedialog.asksaveasfilename(
+                    title="Save Report",
+                    initialdir=self.systems.get_reports_path,
+                    filetypes=(("Text Files", "*.txt"), ("All Files", "*.*")),
+                    defaultextension="*.txt*")
+                self.systems.save_report(save_path)
             case "cancel":
                 self.output_container.get_widget("loading_bar").stop()
                 self.output_container.update_view("none")
@@ -162,7 +167,13 @@ class App:
             background=const.BUTTON_LIGHT_PRIMARY,
             foreground=const.BUTTON_LIGHT_SECONDARY,
             borderwidth=0,
+            disabledforeground=const.BUTTON_LIGHT_PRIMARY,
             font=('Helvetica', 12, 'normal'),
+        )
+        self.style.map(
+            'ttk.Button.CustomButton.TButton',
+            background=[('active', const.BUTTON_LIGHT_SECONDARY),
+                        ('disabled', const.BUTTON_LIGHT_PRIMARY)],
         )
 
         self.style.configure(
@@ -224,7 +235,11 @@ class App:
                              foreground=img_button_secondary)
         self.style.configure(const.MAIN_BUTTON_STYLE,
                              background=main_button_primary)
-
+        self.style.map(
+            'ttk.Button.CustomButton.TButton',
+            background=[('active', button_secondary),
+                        ('disabled', button_primary)],
+        )
         self.output_container.toggle_theme(self.theme)
 
     def setup_thread(self, command):

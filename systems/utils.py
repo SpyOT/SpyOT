@@ -107,7 +107,7 @@ def clean_up_local_storage():
 
 def purge_old_files(path, count_limit=10, time_limit=14):
     removed_files = 0
-    path_files = listdir(path)
+    path_files = [file for file in listdir(path) if 'report' in file or 'scan' in file]
     # sort the files by date
     path_files.sort(key=lambda x: datetime.strptime(x.strip('.txt').strip('scan-').strip('report-'),
                                                     '%Y-%m-%d-%H-%M-%S'), reverse=True)

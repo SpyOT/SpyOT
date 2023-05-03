@@ -117,12 +117,16 @@ class OutputView(CustomContainer):
                         style='ttk.Label.CustomLabel.TLabel',
                         font='Helvetica 10 bold',
                         text='Summary:')
-        self.set_widget("device_summary", ttk.Treeview,
-                        columns='Status')
-        self.get_widget("device_summary").column('#0', stretch='no')
+        self.set_widget("device_summary", ttk.Treeview, selectmode='none',
+                        columns=('Open Ports', 'Packet Encryption', 'Status'))
+        self.get_widget("device_summary").column('#0', stretch='no', anchor='center', minwidth=125)
         self.get_widget("device_summary").heading('#0', text='Device')
-        self.get_widget("device_summary").column('Status', anchor='center')
+        self.get_widget("device_summary").column('Status', anchor='center', width=60)
         self.get_widget("device_summary").heading('Status', text='Status')
+        self.get_widget("device_summary").column('Open Ports', anchor='center', width=75)
+        self.get_widget("device_summary").heading('Open Ports', text='Open Ports')
+        self.get_widget("device_summary").column('Packet Encryption', anchor='center', width=75)
+        self.get_widget("device_summary").heading('Packet Encryption', text='Encryption')
         edit_list_icon = PhotoImage(file=const.EDIT_LIST_ICON_PATH)
         self.set_widget("edit_list", CustomButton,
                         style=const.BUTTON_STYLE,
@@ -269,8 +273,9 @@ of the devices on your network.""",)
                 print("Error: Invalid view name")
 
     """ Utils """
-
     def handle_listbox_select(self, _):
+        if self.view != "output_scan":
+            return
         selected_device = self.get_selected_device()
         device_metadata = self.systems.get_device_metadata(selected_device)
         device_index = device_metadata.index.tolist()[0]
@@ -323,7 +328,9 @@ of the devices on your network.""",)
         # Insert device summary into treeview
         for device_name in device_summary_values:
             device_summary_tree.insert('', 'end', text=device_name,
-                                       values=(device_summary_values[device_name]))
+                                       values=(device_summary_values[device_name]['open_ports'],
+                                               device_summary_values[device_name]['encryption_percentage'],
+                                               device_summary_values[device_name]['status'],))
 
     def set_selected_device_status(self, status):
         selected_device_name = self.get_selected_device()
