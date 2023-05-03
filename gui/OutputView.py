@@ -140,6 +140,13 @@ class OutputView(CustomContainer):
                         command=lambda: controller.handle_btn_press("save_report"))
 
         """ Upload Widgets """
+        self.set_widget("upload_label", CustomLabel,
+                        style='ttk.Label.CustomLabel.TLabel',
+                        font='Helvetica 10 bold',
+                        text="""\tUpload Complete:
+Log into the web portal at:
+SpyOT.com to get a full report 
+of the devices on your network.""",)
 
         """ About Widgets """
         self.set_widget("about_label", CustomLabel,
@@ -249,7 +256,9 @@ class OutputView(CustomContainer):
                                     column=0, row=4, columnspan=2,
                                     padx=15, pady=15)
             case "output_upload":
-                pass
+                self.display_widget("upload_label", sticky='nsw',
+                                    column=0, row=1, columnspan=2, rowspan=3,
+                                    padx=15, pady=15)
             case "about":
                 self.display_widget("about_label", sticky='nsew',
                                     column=0, row=0, columnspan=2,
