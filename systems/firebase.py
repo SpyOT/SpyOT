@@ -28,7 +28,8 @@ class FireBase:
                     device_name: {
                         "ip": device_ip,
                         "mac": device_mac,
-                        "status": secure
+                        "status": secure,
+                        "encryption_percentage": %,
                         "ports": {
                                     "port23": state,
                                     "port80": state,

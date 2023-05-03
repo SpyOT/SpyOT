@@ -2,7 +2,6 @@ import pyshark
 import os
 
 
-# TODO: Figure out why some TCP Payloads are not showing as encrypted
 # os.system("tshark -i Wi-Fi -c 2000 -w Eavesdrop_Data") Captures data from tshark and stores it.
 class PCAPture():
     def __init__(self):
