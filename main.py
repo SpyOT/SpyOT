@@ -20,13 +20,12 @@ class SpyOT(Tk):
     Controller: App
     """
 
-    def __init__(self, version, env):
+    def __init__(self, version):
         super().__init__()
         print("Welcome to SpyOT! The IoT Network Monitoring System.")
         self.version = "SpyOT - " + version
-        self.env = env
-        self.systems = Systems(self.env)
-        self.app = App(self, self.systems, self.title, self.env)
+        self.systems = Systems()
+        self.app = App(self, self.systems, self.title)
         self.configure_app()
 
     def configure_app(self):
@@ -52,16 +51,13 @@ def main():
     # Check for version and env args
     # If not passed, use default values of DEMO and dev
     # version passed in format : --version=1.0
-    # env passed in format : --env=dev
-    version, env = "DEMO", "dev"
+    version = "v1"
     for arg in argv:
         if "--version" in arg:
             version = arg.split("=")[1]
-        elif "--env" in arg:
-            env = arg.split("=")[1]
 
     # test = TestMain()
-    root = SpyOT(version=version, env=env)
+    root = SpyOT(version=version)
     root.mainloop()
 
 

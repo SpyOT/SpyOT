@@ -6,12 +6,10 @@ from gui import constants as const
 
 
 class App:
-    def __init__(self, window, systems, title, env):
+    def __init__(self, window, systems, title):
         self.window = window
         self.systems = systems
         self.version = title
-        self.APP_ENV = env
-        self.is_prod = self.APP_ENV == 'prod'
 
         self.theme = "LIGHT"
         self.style = ttk.Style()

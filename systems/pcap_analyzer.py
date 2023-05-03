@@ -8,9 +8,9 @@ class PCAP:
         self.capture_file = 'packet_capture.pcap'
         print("Generating PCAP file...")
         # threading.Thread(target=lambda: os.system("tshark -i wi-fi -c 2000 -w " + self.capture_file)).start()
-        self.capture = pyshark.FileCapture(self.capture_file)
-        self.tcp_packets = pyshark.FileCapture(self.capture_file, display_filter='tcp.payload')
-        self.udp_packets = pyshark.FileCapture(self.capture_file, display_filter='udp.payload')
+        # self.capture = pyshark.FileCapture(self.capture_file)
+        # self.tcp_packets = pyshark.FileCapture(self.capture_file, display_filter='tcp.payload')
+        # self.udp_packets = pyshark.FileCapture(self.capture_file, display_filter='udp.payload')
 
         self.TCPpayload = None
         self.TCPdata = ""

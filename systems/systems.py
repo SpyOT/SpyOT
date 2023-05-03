@@ -6,10 +6,8 @@ fernet = Fernet(KEY)
 
 
 class Systems:
-    def __init__(self, env):
-        self.env = env
-        self.is_prod = self.env == 'prod'
-        self.show_log = not self.is_prod
+    def __init__(self):
+        self.show_log = True
         utils.setup_local_storage(self.show_log)
 
         self.network_mgr = NetworkMgr()
